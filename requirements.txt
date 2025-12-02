@@ -1,0 +1,28 @@
+# Bio-Systems Engineering - Core Dependencies
+# Generated: 2025-12-02
+
+# Data manipulation and analysis
+numpy>=1.24.0,<2.0.0
+pandas>=2.0.0,<3.0.0
+
+# Data validation and contracts
+pydantic>=2.0.0,<3.0.0
+
+# Activity file parsing
+fitdecode>=0.10.0
+haversine>=2.8.0
+
+# Configuration
+pyyaml>=6.0
+
+# API Integration
+requests>=2.31.0
+
+# Development dependencies (install with: pip install -e ".[dev]")
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# mypy>=1.0.0
+# ruff>=0.1.0
+# jupyter>=1.0.0
+# matplotlib>=3.7.0
+# seaborn>=0.12.0
