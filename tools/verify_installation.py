@@ -51,12 +51,28 @@ def verify_imports():
             calculate_efficiency_factor,
             calculate_decoupling,
             calculate_hr_tss,
+            calculate_average_gap,
+            minetti_energy_cost,
         )
         print("  ✓ Physics functions imported successfully")
         print(f"    run_metrics callable: {callable(run_metrics)}")
         print(f"    calculate_efficiency_factor callable: {callable(calculate_efficiency_factor)}")
         print(f"    calculate_decoupling callable: {callable(calculate_decoupling)}")
         print(f"    calculate_hr_tss callable: {callable(calculate_hr_tss)}")
+        print(f"    calculate_average_gap callable: {callable(calculate_average_gap)}")
+        print(f"    minetti_energy_cost callable: {callable(minetti_energy_cost)}")
+        
+        # Test GAP calculation with simple example
+        print("  ✓ Testing GAP calculation...")
+        test_cost_flat = minetti_energy_cost(0.0)
+        test_cost_uphill = minetti_energy_cost(5.0)
+        print(f"    Minetti cost (flat): {test_cost_flat:.3f}")
+        print(f"    Minetti cost (5% uphill): {test_cost_uphill:.3f}")
+        if test_cost_uphill > test_cost_flat:
+            print("    ✓ GAP calculations working correctly")
+        else:
+            errors.append("GAP calculation logic error")
+            print("    ✗ GAP calculation logic error")
     except Exception as e:
         errors.append(f"Physics import failed: {e}")
         print(f"  ✗ Physics import failed: {e}")
