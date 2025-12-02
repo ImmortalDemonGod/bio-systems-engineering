@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 
 from biosystems.models import ZoneConfig, PhysiologicalMetrics, RunContext
+from biosystems.physics.gap import calculate_average_gap
 
 
 def _as_series(arr):
@@ -301,6 +302,26 @@ def run_metrics(
         if not cadence_series.isna().all():
             avg_cadence = int(cadence_series.mean())
     
+    # Calculate Grade Adjusted Pace if elevation data available
+    gap_min_per_km = None
+    if 'ele' in df.columns and 'pace_sec_km' in df.columns and 'dist' in df.columns:
+        # Check if we have valid elevation data
+        ele_series = df['ele'].replace(0, np.nan)
+        if not ele_series.isna().all():
+            try:
+                gap_sec_km = calculate_average_gap(
+                    df,
+                    pace_col='pace_sec_km',
+                    ele_col='ele',
+                    dist_col='dist',
+                    dt_col='dt'
+                )
+                if not np.isnan(gap_sec_km):
+                    gap_min_per_km = round(gap_sec_km / 60, 2)
+            except Exception:
+                # If GAP calculation fails, leave as None
+                pass
+    
     return PhysiologicalMetrics(
         distance_km=round(total_dist_m / 1_000, 2),
         duration_min=round(secs / 60, 1),
@@ -310,5 +331,6 @@ def run_metrics(
         decoupling_pct=round(decouple_pct, 2),
         hr_tss=round(hr_tss, 1),
         avg_cadence=avg_cadence,
+        gap_min_per_km=gap_min_per_km,
         context=context
     )
