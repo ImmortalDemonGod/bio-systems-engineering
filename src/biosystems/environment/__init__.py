@@ -10,4 +10,14 @@ Features:
 - Caching for offline analysis
 """
 
-__all__ = []
+from biosystems.environment.weather import (
+    fetch_weather_open_meteo,
+    get_weather_description,
+    WeatherCache,
+)
+
+__all__ = [
+    "fetch_weather_open_meteo",
+    "get_weather_description",
+    "WeatherCache",
+]

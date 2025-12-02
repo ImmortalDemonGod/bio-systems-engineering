@@ -9,4 +9,6 @@ Available parsers:
 - FIT: Garmin binary format (Flexible and Interoperable Data Transfer)
 """
 
-__all__ = []
+from biosystems.ingestion.gpx import parse_gpx
+
+__all__ = ["parse_gpx"]
