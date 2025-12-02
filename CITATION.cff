@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Bio-Systems Engineering: MLOps for Human Performance Optimization"
+version: 1.0.0
+date-released: 2025-12-02
+url: "https://github.com/yourusername/bio-systems-engineering"
+repository-code: "https://github.com/yourusername/bio-systems-engineering"
+license: MIT
+keywords:
+  - running
+  - physiology
+  - performance optimization
+  - n-of-1 research
+  - mlops
+  - sports science
+  - efficiency factor
+  - aerobic decoupling
+authors:
+  - family-names: "Contributors"
+    given-names: "Holistic Performance Enhancement"
+abstract: >
+  A Python library and research artifact for systematic human performance 
+  optimization using MLOps principles. Documents a 103-day longitudinal N=1 
+  study demonstrating an 18.4% improvement in running Efficiency Factor through
+  data-driven biomechanical intervention. Includes a reproducible software pipeline
+  for parsing GPS activity files, calculating physiological metrics, and generating
+  publication-quality analyses.
