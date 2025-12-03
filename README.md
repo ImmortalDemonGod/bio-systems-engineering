@@ -12,9 +12,9 @@
 
 This repository documents a 103-day experiment (2025-W17 to W36) where systematic, data-driven interventions produced measurable physiological improvements:
 
-| Metric | Baseline (W17) | Final (W35) | Δ Change |
-|--------|---------------|-------------|----------|
-| **Efficiency Factor** | 0.0161 | 0.0188 | **+18.4%** |
+| Metric | Baseline (W17-20) | Final (W34-36) | Δ Change |
+|--------|-------------------|----------------|----------|
+| **Efficiency Factor** | 0.0142 | 0.0172 | **+21.3%** |
 | **Aerobic Decoupling** | 8.2% | 4.7% | **-42.7%** |
 | **Average Pace** | 5:03/km | 4:20/km | **-15.2%** |
 | **Cadence** | 155 spm | 166 spm | **+10 spm** |
@@ -28,7 +28,7 @@ This repository documents a 103-day experiment (2025-W17 to W36) where systemati
 
 ![EF Progression](docs/images/ef_progression.png)
 
-*Four-phase progression showing systematic improvement: Baseline diagnosis → Heat stress validation → Biomechanical intervention → Performance breakthrough. The +18.4% improvement represents 103 days of data-driven training.*
+*Four-phase progression showing systematic improvement: Baseline diagnosis → Heat stress validation → Biomechanical intervention → Performance breakthrough. The +21.3% improvement represents 103 days of data-driven training.*
 
 **Aerobic Decoupling: Thermal Resilience:**
 

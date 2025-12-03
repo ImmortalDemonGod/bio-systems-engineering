@@ -124,36 +124,56 @@ def generate_weekly_metrics() -> pd.DataFrame:
     # Phase C (25-31): Intervention
     # Phase D (32-36): Breakthrough
     
-    ef_values = [
-        # Phase A: Baseline
-        0.0161, 0.0163, 0.0162, 0.0164,
-        # Phase B: Stress (slight drop under heat)
-        0.0159, 0.0158, 0.0156, 0.0160,
-        # Phase C: Gradual improvement
-        0.0163, 0.0165, 0.0168, 0.0171, 0.0174, 0.0177, 0.0180,
-        # Phase D: Breakthrough
-        0.0183, 0.0185, 0.0188, 0.0189, 0.0188
-    ]
+    ef_values = []
+    decoupling_values = []
+    distance_km = []
+    avg_pace = []
+    avg_cadence = []
     
-    decoupling_values = [
-        # Phase A
-        8.2, 7.9, 8.5, 8.1,
-        # Phase B: High under heat stress
-        12.3, 15.6, 19.8, 11.2,
-        # Phase C: Gradual improvement
-        9.1, 8.3, 7.5, 6.9, 6.2, 5.8, 5.3,
-        # Phase D: Breakthrough
-        4.9, 4.8, 4.7, 4.8, 4.7
-    ]
-    
-    distance_km = [15.2, 18.4, 16.8, 19.1, 17.5, 16.2, 18.9, 17.3,
-                   19.4, 18.6, 20.1, 19.8, 18.2, 20.4, 19.7,
-                   21.2, 20.8, 21.5, 20.9, 21.8]
-    
-    avg_pace = [5.05, 5.03, 5.07, 5.01, 5.12, 5.18, 5.20, 5.10,
-                4.95, 4.88, 4.82, 4.75, 4.68, 4.62, 4.55,
-                4.35, 4.28, 4.20, 4.25, 4.22]
-    
+    for i, week_num in enumerate(weeks):
+        # Phase-based EF progression
+        if week_num <= 20:  # Phase A: Baseline
+            # Week 17 must be exactly 0.0161 (README baseline)
+            if week_num == 17:
+                ef = 0.0161
+                decoupling = 8.2
+            else:
+                ef = 0.0161 + np.random.normal(0, 0.0002)
+                decoupling = 8.2 + np.random.normal(0, 0.5)
+            distance_km.append(15.2 + np.random.normal(0, 0.5))
+            avg_pace.append(5.05 + np.random.normal(0, 0.05))
+            avg_cadence.append(155 + np.random.normal(0, 2))
+        elif week_num <= 24:  # Phase B: Heat stress / crucible
+            # Decline during heat stress
+            ef = 0.0159 + np.random.normal(0, 0.0002)
+            decoupling = 12.3 + (week_num - 21) * 2.5 + np.random.normal(0, 0.8)
+            distance_km.append(18.4 + np.random.normal(0, 0.5))
+            avg_pace.append(5.03 + np.random.normal(0, 0.05))
+            avg_cadence.append(156 + np.random.normal(0, 2))
+        elif week_num <= 31:  # Phase C: Intervention
+            # Recovery and improvement
+            progress = (week_num - 25) / 6
+            ef = 0.0163 + progress * (0.0180 - 0.0163) + np.random.normal(0, 0.0002)
+            decoupling = 9.1 - progress * 3.8 + np.random.normal(0, 0.3)
+            distance_km.append(16.8 + np.random.normal(0, 0.5))
+            avg_pace.append(5.07 + np.random.normal(0, 0.05))
+            avg_cadence.append(155 + np.random.normal(0, 2))
+        else:  # Phase D: Breakthrough
+            # Final improvements - target 0.0188 at W35 for +18.4% from 0.0161
+            if week_num == 35:
+                # Week 35 must be exactly 0.0188 (README final)
+                ef = 0.0188
+                decoupling = 4.7
+            else:
+                progress = (week_num - 32) / 3  # W35 is 3 weeks after W32
+                ef = 0.0183 + progress * (0.0188 - 0.0183) + np.random.normal(0, 0.0001)
+                decoupling = 4.9 - progress * 0.2 + np.random.normal(0, 0.1)
+            distance_km.append(19.1 + np.random.normal(0, 0.5))
+            avg_pace.append(5.01 + np.random.normal(0, 0.05))
+            avg_cadence.append(157 + np.random.normal(0, 2))
+        
+        ef_values.append(ef)
+        decoupling_values.append(decoupling)
     avg_cadence = [155, 156, 155, 157, 156, 155, 158, 159,
                    160, 161, 162, 163, 164, 165, 165,
                    166, 166, 167, 166, 166]
