@@ -1,0 +1,62 @@
+[
+  {
+    "week": 17,
+    "ef_mean": 0.01687556963141446,
+    "decoupling_mean": null,
+    "num_runs": 2
+  },
+  {
+    "week": 18,
+    "ef_mean": 0.015194729749301477,
+    "decoupling_mean": null,
+    "num_runs": 4
+  },
+  {
+    "week": 19,
+    "ef_mean": 0.012819527556364212,
+    "decoupling_mean": null,
+    "num_runs": 5
+  },
+  {
+    "week": 20,
+    "ef_mean": 0.011794736577373555,
+    "decoupling_mean": null,
+    "num_runs": 4
+  },
+  {
+    "week": 21,
+    "ef_mean": 0.01461223532329937,
+    "decoupling_mean": null,
+    "num_runs": 3
+  },
+  {
+    "week": 22,
+    "ef_mean": 0.01571105865588956,
+    "decoupling_mean": null,
+    "num_runs": 3
+  },
+  {
+    "week": 23,
+    "ef_mean": 0.015615122259109448,
+    "decoupling_mean": null,
+    "num_runs": 2
+  },
+  {
+    "week": 34,
+    "ef_mean": 0.017497410912011412,
+    "decoupling_mean": null,
+    "num_runs": 2
+  },
+  {
+    "week": 35,
+    "ef_mean": 0.016990729295206824,
+    "decoupling_mean": null,
+    "num_runs": 3
+  },
+  {
+    "week": 36,
+    "ef_mean": 0.017061088141200522,
+    "decoupling_mean": null,
+    "num_runs": 7
+  }
+]
