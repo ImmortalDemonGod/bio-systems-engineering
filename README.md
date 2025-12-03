@@ -262,7 +262,7 @@ If you use this work in research, please cite:
 
 ```bibtex
 @software{biosystems2025,
-  author = {Holistic Performance Enhancement Contributors},
+  author = {Miguel Ingram},
   title = {Bio-Systems Engineering: MLOps for Human Performance},
   year = {2025},
   url = {https://github.com/ImmortalDemonGod/bio-systems-engineering}
