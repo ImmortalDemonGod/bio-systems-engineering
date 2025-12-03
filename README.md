@@ -8,7 +8,7 @@
 
 ---
 
-## The Hook: Science Meets Systems Engineering
+## Overview: Science Meets Systems Engineering
 
 This repository documents a 103-day experiment (2025-W17 to W36) where systematic, data-driven interventions produced measurable physiological improvements:
 
@@ -49,7 +49,7 @@ This repository documents a 103-day experiment (2025-W17 to W36) where systemati
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/bio-systems-engineering.git
+git clone https://github.com/ImmortalDemonGod/bio-systems-engineering.git
 cd bio-systems-engineering
 
 # Create virtual environment
@@ -205,8 +205,8 @@ We welcome contributions! Areas of interest:
 # Run full test suite with coverage
 pytest
 
-# Run specific test file
-pytest tests/test_physics.py -v
+# Run individual test file
+pytest tests/test_physics_gap.py -v
 
 # Type checking
 mypy src/biosystems
@@ -221,7 +221,7 @@ If you use this work in research, please cite:
   author = {Holistic Performance Enhancement Contributors},
   title = {Bio-Systems Engineering: MLOps for Human Performance},
   year = {2025},
-  url = {https://github.com/yourusername/bio-systems-engineering}
+  url = {https://github.com/ImmortalDemonGod/bio-systems-engineering}
 }
 ```
 
@@ -242,7 +242,7 @@ Traditional sports science relies on manual logging, proprietary platforms, or e
 3. **Rigorous Filtering** - Run-Only algorithm for signal purity
 4. **Privacy-Safe Design** - No GPS coordinates, only derived time-series
 
-**The broader impact:** A blueprint for N=1 self-experimentation that meets publication standards.
+**The broader goal:** Make N=1 self-experimentation practical, reproducible, and suitable for publication rather than just anecdotal.
 
 ---
 
@@ -260,7 +260,7 @@ The physiological improvements documented in this study (W17-W36, 2025) were tra
 
 ### Validation
 
-The library has been validated to produce statistically identical results to the prototype scripts. Key metrics (Efficiency Factor, Aerobic Decoupling, Training Stress Score) match within floating-point precision on sample data. The refactoring preserves algorithmic integrity while improving code quality, testability, and maintainability.
+The library is designed to reproduce the results of the prototype scripts. A dedicated validation harness will compare key metrics (Efficiency Factor, Aerobic Decoupling, Training Stress Score) across both implementations to confirm matching behavior within expected floating-point tolerances, while the refactoring improves code quality, testability, and maintainability.
 
 ### Future Use
 
@@ -284,4 +284,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 **Status:** ✅ Active Development | 📊 Publication-Ready | 🔬 Research Artifact
 
-For questions or collaboration: [Open an Issue](https://github.com/yourusername/bio-systems-engineering/issues)
+For questions or collaboration: [Open an Issue](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues)
