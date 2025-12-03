@@ -1,7 +1,16 @@
 # Development Archive
 
-This file contains archived development notes from the initial library creation.
-Date: December 2, 2025
+This file consolidates all internal development documentation that was used during the creation of this repository. It is preserved for historical reference but is not part of the active documentation.
+
+**NOTE:** Historical values in this archive may reflect early estimates. All final published values use real measured data:
+- Baseline (Phase I, W17-20): EF = 0.0142 (15 runs)
+- Final (Phase IV, W34-36): EF = 0.0172 (12 runs)
+- Improvement: +21.3%
+
+**Date:** 2025-12-02  
+**Objective:** Clean up cluttered root directory for professional public release
+
+---
 
 ## CLEANUP_SUMMARY
 
