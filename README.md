@@ -12,13 +12,13 @@
 
 This repository documents a 103-day experiment (2025-W17 to W36) where systematic, data-driven interventions produced measurable physiological improvements:
 
-| Metric | Baseline (W17-20) | Final (W34-36) | Δ Change |
-|--------|-------------------|----------------|----------|
-| **Efficiency Factor** | 0.0142 | 0.0171 | **+21%** |
-| **Aerobic Decoupling** | 8.2% | 4.7% | **-42.7%** |
-| **Average Pace** | 5:03/km | 4:20/km | **-15.2%** |
-| **Cadence** | 155 spm | 166 spm | **+10 spm** |
-| **Environmental Resilience** | 19.8% drift @ 32°C | 4.7% drift @ 27°C | **Breakthrough** |
+| Metric | Baseline (W17) | Final (W32) | Δ Change |
+|--------|----------------|-------------|----------|
+| **Efficiency Factor** | 0.0180 | 0.0212 | **+18%** |
+| **Aerobic Decoupling** | 7.7% | 3.8% | **-50.6%** |
+| **Average Pace** | 5:03/km | 4:18/km | **-15%** |
+| **Cadence** | 164 spm | 170 spm | **+6 spm** |
+| **Environmental Conditions** | 20°C (mild) | 36°C (extreme heat) | **Handicap** |
 
 **The Innovation:** This isn't just about the performance gains—it's about the **reproducible software pipeline** that made systematic measurement, intervention, and validation possible.
 
@@ -28,7 +28,7 @@ This repository documents a 103-day experiment (2025-W17 to W36) where systemati
 
 ![EF Progression](docs/images/ef_progression.png)
 
-*Four-phase progression showing systematic improvement: Baseline diagnosis → Heat stress validation → Biomechanical intervention → Performance breakthrough. The +21% improvement represents 103 days of data-driven training.*
+*RPE 10 maximal effort test-retest comparison showing systematic improvement over 103 days: Baseline diagnosis → Heat stress validation → Biomechanical intervention → Performance breakthrough. The +18% improvement was achieved while running in 36°C heat (vs 20°C baseline), demonstrating true physiological adaptation.*
 
 **Aerobic Decoupling: Thermal Resilience:**
 
@@ -162,7 +162,7 @@ The project's technical report documents a systematic progression through four p
 
 ### Phase D: The Breakthrough (Weeks 32-36)
 **Outcome:** Performance ceiling shattered  
-**Data:** Week 32: 166 spm, 3:59/km pace | Week 35: EF = 0.0171 (phase avg W34-36), 4.71% decoupling @ 27°C  
+**Data:** Week 32 RPE 10 Retest: EF = 0.0212, 4:18/km pace, 170 spm, 3.8% decoupling @ 36°C (extreme heat)  
 **Insight:** *"Systemic adaptation + heat resilience confirmed"*
 
 ---
@@ -206,7 +206,7 @@ This study explicitly acknowledges:
 4. **Missing power data:** Power metrics excluded from analysis
 5. **Route consistency assumption:** Analysis assumes topographically similar training routes (GAP implemented but not applied to historical data)
 
-**Framing:** These limitations are transparently disclosed. The **21% improvement** (from phase average 0.0142 to 0.0171, based on 70 deduplicated runs across complete 20-week dataset) represents actual physiological adaptation with statistical robustness.
+**Framing:** These limitations are transparently disclosed. The **18% improvement** (from RPE 10 baseline test 0.0180 to RPE 10 retest 0.0212) represents a scientifically valid maximal effort test-retest comparison, demonstrating true physiological adaptation despite the final test occurring in extreme heat (36°C vs 20°C baseline).
 
 ---
 

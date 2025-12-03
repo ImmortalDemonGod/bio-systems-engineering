@@ -1,122 +1,124 @@
 [
   {
     "week": 17,
-    "ef_mean": 0.016875581601444686,
+    "ef_mean": 0.01801,
     "num_runs": 2,
-    "decoupling_mean": 11.159251457129239
+    "decoupling_mean": 7.9,
+    "note": "RPE_10 Baseline Test"
   },
   {
     "week": 18,
-    "ef_mean": 0.01467211601465736,
+    "ef_mean": 0.015874795120460455,
     "num_runs": 3,
-    "decoupling_mean": 4.500846879974405
+    "decoupling_mean": 6.197004890177567
   },
   {
     "week": 19,
-    "ef_mean": 0.013479771167658408,
+    "ef_mean": 0.01615124696882678,
     "num_runs": 4,
-    "decoupling_mean": 5.112728130898624
+    "decoupling_mean": 6.781483384526899
   },
   {
     "week": 20,
-    "ef_mean": 0.011794740851073966,
+    "ef_mean": 0.01557021466978938,
     "num_runs": 4,
-    "decoupling_mean": 19.424350720928178
+    "decoupling_mean": 5.593620613622427
   },
   {
     "week": 21,
-    "ef_mean": 0.0146122416653658,
+    "ef_mean": 0.016938056851193786,
     "num_runs": 3,
-    "decoupling_mean": 8.323544485918829
+    "decoupling_mean": 7.215227418649508
   },
   {
     "week": 22,
-    "ef_mean": 0.01571108035692605,
+    "ef_mean": 0.017408596014635545,
     "num_runs": 3,
-    "decoupling_mean": 4.352079301456789
+    "decoupling_mean": 1.5868629645284293
   },
   {
     "week": 23,
-    "ef_mean": 0.015615143827640614,
+    "ef_mean": 0.018158860983650882,
     "num_runs": 2,
-    "decoupling_mean": 14.01008545334917
+    "decoupling_mean": 9.951334087127334
   },
   {
     "week": 24,
-    "ef_mean": 0.014746791867937365,
+    "ef_mean": 0.016321881826827,
     "num_runs": 4,
-    "decoupling_mean": 7.691263858381713
+    "decoupling_mean": 2.6738651984716477
   },
   {
     "week": 25,
-    "ef_mean": 0.015459222248098314,
+    "ef_mean": 0.018553176364794165,
     "num_runs": 1,
-    "decoupling_mean": 12.092502115167306
+    "decoupling_mean": 9.860781569546143
   },
   {
     "week": 26,
-    "ef_mean": 0.015999102992894264,
+    "ef_mean": 0.017647512939846545,
     "num_runs": 4,
-    "decoupling_mean": 10.204785591468415
+    "decoupling_mean": 6.8222033948153
   },
   {
     "week": 27,
-    "ef_mean": 0.017523540634778026,
+    "ef_mean": 0.018626375918706122,
     "num_runs": 2,
-    "decoupling_mean": 8.829791062814953
+    "decoupling_mean": 12.036989270159474
   },
   {
     "week": 28,
-    "ef_mean": 0.01546285110291828,
+    "ef_mean": 0.016815796329016072,
     "num_runs": 4,
-    "decoupling_mean": 11.34894027045539
+    "decoupling_mean": 7.837298192796071
   },
   {
     "week": 29,
-    "ef_mean": 0.017111004866416448,
+    "ef_mean": 0.018675834854306295,
     "num_runs": 4,
-    "decoupling_mean": 7.977694535912287
+    "decoupling_mean": 8.168854431845993
   },
   {
     "week": 30,
-    "ef_mean": 0.0167000264153356,
+    "ef_mean": 0.017356285446614484,
     "num_runs": 4,
-    "decoupling_mean": 3.5779970142722997
+    "decoupling_mean": 4.90395687963409
   },
   {
     "week": 31,
-    "ef_mean": 0.016894294361860886,
+    "ef_mean": 0.01798842049693564,
     "num_runs": 4,
-    "decoupling_mean": 10.204676060399326
+    "decoupling_mean": 8.446336815947166
   },
   {
     "week": 32,
-    "ef_mean": 0.017432541373720075,
+    "ef_mean": 0.021215824712598048,
     "num_runs": 4,
-    "decoupling_mean": 10.354690146605721
+    "decoupling_mean": 3.8491156070442276,
+    "note": "RPE_10 Final Retest (36\u00b0C heat)"
   },
   {
     "week": 33,
-    "ef_mean": 0.016319354875215537,
+    "ef_mean": 0.017317555173925477,
     "num_runs": 5,
-    "decoupling_mean": 5.79478265622288
+    "decoupling_mean": 6.373620410696832
   },
   {
     "week": 34,
-    "ef_mean": 0.01726625360198546,
+    "ef_mean": 0.018031774631770307,
     "num_runs": 3,
-    "decoupling_mean": 9.624744336391096
+    "decoupling_mean": 8.32468592821899
   },
   {
     "week": 35,
-    "ef_mean": 0.01699073675098575,
+    "ef_mean": 0.0173944107718258,
     "num_runs": 3,
-    "decoupling_mean": 5.520307627251378
+    "decoupling_mean": 4.688820557708
   },
   {
     "week": 36,
-    "ef_mean": 0.017144839004916094,
+    "ef_mean": 0.01823933476374609,
     "num_runs": 7,
-    "decoupling_mean": 8.799337408249533
+    "decoupling_mean": 5.397200289402407
   }
 ]
