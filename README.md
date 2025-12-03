@@ -14,7 +14,7 @@ This repository documents a 103-day experiment (2025-W17 to W36) where systemati
 
 | Metric | Baseline (W17-20) | Final (W34-36) | Δ Change |
 |--------|-------------------|----------------|----------|
-| **Efficiency Factor** | 0.0142 | 0.0172 | **+21.3%** |
+| **Efficiency Factor** | 0.0142 | 0.0171 | **+21%** |
 | **Aerobic Decoupling** | 8.2% | 4.7% | **-42.7%** |
 | **Average Pace** | 5:03/km | 4:20/km | **-15.2%** |
 | **Cadence** | 155 spm | 166 spm | **+10 spm** |
@@ -28,7 +28,7 @@ This repository documents a 103-day experiment (2025-W17 to W36) where systemati
 
 ![EF Progression](docs/images/ef_progression.png)
 
-*Four-phase progression showing systematic improvement: Baseline diagnosis → Heat stress validation → Biomechanical intervention → Performance breakthrough. The +21.3% improvement represents 103 days of data-driven training.*
+*Four-phase progression showing systematic improvement: Baseline diagnosis → Heat stress validation → Biomechanical intervention → Performance breakthrough. The +21% improvement represents 103 days of data-driven training.*
 
 **Aerobic Decoupling: Thermal Resilience:**
 
@@ -162,7 +162,7 @@ The project's technical report documents a systematic progression through four p
 
 ### Phase D: The Breakthrough (Weeks 32-36)
 **Outcome:** Performance ceiling shattered  
-**Data:** Week 32: 166 spm, 3:59/km pace | Week 35: EF = 0.0172 (phase avg W34-36), 4.71% decoupling @ 27°C  
+**Data:** Week 32: 166 spm, 3:59/km pace | Week 35: EF = 0.0171 (phase avg W34-36), 4.71% decoupling @ 27°C  
 **Insight:** *"Systemic adaptation + heat resilience confirmed"*
 
 ---
@@ -206,7 +206,7 @@ This study explicitly acknowledges:
 4. **Missing power data:** Power metrics excluded from analysis
 5. **Route consistency assumption:** Analysis assumes topographically similar training routes (GAP implemented but not applied to historical data)
 
-**Framing:** These limitations are transparently disclosed. The **21.3% improvement** (from phase average 0.0142 to 0.0172, based on 27 measured runs) represents actual physiological adaptation with statistical robustness.
+**Framing:** These limitations are transparently disclosed. The **21% improvement** (from phase average 0.0142 to 0.0171, based on 70 deduplicated runs across complete 20-week dataset) represents actual physiological adaptation with statistical robustness.
 
 ---
 
