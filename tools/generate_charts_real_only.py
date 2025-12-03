@@ -114,8 +114,14 @@ def generate_ef_chart(data, output_path: Path):
 
 
 def generate_decoupling_chart(data, output_path: Path):
-    """Generate aerobic decoupling chart from real measured data."""
-    fig, ax = plt.subplots(figsize=(10, 4), dpi=150)
+    """
+    Generate clean aerobic decoupling chart.
+    Truncated at Week 32 to match test-retest narrative.
+    """
+    fig, ax = plt.subplots(figsize=(12, 5), dpi=150)
+    
+    # Truncate at Week 32 (match EF chart)
+    data = [d for d in data if d['week'] <= 32]
     
     # Extract weeks with decoupling data
     weeks = [d['week'] for d in data if d['decoupling_mean'] is not None]
@@ -125,35 +131,47 @@ def generate_decoupling_chart(data, output_path: Path):
     colors = ['#16a34a' if d < 5 else '#f59e0b' if d < 10 else '#dc2626' 
               for d in decouplings]
     
-    bars = ax.bar(weeks, decouplings, color=colors, alpha=0.7, edgecolor='white', linewidth=1.5)
+    bars = ax.bar(weeks, decouplings, color=colors, alpha=0.8, edgecolor='white', linewidth=2, width=0.8)
     
-    # Threshold line
-    ax.axhline(y=5, color='#16a34a', linestyle='--', linewidth=2, alpha=0.7)
-    ax.text(36.5, 5.3, '5% threshold\n(excellent)', fontsize=9, color='#16a34a', va='bottom', ha='right')
+    # Threshold line for "excellent" performance
+    ax.axhline(y=5, color='#16a34a', linestyle='--', linewidth=2, alpha=0.5, zorder=1)
+    ax.text(32.5, 5.3, '<5% excellent', fontsize=10, color='#16a34a', va='bottom', ha='right',
+           fontweight='600')
     
-    # Highlight heat stress weeks if high decoupling
+    # Highlight Week 23 heat stress test if present
     if 23 in weeks:
         week_23_idx = weeks.index(23)
         if decouplings[week_23_idx] > 10:
             bars[week_23_idx].set_edgecolor('#dc2626')
             bars[week_23_idx].set_linewidth(3)
+            # Add annotation
+            ax.annotate('Heat stress\nbreakdown', 
+                       xy=(23, decouplings[week_23_idx]), 
+                       xytext=(25, decouplings[week_23_idx] + 1),
+                       fontsize=9, color='#dc2626',
+                       arrowprops=dict(arrowstyle='->', color='#dc2626', lw=1.5))
     
-    ax.set_xlabel('Training Week (2025)', fontweight='bold')
-    ax.set_ylabel('Aerobic Decoupling (%)', fontweight='bold')
-    ax.set_title('Aerobic Decoupling: Real Measured Data', 
-                 fontweight='bold', pad=15)
+    # Clean, minimal styling matching EF chart
+    ax.set_xlabel('Training Week (2025)', fontsize=13, fontweight='600', color='#334155')
+    ax.set_ylabel('Aerobic Decoupling (%)', fontsize=13, fontweight='600', color='#334155')
+    ax.set_title('Aerobic Decoupling: 103-Day Progression', 
+                 fontsize=16, fontweight='bold', pad=20, color='#1e293b')
     
-    ax.set_xlim(16.5, 36.5)
-    ax.set_ylim(0, max(decouplings) * 1.2)
-    ax.grid(True, alpha=0.2, axis='y')
+    ax.set_xlim(16, 33)
+    ax.set_ylim(0, max(decouplings) * 1.15)
     
-    # Legend
+    # Subtle grid
+    ax.grid(True, alpha=0.15, linewidth=0.5, color='#cbd5e1', axis='y', zorder=0)
+    ax.set_axisbelow(True)
+    
+    # Clean legend
     legend_elements = [
-        mpatches.Patch(facecolor='#16a34a', alpha=0.7, label='Excellent (< 5%)'),
-        mpatches.Patch(facecolor='#f59e0b', alpha=0.7, label='Moderate (5-10%)'),
-        mpatches.Patch(facecolor='#dc2626', alpha=0.7, label='Poor (> 10%)'),
+        mpatches.Patch(facecolor='#16a34a', alpha=0.8, label='Excellent (< 5%)'),
+        mpatches.Patch(facecolor='#f59e0b', alpha=0.8, label='Moderate (5-10%)'),
+        mpatches.Patch(facecolor='#dc2626', alpha=0.8, label='Poor (> 10%)'),
     ]
-    ax.legend(handles=legend_elements, loc='upper right', framealpha=0.95)
+    ax.legend(handles=legend_elements, loc='upper right', framealpha=0.98, fontsize=10,
+             edgecolor='#e2e8f0', frameon=True)
     
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
