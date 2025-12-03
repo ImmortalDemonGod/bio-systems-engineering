@@ -45,11 +45,10 @@ def setup_style():
 
 def generate_ef_chart(data, output_path: Path):
     """
-    Generate EF chart using ONLY real measured data.
-    Shows gaps where no data exists (no interpolation).
-    Truncated at Week 32 (RPE 10 final retest).
+    Generate clean, publication-quality EF chart for test-retest comparison.
+    Focuses on RPE 10 baseline and retest with minimal visual noise.
     """
-    fig, ax = plt.subplots(figsize=(10, 5), dpi=150)
+    fig, ax = plt.subplots(figsize=(12, 6), dpi=150)
     
     # Truncate at Week 32 (the final RPE 10 retest)
     data = [d for d in data if d['week'] <= 32]
@@ -57,31 +56,12 @@ def generate_ef_chart(data, output_path: Path):
     # Extract measured weeks and values
     weeks = [d['week'] for d in data]
     ef_values = [d['ef_mean'] for d in data]
-    run_counts = [d['num_runs'] for d in data]
     
-    # Phase boundaries (for background coloring) - truncated at Week 32
-    phase_boundaries = {
-        'A: Diagnosis': (17, 20),
-        'B: Crucible': (21, 24),
-        'C: Intervention': (25, 31),
-        'D: Breakthrough': (32, 32),  # Only Week 32 (the final test)
-    }
-    
-    phase_colors = ['#e8f4f8', '#fff4e6', '#e8f8e8', '#ffe8e8']
-    
-    # Draw phase backgrounds
-    for (phase_name, (start, end)), color in zip(phase_boundaries.items(), phase_colors):
-        ax.axvspan(start, end, alpha=0.3, color=color, zorder=0)
-        mid_week = (start + end) / 2
-        ax.text(mid_week, 0.0215, phase_name.split(':')[0], 
-                ha='center', va='bottom', fontsize=9, fontweight='bold',
-                bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8, edgecolor='none'))
-    
-    # Plot ONLY measured data points (with gaps)
+    # Plot training data as subtle background context (de-emphasized)
     ax.plot(weeks, ef_values, 
-            marker='o', markersize=8, linewidth=0,  # NO LINE between gaps
-            color='#2563eb', label='Measured EF (Real Data)',
-            markerfacecolor='#2563eb', markeredgewidth=2, markeredgecolor='white')
+            color='#cbd5e1', linewidth=1.5, alpha=0.4, zorder=1)
+    ax.scatter(weeks, ef_values,
+               s=30, color='#94a3b8', alpha=0.3, zorder=2)
     
     # Highlight RPE 10 tests with special markers
     rpe10_tests = []
@@ -91,99 +71,41 @@ def generate_ef_chart(data, output_path: Path):
     
     if rpe10_tests:
         for week, ef, note in rpe10_tests:
-            color = '#dc2626' if 'Baseline' in note else '#16a34a'
-            label = 'RPE 10 Baseline' if 'Baseline' in note else 'RPE 10 Retest'
-            ax.plot(week, ef, 'o', markersize=14, markerfacecolor=color,
-                   markeredgewidth=2, markeredgecolor='white', zorder=5,
-                   label=label)
+            is_baseline = 'Baseline' in note
+            color = '#dc2626' if is_baseline else '#16a34a'
             
-            # Add annotation
-            y_offset = 0.0003 if 'Baseline' in note else -0.0003
-            va = 'bottom' if 'Baseline' in note else 'top'
-            ax.annotate(f'{ef:.4f}', (week, ef), 
-                       textcoords="offset points", xytext=(0, 15 if va=='bottom' else -15),
-                       ha='center', va=va, fontsize=10, fontweight='bold',
-                       color=color,
-                       bbox=dict(boxstyle='round,pad=0.4', facecolor='white', 
-                                edgecolor=color, linewidth=2))
+            # Large, prominent markers for RPE 10 tests
+            ax.scatter(week, ef, s=400, color=color, marker='o',
+                      edgecolors='white', linewidths=3, zorder=10,
+                      label='RPE 10 Baseline' if is_baseline else 'RPE 10 Retest')
+            
+            # Clean, minimal annotations
+            label_text = f"Baseline\nEF = {ef:.4f}\nWeek {week}" if is_baseline else f"Final Test\nEF = {ef:.4f}\nWeek {week}\n(+18%)"
+            y_pos = ef - 0.0015 if is_baseline else ef - 0.0015
+            
+            ax.text(week, y_pos, label_text,
+                   ha='center', va='top', fontsize=11, fontweight='bold',
+                   color=color,
+                   bbox=dict(boxstyle='round,pad=0.5', facecolor='white',
+                            edgecolor=color, linewidth=2.5, alpha=0.98))
     
-    # Draw lines only between consecutive weeks
-    for i in range(len(weeks) - 1):
-        if weeks[i+1] == weeks[i] + 1:  # Only connect consecutive weeks
-            ax.plot([weeks[i], weeks[i+1]], [ef_values[i], ef_values[i+1]], 
-                   color='#2563eb', linewidth=2, alpha=0.5)
+    # Clean, minimal styling
+    ax.set_xlabel('Training Week (2025)', fontsize=13, fontweight='600', color='#334155')
+    ax.set_ylabel('Efficiency Factor (m/s per bpm)', fontsize=13, fontweight='600', color='#334155')
+    ax.set_title('103-Day Test-Retest: +18% Efficiency Improvement', 
+                 fontsize=16, fontweight='bold', pad=20, color='#1e293b')
     
-    # Check for gaps (only show if data is actually missing) - range truncated at Week 32
-    missing_weeks = [w for w in range(17, 33) if w not in weeks]
-    if missing_weeks:
-        # Find contiguous gaps
-        gap_start = min(missing_weeks)
-        gap_end = max(missing_weeks)
-        ax.axvspan(gap_start, gap_end, alpha=0.15, color='gray', zorder=0)
-        ax.text((gap_start + gap_end) / 2, 0.0110, f'NO DATA\n(Weeks {gap_start}-{gap_end})', 
-                ha='center', va='bottom', fontsize=10, style='italic',
-                bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.9, 
-                         edgecolor='gray', linestyle='--', linewidth=2))
+    ax.set_xlim(16, 33)
+    ax.set_ylim(0.014, 0.023)
     
-    # Find RPE 10 tests for baseline/final annotation
-    rpe10_baseline = None
-    rpe10_final = None
+    # Subtle grid
+    ax.grid(True, alpha=0.15, linewidth=0.5, color='#cbd5e1')
+    ax.set_axisbelow(True)
     
-    for d in data:
-        if 'note' in d and 'RPE_10' in d.get('note', ''):
-            if 'Baseline' in d['note']:
-                rpe10_baseline = d
-            elif 'Final' in d['note'] or 'Retest' in d['note']:
-                rpe10_final = d
-    
-    # Use RPE 10 tests if available, otherwise phase averages
-    if rpe10_baseline and rpe10_final:
-        baseline_ef = rpe10_baseline['ef_mean']
-        final_ef = rpe10_final['ef_mean']
-        improvement = ((final_ef - baseline_ef) / baseline_ef) * 100
-        
-        # Baseline annotation (RPE 10 test)
-        ax.text(17.5, baseline_ef - 0.0005, 
-                f'RPE 10 Baseline\n{baseline_ef:.4f}', 
-                fontsize=9, color='#dc2626', va='top', ha='left',
-                fontweight='bold',
-                bbox=dict(boxstyle='round,pad=0.3', facecolor='white', 
-                         edgecolor='#dc2626', linewidth=1.5, alpha=0.95))
-        
-        # Final annotation (RPE 10 retest) - positioned to avoid title overlap
-        ax.text(32, final_ef - 0.0008, 
-                f'RPE 10 Retest\n{final_ef:.4f}\n(+{improvement:.1f}%)', 
-                fontsize=9, color='#16a34a', va='top', ha='center',
-                fontweight='bold',
-                bbox=dict(boxstyle='round,pad=0.3', facecolor='white', 
-                         edgecolor='#16a34a', linewidth=1.5, alpha=0.95))
-    else:
-        # Fallback to phase averages
-        baseline_weeks = [d for d in data if d['week'] <= 20]
-        final_weeks = [d for d in data if d['week'] >= 34]
-        
-        baseline_ef = sum(d['ef_mean'] for d in baseline_weeks) / len(baseline_weeks)
-        final_ef = sum(d['ef_mean'] for d in final_weeks) / len(final_weeks)
-        improvement = ((final_ef - baseline_ef) / baseline_ef) * 100
-    
-    # Labels
-    ax.set_xlabel('Training Week (2025)', fontweight='bold')
-    ax.set_ylabel('Efficiency Factor (m·min⁻¹·bpm⁻¹)', fontweight='bold')
-    
-    # Title reflects RPE 10 test-retest if available
-    if rpe10_baseline and rpe10_final:
-        ax.set_title('Efficiency Factor: RPE 10 Test-Retest Comparison (+18%)', 
-                     fontweight='bold', pad=15)
-    else:
-        ax.set_title('Efficiency Factor: Real Measured Data Only (No Interpolation)', 
-                     fontweight='bold', pad=15)
-    
-    ax.set_xlim(16.5, 33)  # Truncated at Week 32 (final test)
-    ax.set_ylim(0.0110, 0.0220)  # Extended to show RPE 10 retest at 0.0212
-    ax.grid(True, alpha=0.2)
-    
-    # Legend
-    ax.legend(loc='upper left', framealpha=0.95, fontsize=9)
+    # Clean legend (only show if RPE 10 tests exist)
+    if rpe10_tests:
+        ax.legend(loc='upper left', framealpha=0.98, fontsize=10, 
+                 edgecolor='#e2e8f0', frameon=True)
     
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
