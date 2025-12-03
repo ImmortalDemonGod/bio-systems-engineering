@@ -22,6 +22,20 @@ This repository documents a 103-day experiment (2025-W17 to W36) where systemati
 
 **The Innovation:** This isn't just about the performance gains—it's about the **reproducible software pipeline** that made systematic measurement, intervention, and validation possible.
 
+### Visual Evidence: The Progression
+
+**Efficiency Factor Over Time:**
+
+![EF Progression](docs/images/ef_progression.png)
+
+*Four-phase progression showing systematic improvement: Baseline diagnosis → Heat stress validation → Biomechanical intervention → Performance breakthrough. The +18.4% improvement represents 103 days of data-driven training.*
+
+**Aerobic Decoupling: Thermal Resilience:**
+
+![Aerobic Decoupling](docs/images/aerobic_decoupling.png)
+
+*Cardiac drift under thermal stress decreased from 19.78% @ 32°C (Week 23) to 4.71% @ 27°C (Week 35), demonstrating heat adaptation and improved aerobic efficiency.*
+
 👉 **[Read the Full Technical Report →](reports/01_longitudinal_study.md)**
 
 ---
@@ -66,34 +80,64 @@ pip install -e ".[dev]"
 # Build the image
 docker build -t biosystems:latest .
 
-# Run analysis
+# Run analysis on sample data
 docker run -v $(pwd)/data:/app/data biosystems:latest
+
+# Or run on your own data (place .gpx/.fit files in data/raw/)
+docker run -v $(pwd)/data:/app/data -v /path/to/your/gpx:/app/data/raw biosystems:latest
 ```
 
-### Basic Usage
+### Try It Out: Demo with Sample Data
+
+The repository includes **anonymized sample data** to demonstrate the pipeline without requiring your own GPS files.
 
 ```python
-from biosystems.ingestion.gpx import parse_gpx
-from biosystems.physics.metrics import calculate_efficiency_factor
-from biosystems.models import ZoneConfig
+import pandas as pd
+from biosystems.physics.metrics import run_metrics
+from biosystems.models import ZoneConfiguration
 
-# Parse your activity file
-df = parse_gpx("data/raw/my_run.gpx")
+# Load the included sample run
+df = pd.read_csv('data/sample/sample_run.csv', parse_dates=['time'])
 
-# Define your heart rate zones
-zones = ZoneConfig(
+# Define heart rate zones
+zones = ZoneConfiguration(
     resting_hr=50,
     threshold_hr=186,
     zones={
-        "Z2": {"bpm": (160, 186), "pace_min_per_km": (9.0, 9.4)}
+        "Z2": {"bpm": (145, 165), "pace_min_per_km": (9.0, 9.4)}
     }
 )
 
 # Calculate metrics
-metrics = calculate_efficiency_factor(df, zones)
+metrics = run_metrics(df, zones)
 print(f"Efficiency Factor: {metrics.efficiency_factor:.5f}")
 print(f"Aerobic Decoupling: {metrics.decoupling_pct:.2f}%")
+print(f"Training Stress Score: {metrics.hr_tss:.1f}")
 ```
+
+**Output:**
+```
+Efficiency Factor: 0.01523
+Aerobic Decoupling: 8.34%
+Training Stress Score: 42.3
+```
+
+### Using Your Own Data
+
+```python
+from biosystems.ingestion.gpx import parse_gpx
+from biosystems.physics.metrics import run_metrics
+
+# Parse your activity file
+df = parse_gpx("data/raw/my_run.gpx")
+
+# Calculate metrics (using same zones as above)
+metrics = run_metrics(df, zones)
+```
+
+**Supported Formats:**
+- `.gpx` (Garmin, Strava exports)
+- `.fit` (Garmin native format)
 
 ---
 
