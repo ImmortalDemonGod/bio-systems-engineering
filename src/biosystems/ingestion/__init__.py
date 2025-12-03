@@ -10,5 +10,6 @@ Available parsers:
 """
 
 from biosystems.ingestion.gpx import parse_gpx
+from biosystems.ingestion.fit import parse_fit, add_derived_metrics
 
-__all__ = ["parse_gpx"]
+__all__ = ["parse_gpx", "parse_fit", "add_derived_metrics"]
