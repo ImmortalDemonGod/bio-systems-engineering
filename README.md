@@ -53,7 +53,7 @@ This repository documents a 103-day experiment (2025-W17 to W36) where systemati
 - 🧪 **pytest** - Automated testing
 - 📝 **Type Hints** - mypy-compatible type safety
 - 🐳 **Docker** - Reproducible environment
-- 📚 **Jupyter** - Interactive analysis notebooks
+- 📊 **Matplotlib** - Publication-quality chart generation
 
 ---
 
@@ -220,18 +220,21 @@ This study explicitly acknowledges:
 bio-systems-engineering/
 ├── src/biosystems/          # Core library code
 │   ├── ingestion/           # FIT/GPX parsers
-│   ├── physics/             # EF, Decoupling, TSS algorithms
+│   ├── physics/             # EF, Decoupling, TSS, GAP algorithms
+│   ├── environment/         # Weather API integration
 │   ├── signal/              # Walk detection, filtering
-│   └── environment/         # Weather integration
+│   └── models.py            # Pydantic data contracts
 ├── data/
-│   ├── processed/           # Weekly aggregates (safe, anonymized)
-│   └── raw/                 # .gitignored (your private GPS data)
+│   ├── sample/              # Anonymized example run + weekly metrics
+│   └── raw/                 # User's .gpx/.fit files (gitignored)
+├── docs/
+│   └── images/              # Publication-quality charts
 ├── reports/
-│   ├── figures/             # Publication-quality charts
 │   └── 01_longitudinal_study.md  # Full technical narrative
-├── notebooks/               # Jupyter analysis notebooks
 ├── tests/                   # Automated test suite
-└── tools/                   # Utility scripts (GPS sanitization)
+│   ├── test_readme_examples.py  # Validates README code works
+│   └── test_*.py            # Unit and integration tests
+└── tools/                   # Chart generation and utilities
 ```
 
 ---
@@ -243,9 +246,9 @@ bio-systems-engineering/
 We welcome contributions! Areas of interest:
 - [ ] Improve test coverage above 80%
 - [ ] Add integration tests with real activity files
-- [ ] Create interactive visualization notebooks
-- [ ] Implement power meter data support
+- [ ] Implement power meter data support (watts, normalized power)
 - [ ] Add automated weekly report generation
+- [ ] Extend walk detection algorithm with ML refinements
 
 ### Running Tests
 

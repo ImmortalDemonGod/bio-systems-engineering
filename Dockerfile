@@ -22,11 +22,10 @@ COPY pyproject.toml .
 # Install package in editable mode
 RUN pip install --no-cache-dir -e .
 
-# Copy data and reports (if needed)
-# Note: data/raw/ is .gitignored and should be mounted as volume
-COPY data/processed/ ./data/processed/
-COPY reports/ ./reports/
-COPY notebooks/ ./notebooks/
+# Copy sample data and tests
+# Note: data/raw/ is .gitignored and should be mounted as volume at runtime
+COPY data/sample/ ./data/sample/
+COPY tests/ ./tests/
 
 # Create directory for output
 RUN mkdir -p /app/output
@@ -46,11 +45,8 @@ CMD ["pytest", "--verbose"]
 # Run tests:
 #   docker run biosystems:1.0.0
 #
-# Run analysis with data volume:
-#   docker run -v $(pwd)/data/raw:/app/data/raw biosystems:1.0.0 python scripts/analyze.py
+# Run with your own GPX data:
+#   docker run -v $(pwd)/data/raw:/app/data/raw biosystems:1.0.0 python -c "from biosystems.ingestion.gpx import parse_gpx; print(parse_gpx('/app/data/raw/your_run.gpx'))"
 #
 # Interactive shell:
 #   docker run -it biosystems:1.0.0 /bin/bash
-#
-# Run Jupyter (expose port 8888):
-#   docker run -p 8888:8888 biosystems:1.0.0 jupyter notebook --ip=0.0.0.0 --allow-root
