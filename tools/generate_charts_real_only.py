@@ -146,10 +146,10 @@ def generate_ef_chart(data, output_path: Path):
                 bbox=dict(boxstyle='round,pad=0.3', facecolor='white', 
                          edgecolor='#dc2626', linewidth=1.5, alpha=0.95))
         
-        # Final annotation (RPE 10 retest)
-        ax.text(32, final_ef + 0.0005, 
+        # Final annotation (RPE 10 retest) - positioned to avoid title overlap
+        ax.text(32, final_ef - 0.0008, 
                 f'RPE 10 Retest\n{final_ef:.4f}\n(+{improvement:.1f}%)', 
-                fontsize=9, color='#16a34a', va='bottom', ha='center',
+                fontsize=9, color='#16a34a', va='top', ha='center',
                 fontweight='bold',
                 bbox=dict(boxstyle='round,pad=0.3', facecolor='white', 
                          edgecolor='#16a34a', linewidth=1.5, alpha=0.95))
