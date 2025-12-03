@@ -36,9 +36,11 @@ def verify_imports():
     # Test ingestion
     print("✓ Testing ingestion...")
     try:
-        from biosystems.ingestion import parse_gpx
-        print("  ✓ GPX parser imported successfully")
+        from biosystems.ingestion import parse_gpx, parse_fit, add_derived_metrics
+        print("  ✓ Ingestion functions imported successfully")
         print(f"    parse_gpx callable: {callable(parse_gpx)}")
+        print(f"    parse_fit callable: {callable(parse_fit)}")
+        print(f"    add_derived_metrics callable: {callable(add_derived_metrics)}")
     except Exception as e:
         errors.append(f"Ingestion import failed: {e}")
         print(f"  ✗ Ingestion import failed: {e}")
