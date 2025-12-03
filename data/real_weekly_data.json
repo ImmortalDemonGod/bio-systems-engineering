@@ -1,122 +1,122 @@
 [
   {
     "week": 17,
-    "ef_mean": 0.018994330653260387,
-    "num_runs": 4,
-    "decoupling_mean": 8.268558699659929
+    "ef_mean": 0.016875581601444686,
+    "num_runs": 2,
+    "decoupling_mean": 11.159251457129239
   },
   {
     "week": 18,
-    "ef_mean": 0.016188978708235945,
-    "num_runs": 7,
-    "decoupling_mean": 5.615180933736733
+    "ef_mean": 0.01467211601465736,
+    "num_runs": 3,
+    "decoupling_mean": 4.500846879974405
   },
   {
     "week": 19,
-    "ef_mean": 0.01613351915484087,
-    "num_runs": 8,
-    "decoupling_mean": 6.568013418727906
+    "ef_mean": 0.013479771167658408,
+    "num_runs": 4,
+    "decoupling_mean": 5.112728130898624
   },
   {
     "week": 20,
-    "ef_mean": 0.015567115475902747,
-    "num_runs": 8,
-    "decoupling_mean": 5.590458313359459
+    "ef_mean": 0.011794740851073966,
+    "num_runs": 4,
+    "decoupling_mean": 19.424350720928178
   },
   {
     "week": 21,
-    "ef_mean": 0.016938503354001714,
-    "num_runs": 6,
-    "decoupling_mean": 7.220160052944975
+    "ef_mean": 0.0146122416653658,
+    "num_runs": 3,
+    "decoupling_mean": 8.323544485918829
   },
   {
     "week": 22,
-    "ef_mean": 0.017408360977722772,
-    "num_runs": 6,
-    "decoupling_mean": 1.583219619683839
+    "ef_mean": 0.01571108035692605,
+    "num_runs": 3,
+    "decoupling_mean": 4.352079301456789
   },
   {
     "week": 23,
-    "ef_mean": 0.018229536231405323,
-    "num_runs": 5,
-    "decoupling_mean": 11.90828966316846
+    "ef_mean": 0.015615143827640614,
+    "num_runs": 2,
+    "decoupling_mean": 14.01008545334917
   },
   {
     "week": 24,
-    "ef_mean": 0.01632326528270513,
+    "ef_mean": 0.014746791867937365,
     "num_runs": 4,
-    "decoupling_mean": 2.680155095899597
+    "decoupling_mean": 7.691263858381713
   },
   {
     "week": 25,
-    "ef_mean": 0.018554485698577414,
+    "ef_mean": 0.015459222248098314,
     "num_runs": 1,
-    "decoupling_mean": 9.89892445436204
+    "decoupling_mean": 12.092502115167306
   },
   {
     "week": 26,
-    "ef_mean": 0.017655155460245004,
+    "ef_mean": 0.015999102992894264,
     "num_runs": 4,
-    "decoupling_mean": 6.892033493972778
+    "decoupling_mean": 10.204785591468415
   },
   {
     "week": 27,
-    "ef_mean": 0.01862527970526784,
+    "ef_mean": 0.017523540634778026,
     "num_runs": 2,
-    "decoupling_mean": 12.065298801665676
+    "decoupling_mean": 8.829791062814953
   },
   {
     "week": 28,
-    "ef_mean": 0.016820643200693937,
+    "ef_mean": 0.01546285110291828,
     "num_runs": 4,
-    "decoupling_mean": 7.872598270583716
+    "decoupling_mean": 11.34894027045539
   },
   {
     "week": 29,
-    "ef_mean": 0.0186830145240841,
+    "ef_mean": 0.017111004866416448,
     "num_runs": 4,
-    "decoupling_mean": 8.135868511231429
+    "decoupling_mean": 7.977694535912287
   },
   {
     "week": 30,
-    "ef_mean": 0.01735733653736334,
+    "ef_mean": 0.0167000264153356,
     "num_runs": 4,
-    "decoupling_mean": 4.87757104570839
+    "decoupling_mean": 3.5779970142722997
   },
   {
     "week": 31,
-    "ef_mean": 0.01800297861326447,
+    "ef_mean": 0.016894294361860886,
     "num_runs": 4,
-    "decoupling_mean": 8.524267156209188
+    "decoupling_mean": 10.204676060399326
   },
   {
     "week": 32,
-    "ef_mean": 0.018684645132327957,
+    "ef_mean": 0.017432541373720075,
     "num_runs": 4,
-    "decoupling_mean": 8.666513586721184
+    "decoupling_mean": 10.354690146605721
   },
   {
     "week": 33,
-    "ef_mean": 0.01732046660707607,
+    "ef_mean": 0.016319354875215537,
     "num_runs": 5,
-    "decoupling_mean": 6.41042119714278
+    "decoupling_mean": 5.79478265622288
   },
   {
     "week": 34,
-    "ef_mean": 0.018094199194337718,
-    "num_runs": 5,
-    "decoupling_mean": 9.353920182376772
+    "ef_mean": 0.01726625360198546,
+    "num_runs": 3,
+    "decoupling_mean": 9.624744336391096
   },
   {
     "week": 35,
-    "ef_mean": 0.017408898473245702,
-    "num_runs": 6,
-    "decoupling_mean": 4.633339426698856
+    "ef_mean": 0.01699073675098575,
+    "num_runs": 3,
+    "decoupling_mean": 5.520307627251378
   },
   {
     "week": 36,
-    "ef_mean": 0.018247750878318265,
-    "num_runs": 14,
-    "decoupling_mean": 5.4340335686255585
+    "ef_mean": 0.017144839004916094,
+    "num_runs": 7,
+    "decoupling_mean": 8.799337408249533
   }
 ]
