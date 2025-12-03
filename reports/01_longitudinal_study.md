@@ -56,7 +56,7 @@ All data were captured via an automated ETL pipeline implementing:
 - **Efficiency Factor (EF):** `Speed (m/s) / Heart Rate (bpm)`
 - **Aerobic Decoupling:** `|EF₂ - EF₁| / EF₁ × 100%` (first half vs second half)
 - **Training Stress Score (TSS):** HR-based proxy for training load
-- **Grade Adjusted Pace (GAP):** Minetti's equation for elevation normalization
+- **Grade Adjusted Pace (GAP):** Implemented in the underlying library using Minetti's equation for elevation normalization; not applied to the original Week 17–36 dataset reported here.
 
 ### 2.2 The Run-Only Filter
 
@@ -86,7 +86,7 @@ ef = (work_df['speed'].mean() / work_df['hr'].mean())
 
 **Explicitly Acknowledged:**
 1. **N=1 design** - Results demonstrate feasibility, not generalizability
-2. **No GAP in early analysis** - Weeks 17-24 data assumes topographically similar routes
+2. **GAP not applied to historical dataset** - Analyses in this report assume topographically similar routes; GAP is implemented for future use only
 3. **No heat adjustment algorithm** - Performance gains likely **underestimated** given thermal stress
 4. **Missing power data** - Power metrics excluded from all analyses
 
@@ -219,9 +219,9 @@ This demonstrates the intervention created **systemic adaptation** beyond just m
 Beyond the physiological findings, this study demonstrates that:
 1. **Automated instrumentation** enables N=1 research at publication quality
 2. **Signal filtering** (Run-Only Filter) mathematically validates performance claims
-3. **GitOps data provenance** ensures reproducibility and auditability
+3. **Version-controlled analysis code and data schemas** ensure reproducibility and auditability
 
-**The system itself is a primary contribution** - a "Lab in a Box" for human performance optimization.
+**The system itself is a primary contribution**: a software pipeline that functions as a portable lab for running performance analysis.
 
 ### 4.4 Limitations & Future Work
 
@@ -268,7 +268,7 @@ This 103-day longitudinal study demonstrates:
 
 **Run-Only Filter (Python):**
 ```python
-from biosystems.physics import run_metrics
+from biosystems.physics.metrics import run_metrics
 from biosystems.models import ZoneConfig, HeartRateZone
 
 # Define heart rate zones
@@ -290,7 +290,7 @@ print(f"Efficiency Factor: {metrics.efficiency_factor}")
 print(f"Aerobic Decoupling: {metrics.decoupling_pct}%")
 ```
 
-**Full pipeline code available at:** [github.com/your-username/bio-systems-engineering](https://github.com)
+**Full pipeline code available at:** [github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
 
 ---
 
