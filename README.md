@@ -94,17 +94,21 @@ The repository includes **anonymized sample data** to demonstrate the pipeline w
 ```python
 import pandas as pd
 from biosystems.physics.metrics import run_metrics
-from biosystems.models import ZoneConfiguration
+from biosystems.models import ZoneConfig, HeartRateZone
 
 # Load the included sample run
 df = pd.read_csv('data/sample/sample_run.csv', parse_dates=['time'])
 
 # Define heart rate zones
-zones = ZoneConfiguration(
+zones = ZoneConfig(
     resting_hr=50,
     threshold_hr=186,
     zones={
-        "Z2": {"bpm": (145, 165), "pace_min_per_km": (9.0, 9.4)}
+        "Z2": HeartRateZone(
+            name="Z2 (Aerobic)",
+            bpm=(145, 165),
+            pace_min_per_km=(4.5, 6.0)
+        )
     }
 )
 
@@ -117,9 +121,9 @@ print(f"Training Stress Score: {metrics.hr_tss:.1f}")
 
 **Output:**
 ```
-Efficiency Factor: 0.01523
-Aerobic Decoupling: 8.34%
-Training Stress Score: 42.3
+Efficiency Factor: 0.02162
+Aerobic Decoupling: 3.33%
+Training Stress Score: 42.8
 ```
 
 ### Using Your Own Data
