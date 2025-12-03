@@ -95,7 +95,7 @@ def generate_ef_chart(data, output_path: Path):
     ax.set_title('103-Day Test-Retest: +18% Efficiency Improvement', 
                  fontsize=16, fontweight='bold', pad=20, color='#1e293b')
     
-    ax.set_xlim(16, 33)
+    ax.set_xlim(16, 32.5)  # Tight fit to week 32 endpoint
     ax.set_ylim(0.014, 0.023)
     
     # Subtle grid
@@ -157,7 +157,7 @@ def generate_decoupling_chart(data, output_path: Path):
     ax.set_title('Aerobic Decoupling: 103-Day Progression', 
                  fontsize=16, fontweight='bold', pad=20, color='#1e293b')
     
-    ax.set_xlim(16, 33)
+    ax.set_xlim(16, 32.5)  # Tight fit to week 32 endpoint
     ax.set_ylim(0, max(decouplings) * 1.15)
     
     # Subtle grid
