@@ -156,10 +156,11 @@ ef = (work_df['dist'].sum() / work_df['dt'].sum()) / work_df['hr'].mean()
 
 This study explicitly acknowledges:
 
-1. **No Grade Adjusted Pace (GAP):** Analysis assumes topographically similar training routes
-2. **No heat adjustment algorithm:** Performance gains likely **underestimated** (improvement occurred despite higher thermal stress)
-3. **N=1 design:** Results demonstrate feasibility, not generalizability
+1. **N=1 design:** Results demonstrate feasibility, not generalizability
+2. **Single-subject data:** Findings reflect one individual's physiology and training response
+3. **No heat adjustment algorithm:** Performance gains likely **underestimated** (improvement occurred despite higher thermal stress)
 4. **Missing power data:** Power metrics excluded from analysis
+5. **Route consistency assumption:** Analysis assumes topographically similar training routes (GAP implemented but not applied to historical data)
 
 **Framing:** These limitations are transparently disclosed. The **18.4% improvement represents a conservative lower bound** of actual physiological adaptation.
 
@@ -192,10 +193,11 @@ bio-systems-engineering/
 ### Contributing
 
 We welcome contributions! Areas of interest:
-- [ ] Implement Grade Adjusted Pace (Minetti's equation)
-- [ ] Add FIT file parser module
-- [ ] Expand test coverage
-- [ ] Create additional analysis notebooks
+- [ ] Improve test coverage above 80%
+- [ ] Add integration tests with real activity files
+- [ ] Create interactive visualization notebooks
+- [ ] Implement power meter data support
+- [ ] Add automated weekly report generation
 
 ### Running Tests
 
