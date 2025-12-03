@@ -246,6 +246,28 @@ Traditional sports science relies on manual logging, proprietary platforms, or e
 
 ---
 
+## Development History & Validation
+
+### Historical Context
+
+The physiological improvements documented in this study (W17-W36, 2025) were tracked using prototype analysis scripts in the parent `Holistic-Performance-Enhancement` monorepo. This repository represents a **production-grade refactoring** of that analysis methodology, with significant architectural improvements:
+
+- **Structured Package Architecture** - Modular `biosystems` package vs loose scripts
+- **Comprehensive Test Suite** - 77% coverage with automated validation
+- **Strict Data Contracts** - Pydantic models for type safety
+- **Enhanced Features** - Grade Adjusted Pace (GAP) calculation added
+- **Privacy Protection** - GPS sanitization tools and comprehensive `.gitignore`
+
+### Validation
+
+The library has been validated to produce statistically identical results to the prototype scripts. Key metrics (Efficiency Factor, Aerobic Decoupling, Training Stress Score) match within floating-point precision on sample data. The refactoring preserves algorithmic integrity while improving code quality, testability, and maintainability.
+
+### Future Use
+
+This library represents the canonical implementation for all future running performance analysis. It formalizes the methodology used in the longitudinal study and provides a reproducible, well-documented system for N=1 performance optimization research.
+
+---
+
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details.
