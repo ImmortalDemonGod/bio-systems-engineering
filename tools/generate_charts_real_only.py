@@ -47,20 +47,24 @@ def generate_ef_chart(data, output_path: Path):
     """
     Generate EF chart using ONLY real measured data.
     Shows gaps where no data exists (no interpolation).
+    Truncated at Week 32 (RPE 10 final retest).
     """
     fig, ax = plt.subplots(figsize=(10, 5), dpi=150)
+    
+    # Truncate at Week 32 (the final RPE 10 retest)
+    data = [d for d in data if d['week'] <= 32]
     
     # Extract measured weeks and values
     weeks = [d['week'] for d in data]
     ef_values = [d['ef_mean'] for d in data]
     run_counts = [d['num_runs'] for d in data]
     
-    # Phase boundaries (for background coloring)
+    # Phase boundaries (for background coloring) - truncated at Week 32
     phase_boundaries = {
         'A: Diagnosis': (17, 20),
         'B: Crucible': (21, 24),
         'C: Intervention': (25, 31),
-        'D: Breakthrough': (32, 36),
+        'D: Breakthrough': (32, 32),  # Only Week 32 (the final test)
     }
     
     phase_colors = ['#e8f4f8', '#fff4e6', '#e8f8e8', '#ffe8e8']
@@ -109,8 +113,8 @@ def generate_ef_chart(data, output_path: Path):
             ax.plot([weeks[i], weeks[i+1]], [ef_values[i], ef_values[i+1]], 
                    color='#2563eb', linewidth=2, alpha=0.5)
     
-    # Check for gaps (only show if data is actually missing)
-    missing_weeks = [w for w in range(17, 37) if w not in weeks]
+    # Check for gaps (only show if data is actually missing) - range truncated at Week 32
+    missing_weeks = [w for w in range(17, 33) if w not in weeks]
     if missing_weeks:
         # Find contiguous gaps
         gap_start = min(missing_weeks)
@@ -174,7 +178,7 @@ def generate_ef_chart(data, output_path: Path):
         ax.set_title('Efficiency Factor: Real Measured Data Only (No Interpolation)', 
                      fontweight='bold', pad=15)
     
-    ax.set_xlim(16.5, 36.5)
+    ax.set_xlim(16.5, 33)  # Truncated at Week 32 (final test)
     ax.set_ylim(0.0110, 0.0220)  # Extended to show RPE 10 retest at 0.0212
     ax.grid(True, alpha=0.2)
     
