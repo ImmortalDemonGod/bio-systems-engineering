@@ -1,62 +1,122 @@
 [
   {
     "week": 17,
-    "ef_mean": 0.01687556963141446,
-    "decoupling_mean": null,
-    "num_runs": 2
+    "ef_mean": 0.018994330653260387,
+    "num_runs": 4,
+    "decoupling_mean": 8.268558699659929
   },
   {
     "week": 18,
-    "ef_mean": 0.015194729749301477,
-    "decoupling_mean": null,
-    "num_runs": 4
+    "ef_mean": 0.016188978708235945,
+    "num_runs": 7,
+    "decoupling_mean": 5.615180933736733
   },
   {
     "week": 19,
-    "ef_mean": 0.012819527556364212,
-    "decoupling_mean": null,
-    "num_runs": 5
+    "ef_mean": 0.01613351915484087,
+    "num_runs": 8,
+    "decoupling_mean": 6.568013418727906
   },
   {
     "week": 20,
-    "ef_mean": 0.011794736577373555,
-    "decoupling_mean": null,
-    "num_runs": 4
+    "ef_mean": 0.015567115475902747,
+    "num_runs": 8,
+    "decoupling_mean": 5.590458313359459
   },
   {
     "week": 21,
-    "ef_mean": 0.01461223532329937,
-    "decoupling_mean": null,
-    "num_runs": 3
+    "ef_mean": 0.016938503354001714,
+    "num_runs": 6,
+    "decoupling_mean": 7.220160052944975
   },
   {
     "week": 22,
-    "ef_mean": 0.01571105865588956,
-    "decoupling_mean": null,
-    "num_runs": 3
+    "ef_mean": 0.017408360977722772,
+    "num_runs": 6,
+    "decoupling_mean": 1.583219619683839
   },
   {
     "week": 23,
-    "ef_mean": 0.015615122259109448,
-    "decoupling_mean": null,
-    "num_runs": 2
+    "ef_mean": 0.018229536231405323,
+    "num_runs": 5,
+    "decoupling_mean": 11.90828966316846
+  },
+  {
+    "week": 24,
+    "ef_mean": 0.01632326528270513,
+    "num_runs": 4,
+    "decoupling_mean": 2.680155095899597
+  },
+  {
+    "week": 25,
+    "ef_mean": 0.018554485698577414,
+    "num_runs": 1,
+    "decoupling_mean": 9.89892445436204
+  },
+  {
+    "week": 26,
+    "ef_mean": 0.017655155460245004,
+    "num_runs": 4,
+    "decoupling_mean": 6.892033493972778
+  },
+  {
+    "week": 27,
+    "ef_mean": 0.01862527970526784,
+    "num_runs": 2,
+    "decoupling_mean": 12.065298801665676
+  },
+  {
+    "week": 28,
+    "ef_mean": 0.016820643200693937,
+    "num_runs": 4,
+    "decoupling_mean": 7.872598270583716
+  },
+  {
+    "week": 29,
+    "ef_mean": 0.0186830145240841,
+    "num_runs": 4,
+    "decoupling_mean": 8.135868511231429
+  },
+  {
+    "week": 30,
+    "ef_mean": 0.01735733653736334,
+    "num_runs": 4,
+    "decoupling_mean": 4.87757104570839
+  },
+  {
+    "week": 31,
+    "ef_mean": 0.01800297861326447,
+    "num_runs": 4,
+    "decoupling_mean": 8.524267156209188
+  },
+  {
+    "week": 32,
+    "ef_mean": 0.018684645132327957,
+    "num_runs": 4,
+    "decoupling_mean": 8.666513586721184
+  },
+  {
+    "week": 33,
+    "ef_mean": 0.01732046660707607,
+    "num_runs": 5,
+    "decoupling_mean": 6.41042119714278
   },
   {
     "week": 34,
-    "ef_mean": 0.017497410912011412,
-    "decoupling_mean": null,
-    "num_runs": 2
+    "ef_mean": 0.018094199194337718,
+    "num_runs": 5,
+    "decoupling_mean": 9.353920182376772
   },
   {
     "week": 35,
-    "ef_mean": 0.016990729295206824,
-    "decoupling_mean": null,
-    "num_runs": 3
+    "ef_mean": 0.017408898473245702,
+    "num_runs": 6,
+    "decoupling_mean": 4.633339426698856
   },
   {
     "week": 36,
-    "ef_mean": 0.017061088141200522,
-    "decoupling_mean": null,
-    "num_runs": 7
+    "ef_mean": 0.018247750878318265,
+    "num_runs": 14,
+    "decoupling_mean": 5.4340335686255585
   }
 ]

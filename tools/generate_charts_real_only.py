@@ -85,14 +85,17 @@ def generate_ef_chart(data, output_path: Path):
             ax.plot([weeks[i], weeks[i+1]], [ef_values[i], ef_values[i+1]], 
                    color='#2563eb', linewidth=2, alpha=0.5)
     
-    # Annotate gaps
-    gap_start = 24
-    gap_end = 33
-    ax.axvspan(gap_start, gap_end, alpha=0.15, color='gray', zorder=0)
-    ax.text((gap_start + gap_end) / 2, 0.0110, 'NO DATA\n(Weeks 24-33)', 
-            ha='center', va='bottom', fontsize=10, style='italic',
-            bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.9, 
-                     edgecolor='gray', linestyle='--', linewidth=2))
+    # Check for gaps (only show if data is actually missing)
+    missing_weeks = [w for w in range(17, 37) if w not in weeks]
+    if missing_weeks:
+        # Find contiguous gaps
+        gap_start = min(missing_weeks)
+        gap_end = max(missing_weeks)
+        ax.axvspan(gap_start, gap_end, alpha=0.15, color='gray', zorder=0)
+        ax.text((gap_start + gap_end) / 2, 0.0110, f'NO DATA\n(Weeks {gap_start}-{gap_end})', 
+                ha='center', va='bottom', fontsize=10, style='italic',
+                bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.9, 
+                         edgecolor='gray', linestyle='--', linewidth=2))
     
     # Calculate phase averages from REAL data
     baseline_weeks = [d for d in data if d['week'] <= 20]
@@ -137,6 +140,54 @@ def generate_ef_chart(data, output_path: Path):
     plt.close()
 
 
+def generate_decoupling_chart(data, output_path: Path):
+    """Generate aerobic decoupling chart from real measured data."""
+    fig, ax = plt.subplots(figsize=(10, 4), dpi=150)
+    
+    # Extract weeks with decoupling data
+    weeks = [d['week'] for d in data if d['decoupling_mean'] is not None]
+    decouplings = [d['decoupling_mean'] for d in data if d['decoupling_mean'] is not None]
+    
+    # Color code by decoupling level
+    colors = ['#16a34a' if d < 5 else '#f59e0b' if d < 10 else '#dc2626' 
+              for d in decouplings]
+    
+    bars = ax.bar(weeks, decouplings, color=colors, alpha=0.7, edgecolor='white', linewidth=1.5)
+    
+    # Threshold line
+    ax.axhline(y=5, color='#16a34a', linestyle='--', linewidth=2, alpha=0.7)
+    ax.text(36.5, 5.3, '5% threshold\n(excellent)', fontsize=9, color='#16a34a', va='bottom', ha='right')
+    
+    # Highlight heat stress weeks if high decoupling
+    if 23 in weeks:
+        week_23_idx = weeks.index(23)
+        if decouplings[week_23_idx] > 10:
+            bars[week_23_idx].set_edgecolor('#dc2626')
+            bars[week_23_idx].set_linewidth(3)
+    
+    ax.set_xlabel('Training Week (2025)', fontweight='bold')
+    ax.set_ylabel('Aerobic Decoupling (%)', fontweight='bold')
+    ax.set_title('Aerobic Decoupling: Real Measured Data', 
+                 fontweight='bold', pad=15)
+    
+    ax.set_xlim(16.5, 36.5)
+    ax.set_ylim(0, max(decouplings) * 1.2)
+    ax.grid(True, alpha=0.2, axis='y')
+    
+    # Legend
+    legend_elements = [
+        mpatches.Patch(facecolor='#16a34a', alpha=0.7, label='Excellent (< 5%)'),
+        mpatches.Patch(facecolor='#f59e0b', alpha=0.7, label='Moderate (5-10%)'),
+        mpatches.Patch(facecolor='#dc2626', alpha=0.7, label='Poor (> 10%)'),
+    ]
+    ax.legend(handles=legend_elements, loc='upper right', framealpha=0.95)
+    
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
+    print(f"✅ Created: {output_path}")
+    plt.close()
+
+
 def main():
     """Generate charts from ONLY real measured data."""
     print("="*60)
@@ -150,18 +201,27 @@ def main():
     print(f"   ✅ Loaded {len(data)} weeks with measured data")
     print(f"   Weeks: {sorted([d['week'] for d in data])}")
     print(f"   Total runs: {sum(d['num_runs'] for d in data)}")
+    
+    # Check how many have decoupling data
+    with_decoupling = sum(1 for d in data if d['decoupling_mean'] is not None)
+    print(f"   Weeks with decoupling: {with_decoupling}/{len(data)}")
     print()
     
     # Create output directory
     images_dir = Path(__file__).parent.parent / "docs" / "images"
     images_dir.mkdir(parents=True, exist_ok=True)
     
-    # Generate chart
+    # Generate charts
     setup_style()
     
     print("2. Generating EF progression chart (real data only)...")
     ef_chart = images_dir / "ef_progression.png"
     generate_ef_chart(data, ef_chart)
+    print()
+    
+    print("3. Generating aerobic decoupling chart (real data only)...")
+    decoupling_chart = images_dir / "aerobic_decoupling.png"
+    generate_decoupling_chart(data, decoupling_chart)
     print()
     
     # Validation
@@ -175,8 +235,14 @@ def main():
     print("="*60)
     print("VALIDATION")
     print("="*60)
-    print(f"Measured weeks: {sorted([d['week'] for d in data])}")
-    print(f"Gap: Weeks 24-33 (NO DATA - shown as gap in chart)")
+    measured_weeks = sorted([d['week'] for d in data])
+    missing_weeks = [w for w in range(17, 37) if w not in measured_weeks]
+    
+    print(f"Measured weeks: {measured_weeks}")
+    if missing_weeks:
+        print(f"Missing weeks: {missing_weeks}")
+    else:
+        print(f"✅ COMPLETE: All 20 weeks have data!")
     print()
     print(f"Baseline (W17-20): {baseline_ef:.5f} ({len(baseline_weeks)} weeks, {sum(d['num_runs'] for d in baseline_weeks)} runs)")
     print(f"Final (W34-36):    {final_ef:.5f} ({len(final_weeks)} weeks, {sum(d['num_runs'] for d in final_weeks)} runs)")
@@ -184,7 +250,10 @@ def main():
     print()
     print("✅ Chart shows ONLY real measured data")
     print("✅ NO interpolation or fabrication")
-    print("✅ Gaps clearly marked where data doesn't exist")
+    if missing_weeks:
+        print("✅ Gaps clearly marked where data doesn't exist")
+    else:
+        print("✅ Complete longitudinal dataset (all 20 weeks)")
     print("="*60)
 
 
