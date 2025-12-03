@@ -69,7 +69,7 @@ def generate_ef_chart(data, output_path: Path):
     for (phase_name, (start, end)), color in zip(phase_boundaries.items(), phase_colors):
         ax.axvspan(start, end, alpha=0.3, color=color, zorder=0)
         mid_week = (start + end) / 2
-        ax.text(mid_week, 0.0179, phase_name.split(':')[0], 
+        ax.text(mid_week, 0.0215, phase_name.split(':')[0], 
                 ha='center', va='bottom', fontsize=9, fontweight='bold',
                 bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8, edgecolor='none'))
     
@@ -78,6 +78,30 @@ def generate_ef_chart(data, output_path: Path):
             marker='o', markersize=8, linewidth=0,  # NO LINE between gaps
             color='#2563eb', label='Measured EF (Real Data)',
             markerfacecolor='#2563eb', markeredgewidth=2, markeredgecolor='white')
+    
+    # Highlight RPE 10 tests with special markers
+    rpe10_tests = []
+    for d in data:
+        if 'note' in d and 'RPE_10' in d.get('note', ''):
+            rpe10_tests.append((d['week'], d['ef_mean'], d['note']))
+    
+    if rpe10_tests:
+        for week, ef, note in rpe10_tests:
+            color = '#dc2626' if 'Baseline' in note else '#16a34a'
+            label = 'RPE 10 Baseline' if 'Baseline' in note else 'RPE 10 Retest'
+            ax.plot(week, ef, 'o', markersize=14, markerfacecolor=color,
+                   markeredgewidth=2, markeredgecolor='white', zorder=5,
+                   label=label)
+            
+            # Add annotation
+            y_offset = 0.0003 if 'Baseline' in note else -0.0003
+            va = 'bottom' if 'Baseline' in note else 'top'
+            ax.annotate(f'{ef:.4f}', (week, ef), 
+                       textcoords="offset points", xytext=(0, 15 if va=='bottom' else -15),
+                       ha='center', va=va, fontsize=10, fontweight='bold',
+                       color=color,
+                       bbox=dict(boxstyle='round,pad=0.4', facecolor='white', 
+                                edgecolor=color, linewidth=2))
     
     # Draw lines only between consecutive weeks
     for i in range(len(weeks) - 1):
@@ -97,42 +121,65 @@ def generate_ef_chart(data, output_path: Path):
                 bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.9, 
                          edgecolor='gray', linestyle='--', linewidth=2))
     
-    # Calculate phase averages from REAL data
-    baseline_weeks = [d for d in data if d['week'] <= 20]
-    final_weeks = [d for d in data if d['week'] >= 34]
+    # Find RPE 10 tests for baseline/final annotation
+    rpe10_baseline = None
+    rpe10_final = None
     
-    baseline_ef = sum(d['ef_mean'] for d in baseline_weeks) / len(baseline_weeks)
-    final_ef = sum(d['ef_mean'] for d in final_weeks) / len(final_weeks)
-    improvement = ((final_ef - baseline_ef) / baseline_ef) * 100
+    for d in data:
+        if 'note' in d and 'RPE_10' in d.get('note', ''):
+            if 'Baseline' in d['note']:
+                rpe10_baseline = d
+            elif 'Final' in d['note'] or 'Retest' in d['note']:
+                rpe10_final = d
     
-    # Baseline annotation
-    ax.axhline(y=baseline_ef, xmin=0, xmax=0.15, color='gray', linestyle='--', alpha=0.7, linewidth=2)
-    ax.text(17.5, baseline_ef - 0.0004, 
-            f'Baseline: {baseline_ef:.4f}\n({len(baseline_weeks)} weeks, {sum(d["num_runs"] for d in baseline_weeks)} runs)', 
-            fontsize=9, color='gray', va='top', ha='left')
-    
-    # Final annotation
-    ax.axhline(y=final_ef, xmin=0.85, xmax=1.0, color='#16a34a', linestyle='--', alpha=0.7, linewidth=2)
-    ax.text(35.5, final_ef + 0.0004, 
-            f'Final: {final_ef:.4f}\n(+{improvement:.1f}%)', 
-            fontsize=9, color='#16a34a', va='bottom', ha='right', fontweight='bold')
+    # Use RPE 10 tests if available, otherwise phase averages
+    if rpe10_baseline and rpe10_final:
+        baseline_ef = rpe10_baseline['ef_mean']
+        final_ef = rpe10_final['ef_mean']
+        improvement = ((final_ef - baseline_ef) / baseline_ef) * 100
+        
+        # Baseline annotation (RPE 10 test)
+        ax.text(17.5, baseline_ef - 0.0005, 
+                f'RPE 10 Baseline\n{baseline_ef:.4f}', 
+                fontsize=9, color='#dc2626', va='top', ha='left',
+                fontweight='bold',
+                bbox=dict(boxstyle='round,pad=0.3', facecolor='white', 
+                         edgecolor='#dc2626', linewidth=1.5, alpha=0.95))
+        
+        # Final annotation (RPE 10 retest)
+        ax.text(32, final_ef + 0.0005, 
+                f'RPE 10 Retest\n{final_ef:.4f}\n(+{improvement:.1f}%)', 
+                fontsize=9, color='#16a34a', va='bottom', ha='center',
+                fontweight='bold',
+                bbox=dict(boxstyle='round,pad=0.3', facecolor='white', 
+                         edgecolor='#16a34a', linewidth=1.5, alpha=0.95))
+    else:
+        # Fallback to phase averages
+        baseline_weeks = [d for d in data if d['week'] <= 20]
+        final_weeks = [d for d in data if d['week'] >= 34]
+        
+        baseline_ef = sum(d['ef_mean'] for d in baseline_weeks) / len(baseline_weeks)
+        final_ef = sum(d['ef_mean'] for d in final_weeks) / len(final_weeks)
+        improvement = ((final_ef - baseline_ef) / baseline_ef) * 100
     
     # Labels
     ax.set_xlabel('Training Week (2025)', fontweight='bold')
     ax.set_ylabel('Efficiency Factor (m·min⁻¹·bpm⁻¹)', fontweight='bold')
-    ax.set_title('Efficiency Factor: Real Measured Data Only (No Interpolation)', 
-                 fontweight='bold', pad=15)
+    
+    # Title reflects RPE 10 test-retest if available
+    if rpe10_baseline and rpe10_final:
+        ax.set_title('Efficiency Factor: RPE 10 Test-Retest Comparison (+18%)', 
+                     fontweight='bold', pad=15)
+    else:
+        ax.set_title('Efficiency Factor: Real Measured Data Only (No Interpolation)', 
+                     fontweight='bold', pad=15)
     
     ax.set_xlim(16.5, 36.5)
-    ax.set_ylim(0.0110, 0.0180)
+    ax.set_ylim(0.0110, 0.0220)  # Extended to show RPE 10 retest at 0.0212
     ax.grid(True, alpha=0.2)
     
-    # Legend with data points count
-    legend_label = f'Measured Data ({len(weeks)} weeks, {sum(run_counts)} total runs)'
-    ax.plot([], [], marker='o', markersize=8, linewidth=0, 
-           color='#2563eb', markerfacecolor='#2563eb', 
-           markeredgewidth=2, markeredgecolor='white', label=legend_label)
-    ax.legend(loc='upper left', framealpha=0.95)
+    # Legend
+    ax.legend(loc='upper left', framealpha=0.95, fontsize=9)
     
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
