@@ -31,13 +31,13 @@ def setup_style():
     """Configure matplotlib for clean, professional charts."""
     plt.style.use('seaborn-v0_8-darkgrid')
     plt.rcParams.update({
-        'font.size': 11,
-        'axes.labelsize': 12,
-        'axes.titlesize': 13,
-        'xtick.labelsize': 10,
-        'ytick.labelsize': 10,
-        'legend.fontsize': 10,
-        'figure.titlesize': 14,
+        'font.size': 12,
+        'axes.labelsize': 13,
+        'axes.titlesize': 15,
+        'xtick.labelsize': 11,
+        'ytick.labelsize': 11,
+        'legend.fontsize': 11,
+        'figure.titlesize': 16,
         'axes.spines.top': False,
         'axes.spines.right': False,
     })
@@ -48,7 +48,7 @@ def generate_ef_chart(data, output_path: Path):
     Generate clean, publication-quality EF chart for test-retest comparison.
     Focuses on RPE 10 baseline and retest with minimal visual noise.
     """
-    fig, ax = plt.subplots(figsize=(12, 6), dpi=150)
+    fig, ax = plt.subplots(figsize=(12, 6), dpi=200)
     
     # Truncate at Week 32 (the final RPE 10 retest)
     data = [d for d in data if d['week'] <= 32]
@@ -59,9 +59,9 @@ def generate_ef_chart(data, output_path: Path):
     
     # Plot training data as subtle background context (de-emphasized)
     ax.plot(weeks, ef_values, 
-            color='#cbd5e1', linewidth=1.5, alpha=0.4, zorder=1)
+            color='#cbd5e1', linewidth=2.0, alpha=0.5, zorder=1)
     ax.scatter(weeks, ef_values,
-               s=30, color='#94a3b8', alpha=0.3, zorder=2)
+               s=45, color='#94a3b8', alpha=0.35, zorder=2)
     
     # Highlight RPE 10 tests with special markers
     rpe10_tests = []
@@ -75,16 +75,16 @@ def generate_ef_chart(data, output_path: Path):
             color = '#dc2626' if is_baseline else '#16a34a'
             
             # Large, prominent markers for RPE 10 tests
-            ax.scatter(week, ef, s=400, color=color, marker='o',
+            ax.scatter(week, ef, s=600, color=color, marker='o',
                       edgecolors='white', linewidths=3, zorder=10,
                       label='RPE 10 Baseline' if is_baseline else 'RPE 10 Retest')
             
             # Clean, minimal annotations
             label_text = f"Baseline\nEF = {ef:.4f}\nWeek {week}" if is_baseline else f"Final Test\nEF = {ef:.4f}\nWeek {week}\n(+18%)"
-            y_pos = ef - 0.0015 if is_baseline else ef - 0.0015
+            y_pos = ef - 0.0013 if is_baseline else ef - 0.0013
             
             ax.text(week, y_pos, label_text,
-                   ha='center', va='top', fontsize=11, fontweight='bold',
+                   ha='center', va='top', fontsize=12, fontweight='bold',
                    color=color,
                    bbox=dict(boxstyle='round,pad=0.5', facecolor='white',
                             edgecolor=color, linewidth=2.5, alpha=0.98))
