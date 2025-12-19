@@ -51,6 +51,10 @@ This document serves as the master checklist for auditing the `bio-systems-engin
  | `environment/weather.py` | Robustness | `fetch_weather_open_meteo()` can attempt ~891 HTTP requests per retry attempt (lat/lon/time variations) and uses the forecast endpoint for historical datetimes. This is likely slow/fragile and may not work as intended outside of mocked tests. | Medium | Reduce search space, use the proper historical endpoint for past dates, and replace `print()` with structured logging.
  | `tests/test_models.py` | Testing | Test suite expectations do not match `models.py` (e.g., reversed zone bounds, wrong `ActivitySummary` fields, wrong `WalkSegment` fields). This likely makes tests fail and undermines the “data contracts” guarantee. | High | Update tests to match the models (or revert models to match the tests), treating the public API contract as authoritative.
  | `tools/generate_from_real_data.py` | Scientific Integrity | Script explicitly interpolates/perturbs unmeasured weeks (“for now, interpolating based on phases”). Ensure anything generated from it is clearly labeled synthetic and not conflated with `data/real_weekly_data.json`. | Medium | Use one authoritative data source per artifact and clearly label synthetic vs. measured datasets.
+ | `environment/weather.py` | Reproducibility | `WeatherCache` uses `pd.read_parquet`/`to_parquet`, but the project does not declare a Parquet engine dependency (`pyarrow` or `fastparquet`). Full test runs (and runtime caching) can fail with an ImportError on fresh installs. | High | Add `pyarrow` (recommended) or `fastparquet` as an optional dependency (e.g., `.[weather]`) and include it in `dev` if tests require Parquet.
+ | `.github/workflows/*` | Testing | CI currently validates installation and README examples, but does not run the full unit test suite (e.g., `tests/test_environment.py`, `tests/test_models.py`, `tests/test_signal.py`). Regressions in non-README paths can ship unnoticed. | Medium | Add a CI job that runs `pytest` (full suite) on at least one Python version, and keep README validation as a separate fast signal.
+ | `tools/generate_sample_data.py` | Maintainability | File is empty, which can confuse contributors and suggests a partially removed feature. | Low | Remove it or implement it; if keeping, ensure README/docs do not reference it.
+ | `tools/generate_sample_data.py.OLD` | Maintainability | Archived script contains stale API references (e.g., `ZoneConfiguration` instead of `ZoneConfig`) and embedded sample README text that no longer matches the current public API. If reused, it would generate misleading docs/data. | Low | If you keep an archived version, clearly label it as historical-only and ensure it cannot be mistaken for a supported generator; otherwise delete it.
 
 ---
 
@@ -130,3 +134,25 @@ This document serves as the master checklist for auditing the `bio-systems-engin
 - [x] **Pydantic Models (`models.py`)**
     -   **Validation:** Do models strictly enforce types (e.g., preventing negative distance or HR > 250)?
     -   **Serialization:** Can `PhysiologicalMetrics` be serialized to JSON/dict and back without data loss?
+
+### VIII. Prioritized Remediation Backlog
+
+- **P0 (Must-fix before trusting results)**
+    -   Align `tests/test_models.py` with `src/biosystems/models.py` (or revert models to match tests). Right now the “data contract” guarantee is undermined by mismatched expectations.
+    -   Fix `tools/sanitize_gps.py` short-run truncation crash risk.
+    -   Consolidate dependency management (`pyproject.toml` vs `requirements.txt`) and fix the invalid `ruff` pin to prevent broken installs and Docker builds.
+
+- **P1 (Reliability + reproducibility)**
+    -   Add a Parquet engine dependency strategy for `WeatherCache` (`pyarrow`/`fastparquet`), and decide whether caching supports in-memory mode (`WeatherCache(None)`).
+    -   Add a CI job running the full `pytest` suite (keep README validation as a separate, fast job).
+    -   Reduce the request explosion in `fetch_weather_open_meteo()` and use the appropriate Open-Meteo endpoint for historical dates.
+
+- **P2 (Maintainability / cleanup)**
+    -   Remove or restore `tools/generate_sample_data.py` (empty file) and clarify the status of `generate_sample_data.py.OLD`.
+    -   Replace library `print()` statements with structured logging.
+
+### IX. Remaining Verification (Not Yet Executed)
+
+- **Fresh install smoke test** (`pip install -e .` + basic imports)
+- **Full test run** (`pytest`)
+- **Docker build + test run** (`docker build .` then `docker run … pytest`)
