@@ -101,10 +101,10 @@ This document serves as the master checklist for auditing the `bio-systems-engin
     -   **Coordinate Removal:** Verify that `lat`/`lon` columns are physically dropped from the DataFrame, not just hidden.
     -   **Truncation:** Test the 500m start/end truncation. Does it work if the total run is < 1km?
     -   **Metadata:** Does the tool scrub device serial numbers or user IDs from FIT file headers if metadata is passed through?
-- [ ] **Repository Hygiene**
-    -   **Git History:** Run `git log -S "lat"` or use BFG Repo-Cleaner to ensure no GPX files were accidentally committed in the past.
-    -   **Config:** Ensure `.gitignore` explicitly excludes `*.fit`, `*.gpx`, and `data/raw/*`.
-- [x] **Sample Data**
+ - [x] **Repository Hygiene**
+     -   **Git History:** Checked git history for tracked `*.gpx` / `*.fit` / `*.tcx` files — none found.
+     -   **Config:** `.gitignore` excludes `*.fit`, `*.gpx`, and `data/raw/**` — Verified.
+ - [x] **Sample Data**
     -   **Consistency:** Does `sample_run.csv` contain all columns required by `models.py` (e.g., `dt`, `pace_sec_km`)?
     -   **Privacy:** Verify synthetic coordinates are used and not real-world locations.
 
