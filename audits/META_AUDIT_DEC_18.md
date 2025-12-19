@@ -10,18 +10,16 @@
  
  ## 1) How “Covered” Is Defined
  
- This meta-audit uses two tiers:
+ This meta-audit uses three coverage levels:
  
- - **Explicit coverage**
-   The file/module is named in:
-   - the `QUALITY_AUDIT.md` checklist, or
-   - the `QUALITY_AUDIT.md` findings log.
+ - **Reviewed (explicit)**
+   The file/module is treated as a first-class artifact in `QUALITY_AUDIT.md` (file-specific checklist item and/or a concrete finding).
  
- - **Implicit coverage**
-   The file/module is not directly reviewed in `QUALITY_AUDIT.md`, but is indirectly exercised/validated via:
-   - import smoke tests (`tools/verify_installation.py`),
-   - README example tests (`tests/test_readme_examples.py`),
-   - a full `pytest` execution.
+ - **Mentioned (partial)**
+   The file/module is only referenced indirectly (examples, globs like `.github/workflows/*`, or general checklist questions), without file-specific review.
+ 
+ - **Implicit (automation-only)**
+   The file/module is not referenced in `QUALITY_AUDIT.md`, but is exercised by CI or verification steps (e.g., README example tests, full `pytest`, install/import checks).
  
  **Important:** If something was explored informally but not reflected in `QUALITY_AUDIT.md`, it is treated as **not covered** here (because future readers can’t rely on undocumented work).
  
@@ -47,7 +45,7 @@
  
  ## 3) Coverage Map (Repo vs. `QUALITY_AUDIT.md`)
  
- **Covered explicitly (Quality Audit names it):**
+ **Reviewed explicitly (Quality Audit treats as a first-class artifact):**
  - `src/biosystems/ingestion/{gpx.py, fit.py}`
  - `src/biosystems/physics/{metrics.py, gap.py}`
  - `src/biosystems/signal/walk_detection.py`
@@ -56,20 +54,59 @@
  - `tools/sanitize_gps.py`
  - `tools/generate_from_real_data.py`
  - `tools/generate_sample_data.py` and `tools/generate_sample_data.py.OLD`
+ - `tests/test_ingestion_gpx.py`
+ - `tests/test_models.py`
+ - `data/sample/sample_run.csv`
  - `README.md`
  - `pyproject.toml`, `requirements.txt`, `Dockerfile`
- - `.github/workflows/*`
- - `tests/*` (as a category)
+ - `.gitignore`
  
- **Covered only implicitly (validated indirectly, but not audited as an artifact):**
- - Package API surface:
-   - `src/biosystems/__init__.py`
-   - `src/biosystems/*/__init__.py`
- - Verification tool:
-   - `tools/verify_installation.py`
- - Chart generation tools:
-   - `tools/generate_readme_charts.py`
-   - `tools/generate_charts_real_only.py`
+ ## 3.1) Coverage Gaps (File-by-File)
+ 
+ This table intentionally lists **only** files/areas that are **under-covered** (mentioned only at a category/glob/checklist level) or **uncovered** (not mentioned).
+ 
+ **Key:**
+ - **Partial:** referenced by category/glob/checklist, but not audited as a specific file.
+ - **Uncovered:** not referenced in `QUALITY_AUDIT.md`.
+ 
+ | Path | Coverage | Evidence in `QUALITY_AUDIT.md` | Why this is a gap |
+ | :--- | :--- | :--- | :--- |
+ | `src/biosystems/__init__.py` | Uncovered | — | Public API/export surface not reviewed as a first-class artifact. |
+ | `src/biosystems/environment/__init__.py` | Uncovered | — | Public API/export surface not reviewed as a first-class artifact. |
+ | `src/biosystems/ingestion/__init__.py` | Uncovered | — | Public API/export surface not reviewed as a first-class artifact. |
+ | `src/biosystems/physics/__init__.py` | Uncovered | — | Public API/export surface not reviewed as a first-class artifact. |
+ | `src/biosystems/signal/__init__.py` | Uncovered | — | Public API/export surface not reviewed as a first-class artifact. |
+ | `tools/verify_installation.py` | Uncovered | — | Important QA artifact, but the audit does not reference it or validate it. |
+ | `tools/generate_readme_charts.py` | Partial | Checklist VI → “Visualizations” | Script that generates published charts is not reviewed for reproducibility/inputs. |
+ | `tools/generate_charts_real_only.py` | Partial | Checklist VI → “Visualizations” | Script that generates published charts is not reviewed for reproducibility/inputs. |
+ | `docs/images/ef_progression.png` | Partial | Checklist VI → “Visualizations” | Image exists, but provenance (script+inputs) is not documented/validated. |
+ | `docs/images/aerobic_decoupling.png` | Partial | Checklist VI → “Visualizations” | Image exists, but provenance (script+inputs) is not documented/validated. |
+ | `docs/DATA_PREPARATION.md` | Uncovered | — | ETL/data assumptions can drift from code without detection. |
+ | `docs/internal/CLEANUP_SUMMARY.md` | Uncovered | — | Internal process docs not covered. |
+ | `docs/internal/DEVELOPMENT_ARCHIVE.md` | Uncovered | — | Internal process/history docs not covered. |
+ | `docs/internal/FEEDBACK_ANALYSIS.md` | Uncovered | — | Internal process docs not covered. |
+ | `docs/internal/INFRASTRUCTURE_FIX_COMPLETE.md` | Uncovered | — | Internal process docs not covered. |
+ | `docs/internal/README.md` | Uncovered | — | Internal process docs not covered. |
+ | `docs/internal/README_ADDITIONAL_FAILURES.md` | Uncovered | — | Internal process docs not covered. |
+ | `docs/internal/README_FIX_COMPLETE.md` | Uncovered | — | Internal process docs not covered. |
+ | `docs/internal/README_VERIFICATION_FAILURES.md` | Uncovered | — | Internal process docs not covered. |
+ | `docs/internal/REPOSITORY_CLEANUP.md` | Uncovered | — | Internal process docs not covered. |
+ | `reports/01_longitudinal_study.md` | Uncovered | — | Narrative claims are not tied to scripts+data (traceability gap). |
+ | `data/sample/weekly_metrics.csv` | Partial | Checklist IV → “Sample Data” | Sample artifact provenance/labeling is not audited (synthetic vs measured). |
+ | `data/sample/README.md` | Partial | Checklist IV → “Sample Data” | Sample README not checked for API correctness or drift. |
+ | `data/real_weekly_data.json` | Partial | Findings log (`tools/generate_from_real_data.py`) | Provenance/schema stability not audited. |
+ | `data/processed/` | Uncovered | — | Expected generated outputs and stability are not documented. |
+ | `data/raw/` | Partial | Checklist IV → “Repository Hygiene” | Folder is implied by `.gitignore`, but provenance/handling policy not audited. |
+ | `.github/workflows/installation-test.yml` | Partial | Findings log (`.github/workflows/*`) | Workflow is referenced as a category, not audited line-by-line as a guarantee. |
+ | `.github/workflows/readme-validation.yml` | Partial | Findings log (`.github/workflows/*`) | Workflow is referenced as a category, not audited line-by-line as a guarantee. |
+ | `tests/test_environment.py` | Partial | Findings log (`.github/workflows/*`) | Mentioned as missing from CI full-suite, but test adequacy not reviewed. |
+ | `tests/test_signal.py` | Partial | Findings log (`.github/workflows/*`) | Mentioned as missing from CI full-suite, but test adequacy not reviewed. |
+ | `tests/test_physics_gap.py` | Partial | Checklist VII → “Test Coverage” | Not reviewed as a test artifact (only implementation file reviewed). |
+ | `tests/test_physics_metrics.py` | Partial | Checklist VII → “Test Coverage” | Not reviewed as a test artifact (only implementation file reviewed). |
+ | `tests/test_readme_examples.py` | Partial | Checklist VI → “Readme Accuracy” | CI depends on this file, but the audit does not mention it as an artifact/contract. |
+ | `CHANGELOG.md` | Uncovered | — | Release/version narrative is not audited for consistency with code+metadata. |
+ | `CITATION.cff` | Uncovered | — | Citation metadata is not audited for correctness/completeness. |
+ | `LICENSE` | Uncovered | — | License file is not audited (compatibility/completeness). |
  
  ---
  
@@ -147,6 +184,17 @@
  **Risk:** Users import from “convenience” modules that are not treated as stable.
  
  **Suggested checklist addition:** “Public API audit” (document supported imports and enforce them with tests).
+
+ ### G) Tooling That Drives Outputs (Under-Covered)
+
+ Scripts that directly shape “published” artifacts (charts, demos, smoke checks) are not explicitly audited:
+ - `tools/verify_installation.py`
+ - `tools/generate_readme_charts.py`
+ - `tools/generate_charts_real_only.py`
+
+ **Risk:** These scripts can drift from the public API and silently make outputs non-reproducible (or misleading) without failing CI.
+
+ **Suggested checklist addition:** “Tooling audit” covering all `tools/*.py` scripts that generate docs/images/data or act as QA gates.
  
  ---
  
@@ -163,3 +211,6 @@
  
  - **CI gate audit**
    - Inventory workflows + ensure at least one job runs full `pytest`.
+
+ - **Tooling audit**
+   - Treat `tools/verify_installation.py` and chart generators as audited deliverables, not just convenience scripts.
