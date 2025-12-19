@@ -110,12 +110,13 @@ This document serves as the master checklist for auditing the `bio-systems-engin
 
 ### V. Reproducibility & Environment
 
-- [ ] **Installation**
-    -   **Fresh Install:** Create a clean virtualenv. Run `pip install -e .`. Do imports work immediately?
-    -   **Dependencies:** Check `pyproject.toml`. Are versions pinned loosely (risk of breaking changes) or strictly?
-- [ ] **Docker**
-    -   **Build:** Does `docker build .` succeed without requiring files that are `.dockerignore`d?
-    -   **Run:** Can the Docker container run the tests?
+- [x] **Installation**
+    -   **Fresh Install:** Create a clean virtualenv. Run `pip install -e .`. Do imports work immediately? — Executed: PASS
+    -   **Dependencies:** Check `pyproject.toml`. Are versions pinned loosely (risk of breaking changes) or strictly? — Audited (see findings log for dependency strategy issues)
+ - [ ] **Docker**
+     -   **Build:** Does `docker build .` succeed without requiring files that are `.dockerignore`d?
+     -   **Run:** Can the Docker container run the tests?
+     -   **Local status:** Attempted locally but could not run (Docker daemon not running; `docker-buildx` plugin missing).
 
 ### VI. Documentation & Claims
 
@@ -151,8 +152,13 @@ This document serves as the master checklist for auditing the `bio-systems-engin
     -   Remove or restore `tools/generate_sample_data.py` (empty file) and clarify the status of `generate_sample_data.py.OLD`.
     -   Replace library `print()` statements with structured logging.
 
-### IX. Remaining Verification (Not Yet Executed)
+### IX. Remaining Verification (Executed vs Pending)
 
-- **Fresh install smoke test** (`pip install -e .` + basic imports)
-- **Full test run** (`pytest`)
-- **Docker build + test run** (`docker build .` then `docker run … pytest`)
+- **Fresh install smoke test** (`pip install -e .` + basic imports) — Executed: PASS
+- **Full test run** (`pytest`) — Executed: **11 failed**, **93 passed**
+    - Failed: `tests/test_environment.py` (3)
+    - Failed: `tests/test_models.py` (5)
+    - Failed: `tests/test_physics_gap.py::TestCalculateGAPFromDataFrame::test_flat_dataframe`
+    - Failed: `tests/test_signal.py` (2)
+- **Docker build + test run** (`docker build .` then `docker run … pytest`) — Attempted: FAIL (Docker daemon not running; `docker-buildx` plugin missing)
+- **Installation verification script** (`python tools/verify_installation.py`) — Executed: PASS
