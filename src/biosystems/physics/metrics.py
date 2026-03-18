@@ -15,8 +15,12 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+import logging
+
 from biosystems.models import PhysiologicalMetrics, RunContext, ZoneConfig
-from biosystems.physics.gap import calculate_average_gap
+from biosystems.physics.gap import calculate_average_gap, check_elevation_quality
+
+log = logging.getLogger(__name__)
 
 
 def _as_series(arr: Any) -> pd.Series:
@@ -307,18 +311,23 @@ def run_metrics(
 
     # Calculate Grade Adjusted Pace if elevation data available
     gap_min_per_km = None
+    gap_quality_note = None
     if "ele" in df.columns and "pace_sec_km" in df.columns and "dist" in df.columns:
         # Check if we have valid elevation data
         ele_series = df["ele"].replace(0, np.nan)
         if not ele_series.isna().all():
             try:
-                gap_sec_km = calculate_average_gap(
-                    df, pace_col="pace_sec_km", ele_col="ele", dist_col="dist", dt_col="dt"
-                )
-                if not np.isnan(gap_sec_km):
-                    gap_min_per_km = round(gap_sec_km / 60, 2)
+                ele_ok, ele_reason = check_elevation_quality(df, ele_col="ele", dist_col="dist")
+                if not ele_ok:
+                    gap_quality_note = ele_reason
+                    log.warning("GAP skipped — elevation quality check failed: %s", ele_reason)
+                else:
+                    gap_sec_km = calculate_average_gap(
+                        df, pace_col="pace_sec_km", ele_col="ele", dist_col="dist", dt_col="dt"
+                    )
+                    if not np.isnan(gap_sec_km):
+                        gap_min_per_km = round(gap_sec_km / 60, 2)
             except Exception:
-                # If GAP calculation fails, leave as None
                 pass
 
     return PhysiologicalMetrics(
@@ -331,5 +340,6 @@ def run_metrics(
         hr_tss=round(hr_tss, 1),
         avg_cadence=avg_cadence,
         gap_min_per_km=gap_min_per_km,
+        gap_quality_note=gap_quality_note,
         context=context,
     )

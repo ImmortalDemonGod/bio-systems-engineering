@@ -153,6 +153,7 @@ class PhysiologicalMetrics(BaseModel):
     hr_tss: float = Field(..., ge=0)
     avg_cadence: int | None = Field(None, gt=0)
     gap_min_per_km: float | None = Field(None, gt=0, description="Grade Adjusted Pace")
+    gap_quality_note: str | None = Field(None, description="Set when GAP was suppressed due to bad elevation data")
     context: RunContext | None = None
 
     @field_validator("decoupling_pct")
@@ -362,6 +363,7 @@ class FullRunReport(BaseModel):
 
     # Improvements over original system
     ef_grade_adjusted: float | None = Field(None, description="GAP-speed / avg_hr")
+    gap_quality_note: str | None = Field(None, description="Set when EF_GAP was suppressed due to bad elevation data")
     ef_reliability_cv: float | None = Field(None, description="CV of instantaneous EF — lower = steadier effort")
     aev_pace_min_per_km: float | None = Field(None, description="Pace at reference HR (aerobic efficiency velocity)")
     aev_ref_hr: int | None = Field(None, description="Reference HR used for AeV calculation")

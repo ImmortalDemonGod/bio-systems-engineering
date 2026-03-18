@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/physics/gap.py`
-**Commit:** `78d93d1`
-**Previous:** `9d8733d`
-**Generated:** 2026-03-18T19:25:53Z
+**Commit:** `c38db0b`
+**Previous:** `19256af`
+**Generated:** 2026-03-18T20:39:39Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -18,13 +18,15 @@ classification:
   blast_radius: "src/biosystems/physics/gap.py"
   classification_rationale: "Robustness fix"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:25:53Z"
+  classified_at: "2026-03-18T20:39:39Z"
 ```
 
 ## Claim(s)
 
-1. Clamp grade to ±45% to prevent polynomial divergence and negative energy multipliers
-2. No existing tests were modified or deleted during this change.
+1. Add check_elevation_quality to detect GPS/barometric corruption (clamping >10%)
+2. Suppress GAP/EF_GAP when elevation is unreliable and surface reason via gap_quality_note
+3. Extend data models to capture and propagate GAP quality metadata
+4. No existing tests were modified or deleted during this change.
 
 ---
 
@@ -33,41 +35,41 @@ classification:
 ### Class E (Intent Alignment)
 
 - **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/physics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/physics)
-- **Requirements Verified:** Harden GAP calculation against GPS vertical noise
+- **Requirements Verified:** Harden physiological metrics against nonsensical GPS vertical jitter
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`78d93d1`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/78d93d1138a29e181836051aad44421c9641452b))
+**Scope Inventory** (SHA: [`c38db0b`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/c38db0bfeccba1ebf734a73f482970310ae051da))
 
-- [`src/biosystems/physics/gap.py#L68-L74`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/78d93d1138a29e181836051aad44421c9641452b/src/biosystems/physics/gap.py#L68-L74)
-- [`src/biosystems/physics/gap.py#L80`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/78d93d1138a29e181836051aad44421c9641452b/src/biosystems/physics/gap.py#L80)
+- [`src/biosystems/physics/gap.py#L190-L257`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/c38db0bfeccba1ebf734a73f482970310ae051da/src/biosystems/physics/gap.py#L190-L257)
 
 ### Class A (Execution Evidence)
 
 **Per-symbol test coverage (AST analysis):**
 
-- **`minetti_energy_cost`** (L68-L74): PASS -- 5 test(s) call `minetti_energy_cost` directly
-  - `tests/test_physics_gap.py::test_uphill_5_percent`
-  - `tests/test_physics_gap.py::test_steep_uphill`
-  - `tests/test_physics_gap.py::test_flat_ground_baseline`
-  - `tests/test_physics_gap.py::test_uphill_10_percent`
-  - `tests/test_physics_gap.py::test_downhill_5_percent`
+- **`check_elevation_quality`** (L190-L257): PASS -- 4 test(s) call `check_elevation_quality` directly
+  - `tests/test_physics_gap.py::test_reliable_elevation`
+  - `tests/test_physics_gap.py::test_corrupted_jitter`
+  - `tests/test_physics_gap.py::test_insufficient_data`
+  - `tests/test_physics_gap.py::test_missing_columns`
 
 **Coverage summary:** 1/1 symbols verified by tests.
 
 ### Code Quality (Linting & Types)
 
 - **ruff:** All checks passed
-- **mypy:** Success: no issues found in 1 source file
+- **mypy:** Found 1 error in 1 file (checked 1 source file)
 
 ## Claim Verification Matrix
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | Clamp grade to ±45% to prevent polynomial divergence and neg... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
-| 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
+| 1 | Add check_elevation_quality to detect GPS/barometric corrupt... | symbol | 4 test(s) call `check_elevation_quality` | PASS VERIFIED |
+| 2 | Suppress GAP/EF_GAP when elevation is unreliable and surface... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 3 | Extend data models to capture and propagate GAP quality meta... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 4 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
-**Verdict summary:** 0 verified, 0 unverified, 2 manual review.
+**Verdict summary:** 1 verified, 0 unverified, 3 manual review.
 ---
 
 ## Verification Methodology
@@ -80,4 +82,4 @@ Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/ty
 
 ## Summary
 
-Clamp GAP grade
+Add elevation quality guard

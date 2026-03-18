@@ -600,6 +600,7 @@ def build_run_report(
         session=session_metrics,
         run_only=run_only_metrics,
         ef_grade_adjusted=ef_gap,
+        gap_quality_note=run_only_metrics.gap_quality_note,
         ef_reliability_cv=ef_cv,
         aev_pace_min_per_km=aev_pace,
         aev_ref_hr=aev_ref,

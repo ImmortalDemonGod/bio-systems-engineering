@@ -187,6 +187,74 @@ def calculate_gap_from_dataframe(
     return gap
 
 
+def check_elevation_quality(
+    df: pd.DataFrame,
+    ele_col: str = "ele",
+    dist_col: str = "dist",
+    clamp_fraction_threshold: float = 0.10,
+) -> tuple[bool, str]:
+    """
+    Assess whether elevation data is reliable enough for GAP computation.
+
+    Detects GPS/barometric altimeter corruption that would make Minetti's
+    equation produce nonsensical adjustments (e.g., bridge dropout, tunnel,
+    sudden pressure spike).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Activity DataFrame with elevation data.
+    ele_col : str
+        Elevation column name.
+    dist_col : str
+        Distance column name (metres per segment).
+    clamp_fraction_threshold : float
+        Fraction of segments hitting the ±45% Minetti clamp beyond which
+        the elevation data is considered unreliable (default: 10%).
+
+    Returns
+    -------
+    (is_reliable: bool, reason: str)
+        is_reliable=True means GAP can be trusted.
+        reason explains the failure when is_reliable=False.
+    """
+    if ele_col not in df.columns or dist_col not in df.columns:
+        return False, "elevation or distance column missing"
+
+    ele_series = df[ele_col].replace(0, np.nan).dropna()
+    if len(ele_series) < 10:
+        return False, "insufficient elevation data points"
+
+    # Smooth then diff — same pipeline as calculate_gap_from_dataframe
+    ele_smoothed = df[ele_col].rolling(window=5, min_periods=1, center=True).mean()
+    ele_diff = ele_smoothed.diff()
+
+    clamped_count = 0
+    total_valid   = 0
+    for i in range(1, len(df)):
+        ele_val  = ele_diff.iloc[i]
+        dist_val = df[dist_col].iloc[i]
+        if pd.isna(ele_val) or dist_val == 0:
+            continue
+        grade_pct = (ele_val / dist_val) * 100
+        total_valid += 1
+        if abs(grade_pct) > 45.0:
+            clamped_count += 1
+
+    if total_valid == 0:
+        return False, "no valid elevation segments"
+
+    clamp_fraction = clamped_count / total_valid
+    if clamp_fraction > clamp_fraction_threshold:
+        return False, (
+            f"{clamp_fraction*100:.0f}% of segments exceed ±45% grade "
+            f"({clamped_count}/{total_valid}) — elevation data likely corrupted "
+            "(GPS dropout, tunnel, or barometric spike)"
+        )
+
+    return True, "ok"
+
+
 def calculate_average_gap(
     df: pd.DataFrame,
     pace_col: str = "pace_sec_km",
