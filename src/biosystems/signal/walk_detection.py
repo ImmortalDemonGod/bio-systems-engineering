@@ -296,10 +296,10 @@ def walk_block_segments(
             note = "pause?"
 
         # Format values for output
-        avg_pace_val = round(avg_pace, 1) if not pd.isnull(avg_pace) else ""
-        dist_km_val = round(dist_km, 3) if not pd.isnull(dist_km) else ""
-        avg_hr_val = round(avg_hr, 1) if not pd.isnull(avg_hr) else ""
-        avg_cad_val = round(avg_cad, 1) if not pd.isnull(avg_cad) else ""
+        avg_pace_val = round(avg_pace, 1) if not pd.isnull(avg_pace) else None
+        dist_km_val = round(dist_km, 3) if not pd.isnull(dist_km) else None
+        avg_hr_val = round(avg_hr, 1) if not pd.isnull(avg_hr) else None
+        avg_cad_val = round(avg_cad, 1) if not pd.isnull(avg_cad) else None
 
         segments.append(
             {
