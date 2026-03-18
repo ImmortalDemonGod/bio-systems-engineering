@@ -265,28 +265,27 @@ class TestFetchWeatherOpenMeteo:
     
     @patch('biosystems.environment.weather.requests.get')
     def test_tries_time_variations(self, mock_get):
-        """Test that time variations are tried."""
-        # All fail except one with time offset
+        """Test that time offsets (±1 h) are tried when the exact hour fails."""
         def side_effect_fn(*args, **kwargs):
-            url = args[0]
-            # Success only for offset time
-            if '11:00:00' in url:  # -1 hour offset
+            # New implementation passes params as kwargs; match on start_hour
+            params = kwargs.get("params", {})
+            start_hour = params.get("start_hour", "")
+            # Success only for the -1 hour offset (11:00 when target is 12:00)
+            if "11:00" in start_hour:
                 mock_response = Mock()
                 mock_response.status_code = 200
                 mock_response.json.return_value = {
-                    'hourly': {'temperature_2m': [20.5]}
+                    "hourly": {"temperature_2m": [20.5]}
                 }
                 return mock_response
-            else:
-                mock_response = Mock()
-                mock_response.status_code = 404
-                return mock_response
-        
+            mock_response = Mock()
+            mock_response.status_code = 404
+            return mock_response
+
         mock_get.side_effect = side_effect_fn
-        
+
         dt = datetime(2024, 1, 1, 12, 0)
         weather, offset = fetch_weather_open_meteo(40.7128, -74.0060, dt, max_retries=1)
-        
-        # Should find data with time offset
+
         assert weather is not None
         assert offset is not None

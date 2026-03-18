@@ -110,21 +110,27 @@ class TestCalculateGAPFromDataFrame:
     """Test DataFrame GAP calculation."""
     
     def test_simple_dataframe(self):
-        """Test GAP calculation on simple DataFrame."""
+        """Test GAP calculation on simple DataFrame.
+
+        Uses 10 points so the 5-point rolling elevation smoother has enough
+        context to preserve the grade signal (3-point series collapses to a
+        flat average under the centered window).
+        """
+        n = 10
         df = pd.DataFrame({
-            'pace_sec_km': [300, 300, 300],
-            'ele': [100, 105, 110],  # 5m elevation gain per segment
-            'dist': [100, 100, 100]   # 100m per segment
+            'pace_sec_km': [300.0] * n,
+            'ele': [100.0 + 5.0 * i for i in range(n)],  # 5m gain per segment
+            'dist': [100.0] * n,  # 100m per segment → 5% grade
         })
-        
+
         gap_series = calculate_gap_from_dataframe(df)
-        
-        # First point should be same (no grade)
+
+        # First point has no grade (prev diff is NaN)
         assert gap_series.iloc[0] == pytest.approx(300, rel=0.01)
-        
-        # Subsequent points should adjust for ~5% grade
-        assert gap_series.iloc[1] < 300  # Faster GAP
-        assert gap_series.iloc[2] < 300
+
+        # Interior points should adjust for ~5% uphill → GAP faster than pace
+        assert gap_series.iloc[5] < 300
+        assert gap_series.iloc[-1] < 300
     
     def test_flat_dataframe(self):
         """Test GAP on flat terrain matches actual pace."""
