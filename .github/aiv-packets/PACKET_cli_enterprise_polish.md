@@ -19,21 +19,21 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Final polish of the CLI and documentation suite. Low risk as it improves usability and adds physics regression tests without changing core algorithms."
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T20:45:39Z"
+  classified_at: "2026-03-18T20:46:20Z"
 ```
 
 ## Claims
 
 1. Verifies check_elevation_quality detects jitter and missing data
 2. Ensures GAP calculation uses smoothed elevation correctly
-3. No existing tests were modified or deleted during this change.
-4. Add wellness-trends command to visualize longitudinal fitness arc
-5. Enrich wellness-show with sleep debt and respiratory rate signals
-6. Enhance wellness-analyze with respiratory rate thresholds
-7. Add section on signal timing and pre-run validity (overnight vs daily average)
-8. Document dual G/A/R signal classification and interpretation priority
+3. Add wellness-trends command to visualize longitudinal fitness arc
+4. Enrich wellness-show with sleep debt and respiratory rate signals
+5. Enhance wellness-analyze with respiratory rate thresholds
+6. Add section on signal timing and pre-run validity (overnight vs daily average)
+7. Document dual G/A/R signal classification and interpretation priority
+8. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/cli-enterprise-polish/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ---
 
@@ -41,11 +41,18 @@ classification:
 
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
-| 1 | EVIDENCE_TESTS_TEST_PHYSICS_GAP.md | `e7feb24` | A, B, E |
+| 1 | EVIDENCE_TESTS_TEST_PHYSICS_GAP.md | `e7feb24` | A, B, E, F |
 | 2 | EVIDENCE_BIOSYSTEMS_CLI.md | `cfa8d6d` | A, B, E |
 | 3 | EVIDENCE_DOCS_WELLNESS.MD.md | `9763666` | A, B, E |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Provide the operator with longitudinal fitness insights (RHR/VO2max) to assess training efficacy.
+- **Requirement:** Harden the physics suite with regression tests for the new elevation quality and smoothing logic.
+
+### Class F (Provenance)
+
+**Claim 8:** New regression tests for physics logic were added. Verification confirms that all existing core library tests continue to pass and that documentation accurately reflects the implemented signal nuances.
 
 ### Class B (Referential Evidence)
 
