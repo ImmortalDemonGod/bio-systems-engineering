@@ -1,0 +1,361 @@
+diff --git a/.github/aiv-evidence/EVIDENCE_BIOSYSTEMS_MODELS.md b/.github/aiv-evidence/EVIDENCE_BIOSYSTEMS_MODELS.md
+new file mode 100644
+index 0000000..192848c
+--- /dev/null
++++ b/.github/aiv-evidence/EVIDENCE_BIOSYSTEMS_MODELS.md
+@@ -0,0 +1,137 @@
++# AIV Evidence File (v1.0)
++
++**File:** `src/biosystems/models.py`
++**Commit:** `beb4bae`
++**Generated:** 2026-03-18T00:28:34Z
++**Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
++
++---
++
++## Classification (required)
++
++```yaml
++classification:
++  risk_tier: R1
++  sod_mode: S0
++  critical_surfaces: []
++  blast_radius: "src/biosystems/models.py"
++  classification_rationale: "Core model validation fix affecting zone loading - medium impact"
++  classified_by: "Miguel Ingram"
++  classified_at: "2026-03-18T00:28:34Z"
++```
++
++## Claim(s)
++
++1. HeartRateZone validates bpm=(0, 145) without error for Z1 Recovery zone
++2. Validation rejects negative lower bounds but allows zero as sentinel value
++3. Import statements reordered for consistency
++4. No existing tests were modified or deleted during this change.
++
++---
++
++## Evidence
++
++### Class E (Intent Alignment)
++
++- **Link:** [https://github.com/ImmortalDemonGod/aiv-protocol](https://github.com/ImmortalDemonGod/aiv-protocol)
++- **Requirements Verified:** Z1 zone must accept 0 as lower bound sentinel per zones_personal.yml
++
++### Class B (Referential Evidence)
++
++**Scope Inventory** (SHA: [`beb4bae`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/beb4baed45b7b1d12a6c35340eea84a517fdcc8f))
++
++- [`src/biosystems/models.py#L14-L15`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L14-L15)
++- [`src/biosystems/models.py#L20`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L20)
++- [`src/biosystems/models.py#L30`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L30)
++- [`src/biosystems/models.py#L32-L35`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L32-L35)
++- [`src/biosystems/models.py#L37`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L37)
++- [`src/biosystems/models.py#L41-L42`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L41-L42)
++- [`src/biosystems/models.py#L44-L45`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L44-L45)
++- [`src/biosystems/models.py#L47`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L47)
++- [`src/biosystems/models.py#L59`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L59)
++- [`src/biosystems/models.py#L71`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L71)
++- [`src/biosystems/models.py#L74-L77`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L74-L77)
++- [`src/biosystems/models.py#L81`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L81)
++- [`src/biosystems/models.py#L89`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L89)
++- [`src/biosystems/models.py#L92`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L92)
++- [`src/biosystems/models.py#L108-L114`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L108-L114)
++- [`src/biosystems/models.py#L120`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L120)
++- [`src/biosystems/models.py#L122`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L122)
++- [`src/biosystems/models.py#L146`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L146)
++- [`src/biosystems/models.py#L154-L158`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L154-L158)
++- [`src/biosystems/models.py#L164`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L164)
++- [`src/biosystems/models.py#L172`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L172)
++- [`src/biosystems/models.py#L174`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L174)
++- [`src/biosystems/models.py#L188`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L188)
++- [`src/biosystems/models.py#L193`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L193)
++- [`src/biosystems/models.py#L199`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L199)
++- [`src/biosystems/models.py#L219`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L219)
++- [`src/biosystems/models.py#L226-L227`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L226-L227)
++- [`src/biosystems/models.py#L232`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/beb4baed45b7b1d12a6c35340eea84a517fdcc8f/src/biosystems/models.py#L232)
++
++### Class A (Execution Evidence)
++
++**Per-symbol test coverage (AST analysis):**
++
++- **`HeartRateZone`** (L14-L15): PASS -- 7 test(s) call `HeartRateZone` directly
++  - `tests/test_models.py::test_valid_zone`
++  - `tests/test_models.py::test_bpm_validation_negative`
++  - `tests/test_models.py::test_bpm_validation_zero_lower_allowed`
++  - `tests/test_models.py::test_reversed_bpm_range`
++  - `tests/test_models.py::test_valid_config`
++  - `tests/test_physics_metrics.py::test_missing_z2`
++  - `tests/test_readme_examples.py::test_zone_config_api`
++- **`HeartRateZone.validate_bpm_range`** (L20): FAIL -- WARNING: No tests import or call `validate_bpm_range`
++- **`HeartRateZone.validate_pace_range`** (L30): FAIL -- WARNING: No tests import or call `validate_pace_range`
++- **`ZoneConfig`** (L32-L35): PASS -- 5 test(s) call `ZoneConfig` directly
++  - `tests/test_models.py::test_valid_config`
++  - `tests/test_models.py::test_invalid_resting_hr`
++  - `tests/test_models.py::test_invalid_threshold_hr`
++  - `tests/test_physics_metrics.py::test_missing_z2`
++  - `tests/test_readme_examples.py::test_zone_config_api`
++- **`ZoneConfig.validate_threshold_above_resting`** (L37): FAIL -- WARNING: No tests import or call `validate_threshold_above_resting`
++- **`RunContext`** (L41-L42): PASS -- 2 test(s) call `RunContext` directly
++  - `tests/test_models.py::test_valid_context`
++  - `tests/test_models.py::test_invalid_rest_hr`
++- **`PhysiologicalMetrics`** (L44-L45): PASS -- 4 test(s) call `PhysiologicalMetrics` directly
++  - `tests/test_models.py::test_valid_metrics`
++  - `tests/test_models.py::test_validation_negative_distance`
++  - `tests/test_models.py::test_validation_zero_duration`
++  - `tests/test_models.py::test_valid_summary`
++- **`PhysiologicalMetrics.validate_decoupling_reasonable`** (L47): FAIL -- WARNING: No tests import or call `validate_decoupling_reasonable`
++- **`ActivitySummary`** (L59): PASS -- 1 test(s) call `ActivitySummary` directly
++  - `tests/test_models.py::test_valid_summary`
++- **`WalkSegment`** (L71): PASS -- 2 test(s) call `WalkSegment` directly
++  - `tests/test_models.py::test_optional_fields`
++  - `tests/test_models.py::test_valid_segment`
++
++**Coverage summary:** 6/10 symbols verified by tests.
++
++### Code Quality (Linting & Types)
++
++- **ruff:** All checks passed
++- **mypy:** Success: no issues found in 1 source file
++
++## Claim Verification Matrix
++
++| # | Claim | Type | Evidence | Verdict |
++|---|-------|------|----------|---------|
++| 1 | HeartRateZone validates bpm=(0, 145) without error for Z1 Re... | symbol | 7 test(s) call `HeartRateZone` | PASS VERIFIED |
++| 2 | Validation rejects negative lower bounds but allows zero as ... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
++| 3 | Import statements reordered for consistency | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
++| 4 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
++
++**Verdict summary:** 1 verified, 0 unverified, 3 manual review.
++---
++
++## Verification Methodology
++
++**Zero-Touch Mandate:** Verifier inspects artifacts only.
++Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (6/10 symbols verified).
++Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/types, not behavior.
++
++---
++
++## Summary
++
++Fix Z1 zone validation to allow zero lower bound
+diff --git a/src/biosystems/models.py b/src/biosystems/models.py
+index 735ae9d..b9231f0 100644
+--- a/src/biosystems/models.py
++++ b/src/biosystems/models.py
+@@ -9,15 +9,15 @@ All metrics, configurations, and contexts are defined here to ensure type safety
+ and documentation.
+ """
+ 
+-from typing import Optional, Dict, Tuple
+-from pydantic import BaseModel, Field, field_validator
+ from datetime import datetime
+ 
++from pydantic import BaseModel, Field, field_validator
++
+ 
+ class HeartRateZone(BaseModel):
+     """
+     Definition of a single heart rate training zone.
+-    
++
+     Attributes
+     ----------
+     name : str
+@@ -27,23 +27,24 @@ class HeartRateZone(BaseModel):
+     pace_min_per_km : Tuple[float, float]
+         (lower, upper) pace bounds in minutes per kilometer
+     """
++
+     name: str
+-    bpm: Tuple[int, int] = Field(..., description="(lower, upper) HR bounds in bpm")
+-    pace_min_per_km: Tuple[float, float] = Field(..., description="(lower, upper) pace in min/km")
+-    
+-    @field_validator('bpm')
++    bpm: tuple[int, int] = Field(..., description="(lower, upper) HR bounds in bpm")
++    pace_min_per_km: tuple[float, float] = Field(..., description="(lower, upper) pace in min/km")
++
++    @field_validator("bpm")
+     @classmethod
+-    def validate_bpm_range(cls, v: Tuple[int, int]) -> Tuple[int, int]:
++    def validate_bpm_range(cls, v: tuple[int, int]) -> tuple[int, int]:
+         """Ensure HR bounds are valid (lower < upper, both positive)."""
+         if v[0] >= v[1]:
+             raise ValueError(f"Lower HR ({v[0]}) must be less than upper HR ({v[1]})")
+-        if v[0] < 0 or v[1] < 0:
+-            raise ValueError("Heart rate values must be positive")
++        if v[0] < 0 or v[1] <= 0:
++            raise ValueError("Heart rate values must be non-negative (lower) and positive (upper)")
+         return v
+-    
+-    @field_validator('pace_min_per_km')
++
++    @field_validator("pace_min_per_km")
+     @classmethod
+-    def validate_pace_range(cls, v: Tuple[float, float]) -> Tuple[float, float]:
++    def validate_pace_range(cls, v: tuple[float, float]) -> tuple[float, float]:
+         """Ensure pace bounds are valid (lower < upper, both positive)."""
+         if v[0] >= v[1]:
+             raise ValueError(f"Lower pace ({v[0]}) must be less than upper pace ({v[1]})")
+@@ -55,7 +56,7 @@ class HeartRateZone(BaseModel):
+ class ZoneConfig(BaseModel):
+     """
+     Complete heart rate zone configuration for an athlete.
+-    
++
+     Attributes
+     ----------
+     resting_hr : int
+@@ -67,16 +68,17 @@ class ZoneConfig(BaseModel):
+     zones : Dict[str, HeartRateZone]
+         Dictionary of zone definitions (e.g., {"Z2": HeartRateZone(...)})
+     """
++
+     resting_hr: int = Field(..., gt=0, description="Resting HR in bpm")
+     threshold_hr: int = Field(..., gt=0, description="Lactate threshold HR in bpm")
+-    max_hr: Optional[int] = Field(None, gt=0, description="Max HR in bpm")
+-    zones: Dict[str, HeartRateZone] = Field(..., description="Zone definitions")
+-    
+-    @field_validator('threshold_hr')
++    max_hr: int | None = Field(None, gt=0, description="Max HR in bpm")
++    zones: dict[str, HeartRateZone] = Field(..., description="Zone definitions")
++
++    @field_validator("threshold_hr")
+     @classmethod
+     def validate_threshold_above_resting(cls, v: int, info) -> int:
+         """Ensure threshold HR is higher than resting HR."""
+-        if 'resting_hr' in info.data and v <= info.data['resting_hr']:
++        if "resting_hr" in info.data and v <= info.data["resting_hr"]:
+             raise ValueError("Threshold HR must be greater than resting HR")
+         return v
+ 
+@@ -84,10 +86,10 @@ class ZoneConfig(BaseModel):
+ class RunContext(BaseModel):
+     """
+     Environmental and physiological context for a run.
+-    
++
+     This optional metadata enriches analysis by providing context like weather
+     conditions and wellness state.
+-    
++
+     Attributes
+     ----------
+     temperature_c : float, optional
+@@ -103,20 +105,21 @@ class RunContext(BaseModel):
+     hrv_rmssd : float, optional
+         Heart Rate Variability RMSSD in ms
+     """
+-    temperature_c: Optional[float] = Field(None, description="Temperature in °C")
+-    weather_code: Optional[int] = Field(None, description="WMO weather code")
+-    weather_description: Optional[str] = Field(None, description="Weather description")
+-    rest_hr: Optional[int] = Field(None, gt=0, description="Resting HR in bpm")
+-    sleep_score: Optional[float] = Field(None, ge=0, le=100, description="Sleep score 0-100")
+-    hrv_rmssd: Optional[float] = Field(None, gt=0, description="HRV RMSSD in ms")
++
++    temperature_c: float | None = Field(None, description="Temperature in °C")
++    weather_code: int | None = Field(None, description="WMO weather code")
++    weather_description: str | None = Field(None, description="Weather description")
++    rest_hr: int | None = Field(None, gt=0, description="Resting HR in bpm")
++    sleep_score: float | None = Field(None, ge=0, le=100, description="Sleep score 0-100")
++    hrv_rmssd: float | None = Field(None, gt=0, description="HRV RMSSD in ms")
+ 
+ 
+ class PhysiologicalMetrics(BaseModel):
+     """
+     Core physiological metrics for a single run.
+-    
++
+     These are the primary outputs of the bio-systems pipeline.
+-    
++
+     Attributes
+     ----------
+     distance_km : float
+@@ -140,6 +143,7 @@ class PhysiologicalMetrics(BaseModel):
+     context : RunContext, optional
+         Environmental and wellness context
+     """
++
+     distance_km: float = Field(..., gt=0)
+     duration_min: float = Field(..., gt=0)
+     avg_pace_min_per_km: float = Field(..., gt=0)
+@@ -147,16 +151,17 @@ class PhysiologicalMetrics(BaseModel):
+     efficiency_factor: float = Field(..., gt=0)
+     decoupling_pct: float = Field(...)
+     hr_tss: float = Field(..., ge=0)
+-    avg_cadence: Optional[int] = Field(None, gt=0)
+-    gap_min_per_km: Optional[float] = Field(None, gt=0, description="Grade Adjusted Pace")
+-    context: Optional[RunContext] = None
+-    
+-    @field_validator('decoupling_pct')
++    avg_cadence: int | None = Field(None, gt=0)
++    gap_min_per_km: float | None = Field(None, gt=0, description="Grade Adjusted Pace")
++    context: RunContext | None = None
++
++    @field_validator("decoupling_pct")
+     @classmethod
+     def validate_decoupling_reasonable(cls, v: float) -> float:
+         """Warn if decoupling is suspiciously high (>50%)."""
+         if v > 50:
+             import warnings
++
+             warnings.warn(f"Decoupling {v:.1f}% is unusually high. Check data quality.")
+         return v
+ 
+@@ -164,9 +169,9 @@ class PhysiologicalMetrics(BaseModel):
+ class ActivitySummary(BaseModel):
+     """
+     Complete summary of a processed activity.
+-    
++
+     Combines metrics with metadata for storage and reporting.
+-    
++
+     Attributes
+     ----------
+     activity_id : str
+@@ -180,17 +185,18 @@ class ActivitySummary(BaseModel):
+     file_source : str, optional
+         Original file path
+     """
++
+     activity_id: str
+     timestamp: datetime
+     activity_type: str = Field(..., pattern="^(run|walk|mixed)$")
+     metrics: PhysiologicalMetrics
+-    file_source: Optional[str] = None
++    file_source: str | None = None
+ 
+ 
+ class WalkSegment(BaseModel):
+     """
+     A detected walking segment within an activity.
+-    
++
+     Attributes
+     ----------
+     segment_id : int
+@@ -210,16 +216,17 @@ class WalkSegment(BaseModel):
+     tag : str
+         Classification ("warm-up", "mid-session", "cool-down")
+     """
++
+     segment_id: int = Field(..., gt=0)
+     start_offset_s: int = Field(..., ge=0)
+     end_offset_s: int = Field(..., ge=0)
+     duration_s: int = Field(..., gt=0)
+     distance_km: float = Field(..., ge=0)
+     avg_pace_min_km: float = Field(..., gt=0)
+-    avg_hr: Optional[float] = Field(None, gt=0)
+-    avg_cad: Optional[float] = Field(None, gt=0)
++    avg_hr: float | None = Field(None, gt=0)
++    avg_cad: float | None = Field(None, gt=0)
+     tag: str = Field(..., pattern="^(warm-up|mid-session|cool-down|pause)$")
+ 
+ 
+ # Type aliases for convenience
+-ZoneDict = Dict[str, HeartRateZone]
++ZoneDict = dict[str, HeartRateZone]

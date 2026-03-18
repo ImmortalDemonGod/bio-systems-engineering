@@ -1,0 +1,17 @@
+# AIV Protocol Configuration
+# See: https://github.com/ImmortalDemonGod/aiv-protocol
+
+version: "1.0"
+strict_mode: true
+
+# Pre-commit hook settings
+# Bio-systems project functional file detection
+hook:
+  functional_prefixes:
+    - "src/"
+    - "tests/"
+    - "tools/"
+    - "scripts/"
+  functional_root_files:
+    - "pyproject.toml"
+    - "setup.py"

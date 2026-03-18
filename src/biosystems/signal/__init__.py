@@ -11,9 +11,9 @@ Features:
 """
 
 from biosystems.signal.walk_detection import (
-    walk_block_segments,
-    summarize_walk_segments,
     filter_gps_jitter,
+    summarize_walk_segments,
+    walk_block_segments,
 )
 
 __all__ = [

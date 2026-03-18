@@ -13,7 +13,6 @@ from __future__ import annotations
 import math
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -27,16 +26,16 @@ VERBOSE = False  # Set to True for debug output
 def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
     Calculate great-circle distance in metres between two WGS-84 points.
-    
+
     Uses the haversine formula for accurate distance calculation on a sphere.
-    
+
     Parameters
     ----------
     lat1, lon1 : float
         Latitude and longitude of first point (degrees)
     lat2, lon2 : float
         Latitude and longitude of second point (degrees)
-        
+
     Returns
     -------
     float
@@ -45,28 +44,25 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlambda = math.radians(lon2 - lon1)
-    a = (
-        math.sin(dphi / 2) ** 2
-        + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
-    )
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
     return 2 * EARTH_RADIUS_M * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def parse_gpx(path: Union[str, Path]) -> pd.DataFrame:
+def parse_gpx(path: str | Path) -> pd.DataFrame:
     """
     Parse a GPX file into a tidy, chronologically sorted DataFrame.
-    
+
     This parser robustly handles:
     - Garmin GPX namespace variations
     - Missing heart rate, cadence, or power data
     - Non-namespaced GPX files (fallback)
     - Multiple power data locations in extensions
-    
+
     Parameters
     ----------
     path : str or Path
         Path to the GPX file
-        
+
     Returns
     -------
     pd.DataFrame
@@ -83,7 +79,7 @@ def parse_gpx(path: Union[str, Path]) -> pd.DataFrame:
         - speed_mps : raw speed (m/s)
         - speed_mps_smooth : 5-point rolling average (m/s)
         - pace_sec_km : smoothed pace (seconds per km)
-        
+
     Raises
     ------
     ValueError
@@ -94,22 +90,22 @@ def parse_gpx(path: Union[str, Path]) -> pd.DataFrame:
         "g": "http://www.topografix.com/GPX/1/1",
         "gpxtpx": "http://www.garmin.com/xmlschemas/TrackPointExtension/v1",
     }
-    
+
     rows = []
     root = ET.parse(str(path)).getroot()
     debug_hr = []  # For debug output
-    
+
     # Parse namespaced GPX
     for i, pt in enumerate(root.findall(".//g:trkpt", ns)):
         lat, lon = float(pt.attrib["lat"]), float(pt.attrib["lon"])
-        
+
         # Elevation
         ele_node = pt.find("g:ele", ns)
         ele = float(ele_node.text) if ele_node is not None else np.nan
-        
+
         # Timestamp (required)
         ts = pd.to_datetime(pt.find("g:time", ns).text, utc=True)
-        
+
         # Heart rate (from Garmin extensions)
         hr_node = pt.find(".//gpxtpx:hr", ns)
         if hr_node is not None:
@@ -117,18 +113,18 @@ def parse_gpx(path: Union[str, Path]) -> pd.DataFrame:
             hr = hr_val if hr_val > 0 else np.nan
         else:
             hr = np.nan
-            
+
         # Debug first 5 points
         if i < 5:
             debug_hr.append((i, hr, hr_node.text if hr_node is not None else None))
             if VERBOSE:
                 debug_ele = float(ele_node.text) if ele_node is not None else None
                 print(f"[DEBUG] trkpt {i}: ele={debug_ele}")
-        
+
         # Cadence
         cad_node = pt.find(".//gpxtpx:cad", ns)
         cad = int(cad_node.text) if cad_node is not None else np.nan
-        
+
         # Power (try multiple locations - different devices put it in different places)
         power = np.nan
         # 1. Direct child of trkpt (no namespace)
@@ -150,7 +146,7 @@ def parse_gpx(path: Union[str, Path]) -> pd.DataFrame:
             ext = pt.find("extensions")
             if ext is not None:
                 for child in ext:
-                    if child.tag.endswith('power') and child.text is not None:
+                    if child.tag.endswith("power") and child.text is not None:
                         try:
                             power = int(child.text)
                             if i < 3 and VERBOSE:
@@ -159,12 +155,12 @@ def parse_gpx(path: Union[str, Path]) -> pd.DataFrame:
                         except Exception as e:
                             if i < 3 and VERBOSE:
                                 print(f"[DEBUG][POWER ERROR] trkpt {i}: {child.tag}, error: {e}")
-        
+
         rows.append((ts, lat, lon, ele, hr, cad, power))
-    
+
     if debug_hr and VERBOSE:
         print("[DEBUG] First 5 HR values parsed:", debug_hr)
-    
+
     # Fallback: handle un-namespaced GPX files
     if not rows:
         for i, pt in enumerate(root.findall(".//trkpt")):
@@ -178,25 +174,25 @@ def parse_gpx(path: Union[str, Path]) -> pd.DataFrame:
             hr = np.nan
             cad = np.nan
             rows.append((ts, lat, lon, ele, hr, cad, np.nan))
-    
+
     if not rows:
         raise ValueError(f"No <trkpt> found in {path}")
-    
+
     # Create DataFrame
     df = (
         pd.DataFrame(rows, columns=["time", "lat", "lon", "ele", "hr", "cadence", "power"])
         .sort_values("time")
         .reset_index(drop=True)
     )
-    
+
     if VERBOSE:
         print("[DEBUG] HR column (raw, before fill/interp):")
         print(df["hr"].describe())
         print(df["hr"].head(10))
-    
+
     # Calculate elapsed time between points
     df["dt"] = df["time"].diff().dt.total_seconds().fillna(0)
-    
+
     # Calculate great-circle distance for each segment
     seg_dist = [0.0] + [
         _haversine(
@@ -208,20 +204,18 @@ def parse_gpx(path: Union[str, Path]) -> pd.DataFrame:
         for i in range(1, len(df))
     ]
     df["dist"] = seg_dist
-    
+
     # Calculate instantaneous and smoothed speed
     df["speed_mps"] = df["dist"] / df["dt"].replace(0, np.nan)
     df["speed_mps"] = df["speed_mps"].bfill()  # Backfill first point
-    df["speed_mps_smooth"] = (
-        df["speed_mps"].rolling(window=5, center=True, min_periods=1).mean()
-    )
-    
+    df["speed_mps_smooth"] = df["speed_mps"].rolling(window=5, center=True, min_periods=1).mean()
+
     # Calculate pace (sec/km) from smoothed speed
     df["pace_sec_km"] = 1000 / df["speed_mps_smooth"].replace(0, np.nan)
-    
+
     if VERBOSE:
         print("[DEBUG] Power column (raw, after parsing):")
         print(df["power"].describe())
         print(df["power"].head(10))
-    
+
     return df

@@ -1,0 +1,25 @@
+A  .github/aiv-evidence/EVIDENCE_BIOSYSTEMS_PHYSICS_METRICS.md
+ M src/biosystems/__init__.py
+ M src/biosystems/environment/__init__.py
+ M src/biosystems/environment/weather.py
+ M src/biosystems/ingestion/__init__.py
+ M src/biosystems/ingestion/fit.py
+ M src/biosystems/ingestion/gpx.py
+ M src/biosystems/physics/__init__.py
+ M src/biosystems/physics/gap.py
+M  src/biosystems/physics/metrics.py
+ M src/biosystems/signal/__init__.py
+ M src/biosystems/signal/walk_detection.py
+ M tests/test_models.py
+ M tests/test_physics_gap.py
+ M tests/test_signal.py
+?? .aiv.yml
+?? .aiv/
+?? .cache/
+?? .claude/
+?? .github/aiv-evidence/.gitkeep
+?? .github/aiv-packets/.gitkeep
+?? data/processed/
+?? data/subjective.csv
+?? data/weekly_metrics.parquet
+?? data/zones_personal.yml

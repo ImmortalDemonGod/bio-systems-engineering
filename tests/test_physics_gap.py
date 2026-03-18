@@ -137,7 +137,7 @@ class TestCalculateGAPFromDataFrame:
         gap_series = calculate_gap_from_dataframe(df)
         
         # All points should be same as original
-        assert all(gap_series == pytest.approx(300, rel=0.01))
+        assert gap_series.tolist() == pytest.approx([300, 300, 300], rel=0.01)
     
     def test_missing_values(self):
         """Test handling of NaN values."""
