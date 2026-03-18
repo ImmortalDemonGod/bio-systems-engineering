@@ -17,12 +17,19 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from filelock import FileLock, Timeout as FileLockTimeout
+
 
 def history_path() -> Path:
     """Return the path to the local run history file."""
     base = Path(os.environ.get("BIOSYSTEMS_HOME", Path.home() / ".biosystems"))
     base.mkdir(parents=True, exist_ok=True)
     return base / "history.jsonl"
+
+
+def _lock_path() -> Path:
+    """Return the advisory lock file path alongside the history file."""
+    return history_path().with_suffix(".lock")
 
 
 def load_history() -> list[dict[str, Any]]:
@@ -34,7 +41,13 @@ def load_history() -> list[dict[str, Any]]:
     list[dict]
         Each dict has at minimum: 'date' (ISO string), 'hrTSS' (float).
         Optional keys: 'ef', 'ef_gap', 'decoupling_pct', 'distance_km',
-        'avg_hr', 'avg_pace_min_per_km', 'activity_name'.
+        'avg_hr', 'avg_pace_min_per_km', 'activity_name', 'strava_activity_id'.
+
+    Notes
+    -----
+    Deduplication: entries with a ``strava_activity_id`` are keyed by that ID
+    (allowing multiple runs on the same calendar date to coexist). Entries
+    without an ID are keyed by date (legacy behaviour, last write wins).
     """
     path = history_path()
     if not path.exists():
@@ -50,14 +63,18 @@ def load_history() -> list[dict[str, Any]]:
         except json.JSONDecodeError:
             pass
 
-    # Sort by date, dedup by date (keep last written for each date)
-    by_date: dict[str, dict[str, Any]] = {}
+    # Dedup: activity_id-keyed entries coexist; date-only entries dedup by date
+    by_key: dict[str, dict[str, Any]] = {}
     for e in entries:
-        key = e.get("date", "")
+        activity_id = e.get("strava_activity_id")
+        if activity_id:
+            key = f"id:{activity_id}"
+        else:
+            key = e.get("date", "")
         if key:
-            by_date[key] = e
+            by_key[key] = e
 
-    return sorted(by_date.values(), key=lambda x: x["date"])
+    return sorted(by_key.values(), key=lambda x: x["date"])
 
 
 def append_run(entry: dict[str, Any], strava_efforts: dict[str, int] | None = None) -> None:
@@ -83,13 +100,32 @@ def append_run(entry: dict[str, Any], strava_efforts: dict[str, int] | None = No
         entry = dict(entry)  # avoid mutating caller's dict
         entry["strava_efforts"] = strava_efforts
 
-    existing = load_history()
-    by_date: dict[str, dict[str, Any]] = {e["date"]: e for e in existing}
-    by_date[entry["date"]] = entry
+    try:
+        lock = FileLock(str(_lock_path()), timeout=15)
+    except Exception as exc:
+        raise RuntimeError(f"Cannot acquire history lock: {exc}") from exc
 
-    path = history_path()
-    lines = [json.dumps(e, separators=(",", ":")) for e in sorted(by_date.values(), key=lambda x: x["date"])]
-    path.write_text("\n".join(lines) + "\n")
+    with lock:
+        existing = load_history()
+
+        # Dedup by activity_id when present, else by date
+        activity_id = entry.get("strava_activity_id")
+        if activity_id:
+            by_key: dict[str, dict[str, Any]] = {}
+            for e in existing:
+                eid = e.get("strava_activity_id")
+                k = f"id:{eid}" if eid else e.get("date", "")
+                if k:
+                    by_key[k] = e
+            by_key[f"id:{activity_id}"] = entry
+        else:
+            by_key = {e.get("strava_activity_id") and f"id:{e['strava_activity_id']}" or e["date"]: e
+                      for e in existing if e.get("date")}
+            by_key[entry["date"]] = entry
+
+        path = history_path()
+        lines = [json.dumps(e, separators=(",", ":")) for e in sorted(by_key.values(), key=lambda x: x["date"])]
+        path.write_text("\n".join(lines) + "\n")
 
 
 def detect_block_bests(
