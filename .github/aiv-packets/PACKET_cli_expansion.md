@@ -19,9 +19,9 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Functional expansion of the CLI suite. Low risk as it adds new command paths and improves rate-limiting safety without altering existing core algorithms."
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:27:15Z"
+  classified_at: "2026-03-18T19:28:40Z"
 ```
 
 ## Claims
@@ -29,7 +29,7 @@ classification:
 1. Add wellness-sync, wellness-show, and wellness-analyze commands
 2. Implement 18s run delay to respect Strava rate limits (100 req/15 min)
 3. Enable upward search for .env and XDG-standard config resolution
-4. No existing tests were modified or deleted during this change.
+4. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/cli-expansion/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ---
 
@@ -37,9 +37,16 @@ classification:
 
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
-| 1 | EVIDENCE_BIOSYSTEMS_CLI.md | `52bed6f` | A, B, E |
+| 1 | EVIDENCE_BIOSYSTEMS_CLI.md | `52bed6f` | A, B, E, F |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Operationalize the full physiological stack by exposing wellness analytics through the CLI.
+- **Requirement:** Harden Strava integration to ensure long-running backfills do not trigger API rate-limit bans.
+
+### Class F (Provenance)
+
+**Claim 4:** CLI additions follow the established Typer pattern. Existing regression tests for data ingestion and analysis pass, confirming no breakage of the base path.
 
 ### Class B (Referential Evidence)
 
