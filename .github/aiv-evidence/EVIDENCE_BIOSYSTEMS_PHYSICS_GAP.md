@@ -1,8 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/physics/gap.py`
-**Commit:** `19ae248`
-**Generated:** 2026-03-18T05:11:34Z
+**Commit:** `78d93d1`
+**Previous:** `9d8733d`
+**Generated:** 2026-03-18T19:25:53Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -15,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "src/biosystems/physics/gap.py"
-  classification_rationale: "Algorithmic refinement"
+  classification_rationale: "Robustness fix"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T05:11:34Z"
+  classified_at: "2026-03-18T19:25:53Z"
 ```
 
 ## Claim(s)
 
-1. Minetti's polynomial is sensitive to GPS noise; a 5-point rolling average is applied to elevation before differencing to improve GAP accuracy
+1. Clamp grade to ±45% to prevent polynomial divergence and negative energy multipliers
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -31,24 +32,26 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics)
-- **Requirements Verified:** Improve Grade Adjusted Pace (GAP) reliability
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/physics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/physics)
+- **Requirements Verified:** Harden GAP calculation against GPS vertical noise
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`19ae248`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/19ae2484cbf856df56c105890cf1e161b5a46c23))
+**Scope Inventory** (SHA: [`78d93d1`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/78d93d1138a29e181836051aad44421c9641452b))
 
-- [`src/biosystems/physics/gap.py#L151-L154`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/19ae2484cbf856df56c105890cf1e161b5a46c23/src/biosystems/physics/gap.py#L151-L154)
-- [`src/biosystems/physics/gap.py#L160-L166`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/19ae2484cbf856df56c105890cf1e161b5a46c23/src/biosystems/physics/gap.py#L160-L166)
+- [`src/biosystems/physics/gap.py#L68-L74`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/78d93d1138a29e181836051aad44421c9641452b/src/biosystems/physics/gap.py#L68-L74)
+- [`src/biosystems/physics/gap.py#L80`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/78d93d1138a29e181836051aad44421c9641452b/src/biosystems/physics/gap.py#L80)
 
 ### Class A (Execution Evidence)
 
 **Per-symbol test coverage (AST analysis):**
 
-- **`calculate_gap_from_dataframe`** (L151-L154): PASS -- 3 test(s) call `calculate_gap_from_dataframe` directly
-  - `tests/test_physics_gap.py::test_simple_dataframe`
-  - `tests/test_physics_gap.py::test_flat_dataframe`
-  - `tests/test_physics_gap.py::test_missing_values`
+- **`minetti_energy_cost`** (L68-L74): PASS -- 5 test(s) call `minetti_energy_cost` directly
+  - `tests/test_physics_gap.py::test_uphill_5_percent`
+  - `tests/test_physics_gap.py::test_steep_uphill`
+  - `tests/test_physics_gap.py::test_flat_ground_baseline`
+  - `tests/test_physics_gap.py::test_uphill_10_percent`
+  - `tests/test_physics_gap.py::test_downhill_5_percent`
 
 **Coverage summary:** 1/1 symbols verified by tests.
 
@@ -61,7 +64,7 @@ classification:
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | Minetti's polynomial is sensitive to GPS noise; a 5-point ro... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 1 | Clamp grade to ±45% to prevent polynomial divergence and neg... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
 | 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
 **Verdict summary:** 0 verified, 0 unverified, 2 manual review.
@@ -77,4 +80,4 @@ Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/ty
 
 ## Summary
 
-Smooth elevation for GAP
+Clamp GAP grade

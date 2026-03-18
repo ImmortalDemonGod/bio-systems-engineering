@@ -65,17 +65,19 @@ def minetti_energy_cost(grade_percent: float) -> float:
 
     For flat running (i=0), EC = 3.6 (baseline)
     """
-    # Convert percentage to decimal
-    i = grade_percent / 100.0
+    # Clamp to Minetti's valid domain. The 5th-degree polynomial diverges rapidly
+    # outside ±45% grade: at i=-1 (100% descent) ec = -112, yielding a negative
+    # energy multiplier that would make GAP negative. GPS altimeter glitches
+    # (tunnel dropout, barometric spike) can produce apparent grades far beyond
+    # real terrain, so clamping is a mandatory guard, not just a nicety.
+    clamped = max(min(grade_percent, 45.0), -45.0)
+    i = clamped / 100.0
 
     # Minetti's polynomial equation for energy cost
     ec = 155.4 * i**5 - 30.4 * i**4 - 43.3 * i**3 + 46.3 * i**2 + 19.5 * i + 3.6
 
     # Normalize to flat running (EC at i=0 is 3.6)
-    baseline_ec = 3.6
-    relative_cost = ec / baseline_ec
-
-    return relative_cost
+    return ec / 3.6
 
 
 def calculate_gap_segment(pace_sec_km: float, grade_percent: float) -> float:
