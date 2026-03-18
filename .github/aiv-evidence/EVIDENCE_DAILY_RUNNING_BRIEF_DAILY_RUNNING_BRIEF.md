@@ -1,8 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `daily_running_brief/daily_running_brief.py`
-**Commit:** `8d89068`
-**Generated:** 2026-03-18T19:45:52Z
+**Commit:** `b1d13a7`
+**Previous:** `56cc2e5`
+**Generated:** 2026-03-18T20:40:46Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -17,14 +18,15 @@ classification:
   blast_radius: "daily_running_brief/daily_running_brief.py"
   classification_rationale: "Feature enhancement"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:45:52Z"
+  classified_at: "2026-03-18T20:40:46Z"
 ```
 
 ## Claim(s)
 
-1. Incorporate respiratory rate sigma and 7-day sleep debt into daily status synthesis
-2. Add longitudinal fitness arc summary to briefing preamble
-3. No existing tests were modified or deleted during this change.
+1. Add dual G/A/R classification (overnight vs full-day) to briefing synthesis
+2. Explicitly note unavailable signals (HRV/Recovery) and timing limitations (Body Battery daily average)
+3. Surface GAP suppression notes in the efficiency section of run cards
+4. No existing tests were modified or deleted during this change.
 
 ---
 
@@ -32,19 +34,20 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/briefing](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/briefing)
-- **Requirements Verified:** Synthesize advanced physiological signals for decision support
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/ops](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/ops)
+- **Requirements Verified:** Synthesize nuanced physiological context for decision support
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`8d89068`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/8d890689b838cec0bac1e91b0ffbaf2e26918aac))
+**Scope Inventory** (SHA: [`b1d13a7`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/b1d13a7615ea6a3d2eae13be2b17c9153eb635af))
 
-- [`daily_running_brief/daily_running_brief.py#L580-L591`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/8d890689b838cec0bac1e91b0ffbaf2e26918aac/daily_running_brief/daily_running_brief.py#L580-L591)
-- [`daily_running_brief/daily_running_brief.py#L595-L604`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/8d890689b838cec0bac1e91b0ffbaf2e26918aac/daily_running_brief/daily_running_brief.py#L595-L604)
-- [`daily_running_brief/daily_running_brief.py#L1512-L1527`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/8d890689b838cec0bac1e91b0ffbaf2e26918aac/daily_running_brief/daily_running_brief.py#L1512-L1527)
-- [`daily_running_brief/daily_running_brief.py#L1554-L1579`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/8d890689b838cec0bac1e91b0ffbaf2e26918aac/daily_running_brief/daily_running_brief.py#L1554-L1579)
-- [`daily_running_brief/daily_running_brief.py#L1587`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/8d890689b838cec0bac1e91b0ffbaf2e26918aac/daily_running_brief/daily_running_brief.py#L1587)
-- [`daily_running_brief/daily_running_brief.py#L1593-L1596`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/8d890689b838cec0bac1e91b0ffbaf2e26918aac/daily_running_brief/daily_running_brief.py#L1593-L1596)
+- [`daily_running_brief/daily_running_brief.py#L456-L461`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L456-L461)
+- [`daily_running_brief/daily_running_brief.py#L522-L533`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L522-L533)
+- [`daily_running_brief/daily_running_brief.py#L733-L736`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L733-L736)
+- [`daily_running_brief/daily_running_brief.py#L879`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L879)
+- [`daily_running_brief/daily_running_brief.py#L1598-L1600`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L1598-L1600)
+- [`daily_running_brief/daily_running_brief.py#L1602-L1608`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L1602-L1608)
+- [`daily_running_brief/daily_running_brief.py#L1623-L1624`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L1623-L1624)
 
 ### Class A (Execution Evidence)
 
@@ -64,4 +67,4 @@ Only git diff scope inventory was collected. No execution evidence.
 
 ## Summary
 
-Update briefing tool logic
+Update briefing tool synthesis

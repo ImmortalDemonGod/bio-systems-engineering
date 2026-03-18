@@ -453,7 +453,12 @@ def _build_wellness_section(date_str: str) -> str:
         norms      = {}
         calibrated = False
 
-    lines = ["## Wellness Readiness\n", f"{gar} — {detail}"]
+    gar_overnight        = ctx.get("gar_overnight", gar)
+    gar_overnight_detail = ctx.get("gar_overnight_detail", "")
+
+    lines = ["## Wellness — Daily Accounting\n",
+             f"**Full day (incl. daily-avg signals):** {gar} — {detail}",
+             f"**Overnight only (pre-run valid):** {gar_overnight} — {gar_overnight_detail}"]
     if stale:
         lines.append(f"\n⚠ Data is {stale_d}d old — sync when API key is available.")
 
@@ -513,6 +518,18 @@ def _build_wellness_section(date_str: str) -> str:
         lines.append("\n" + header)
         lines.append(sep)
         lines.extend(table_rows)
+
+        # Note unavailable signals explicitly — don't silently omit
+        import pandas as _pd
+        _era_boundary = _pd.Timestamp("2025-12-26")
+        _in_garmin_era = _pd.Timestamp(date_str).normalize() >= _era_boundary
+        if not has_hrv and _in_garmin_era:
+            lines.append("\n_HRV: not available (Whoop ended Dec 2025 — no intraday HRV from Garmin via HabitDash)_")
+        if not has_recovery and _in_garmin_era:
+            lines.append("_Recovery Score: not available (Whoop-only metric)_")
+        # Note BB timing limitation
+        if has_bb:
+            lines.append("_⚠ Body Battery = Garmin daily average — includes post-run suppression. Not a morning readiness snapshot._")
 
     # Key signals vs personal baselines
     rhr     = ctx.get("resting_hr")
@@ -713,9 +730,10 @@ def _build_run_card(entry: RunEntry, report: RunReport, stats: HistStats) -> str
     run_only  = report.get("run_only") or {}
     session   = report.get("session") or {}
 
-    ef_raw    = run_only.get("efficiency_factor")
-    ef_gap    = report.get("ef_grade_adjusted")
-    decouple  = run_only.get("decoupling_pct")
+    ef_raw         = run_only.get("efficiency_factor")
+    ef_gap         = report.get("ef_grade_adjusted")
+    gap_quality    = report.get("gap_quality_note")  # set when EF_GAP was suppressed
+    decouple       = run_only.get("decoupling_pct")
     hr_tss    = run_only.get("hr_tss")
     dist_km   = run_only.get("distance_km") or entry.get("distance_km", 0)
     dur_min   = run_only.get("duration_min", 0)
@@ -858,7 +876,7 @@ def _build_run_card(entry: RunEntry, report: RunReport, stats: HistStats) -> str
         "",
         "EFFICIENCY (authoritative — pre-computed):",
         f"  EF raw:      {ef_raw}",
-        f"  EF GAP:      {ef_gap}{ef_gap_note}",
+        f"  EF GAP:      {ef_gap}{ef_gap_note}" + (f"  ⚠ SUPPRESSED: {gap_quality}" if gap_quality and not ef_gap else ""),
         f"  Terrain:     {terrain_note}",
         f"  vs 30d mean ({ef_30d_mean}):  {ef_delta:+.1f}% → STATUS: {ef_status}" if ef_delta is not None else f"  vs 30d mean: {ef_30d_mean} (no delta — baseline run)",
         f"  vs all-time best ({ef_best}): {ef_vs_best}",
@@ -1577,9 +1595,17 @@ def generate_fitness_preamble(
         except Exception:
             pass
 
+        gar_overnight        = wellness_ctx.get("gar_overnight", gar)
+        gar_overnight_detail = wellness_ctx.get("gar_overnight_detail", "")
+
         wellness_block = (
-            "Pre-run wellness signals (authoritative — use for fatigue/readiness answer):\n"
-            f"  Readiness: {gar} — {detail}\n"
+            "WELLNESS ACCOUNTING (authoritative — reflects how the day went):\n"
+            f"  Full-day readiness: {gar} — {detail}\n"
+            f"  Overnight-only (pre-run valid): {gar_overnight} — {gar_overnight_detail}\n"
+            "  TIMING NOTE: Body Battery and Avg Stress are DAILY AVERAGES from Garmin/HabitDash.\n"
+            "  They include the run's suppressive effect and do NOT represent morning pre-run state.\n"
+            "  RHR and sleep metrics are overnight measurements (pre-run valid).\n"
+            "  Without Whoop HRV, overnight-only GAR is the only signal that reflects pre-run readiness.\n"
             + hrv_line
             + rhr_line
             + (f"  Recovery Score: {rec:.0f}%\n" if rec else "")
@@ -1594,8 +1620,8 @@ def generate_fitness_preamble(
             + fitness_arc_line
             + "  NOTE: BB→EF correlation r≈0.00 — readiness doesn't predict performance "
               "but predicts adaptation capacity and injury risk.\n"
-            + "  CRITICAL: If readiness is RED, explicitly note athlete should not push hard "
-              "regardless of EF performance signals."
+            + "  CRITICAL: Use OVERNIGHT-ONLY signal for readiness interpretation. "
+              "If overnight is RED, note the athlete should have backed off regardless of EF performance."
         )
     else:
         wellness_block = "Pre-run wellness signals: not available (run 'biosystems wellness-sync' to enable)"
