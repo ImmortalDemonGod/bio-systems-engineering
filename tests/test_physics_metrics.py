@@ -116,10 +116,10 @@ class TestCalculateDecoupling:
             'hr': [160.0] * 300 + [170.0] * 300,
             'pace_sec_km': [300.0] * 600,  # Same pace
         })
-        df.index = pd.date_range('2024-01-01', periods=600, freq='S')
-        
+        df.index = pd.date_range('2024-01-01', periods=600, freq='s')
+
         decoupling = calculate_decoupling(df, sample_zone_config)
-        
+
         # Should show positive decoupling (HR went up)
         assert decoupling > 0
     
@@ -132,8 +132,8 @@ class TestCalculateDecoupling:
             'hr': [170.0] * 300 + [160.0] * 300,
             'pace_sec_km': [300.0] * 600,
         })
-        df.index = pd.date_range('2024-01-01', periods=600, freq='S')
-        
+        df.index = pd.date_range('2024-01-01', periods=600, freq='s')
+
         decoupling = calculate_decoupling(df, sample_zone_config)
         
         # Should show decoupling (absolute value)
