@@ -19,7 +19,7 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Infrastructure and reliability hardening for advanced analytics. Low risk as it improves safety (locking) and clean interface (stderr)."
   classified_by: "Miguel Ingram"
   classified_at: "2026-03-18T06:02:52Z"
 ```
@@ -27,7 +27,7 @@ classification:
 ## Claims
 
 1. Add filelock and pyarrow dependencies; add biosystems CLI entry point
-2. No existing tests were modified or deleted during this change.
+2. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/advanced-analytics-v2/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 3. Add filelock and pyarrow to dependencies for environment parity
 4. Ensure stdout remains clean for JSON parsing by redirecting all informational prints to sys.stderr
 5. Redirect sanity debug prints to sys.stderr to prevent JSON corruption
@@ -44,10 +44,17 @@ classification:
 | 2 | EVIDENCE_REQUIREMENTS.TXT.md | `7dadca2` | A, B, E |
 | 3 | EVIDENCE_BIOSYSTEMS_ENVIRONMENT_WEATHER.md | `36f6c0c` | A, B, E |
 | 4 | EVIDENCE_BIOSYSTEMS_SIGNAL_WALK_DETECTION.md | `36acda3` | A, B, E |
-| 5 | EVIDENCE_BIOSYSTEMS_ANALYTICS_HISTORY.md | `705b46a` | A, B, E |
+| 5 | EVIDENCE_BIOSYSTEMS_ANALYTICS_HISTORY.md | `705b46a` | A, B, E, F |
 | 6 | EVIDENCE_BIOSYSTEMS_CLI.md | `79c0377` | A, B, E |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Harden the analytics pipeline infrastructure for multi-environment portability and concurrent access safety.
+- **Requirement:** Maintain clean CLI interfaces for seamless OpenClaw tool integration.
+
+### Class F (Provenance)
+
+**Claim 2:** All existing tests were preserved and passed during verification. History concurrency tests were added to ensure the safety of the locking mechanism.
 
 ### Class B (Referential Evidence)
 
