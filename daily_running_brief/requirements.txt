@@ -1,0 +1,7 @@
+# Daily Running Brief — Python dependencies
+# These are the *additional* deps beyond what biosystems itself requires.
+# If bio-systems-engineering is pip-installed, numpy/pandas/pydantic/requests are already present.
+
+openai>=1.0.0       # primary LLM provider (gpt-4o-mini: ~$0.002/run)
+anthropic>=0.40.0   # fallback LLM provider (claude-sonnet-4-6)
+                    # biosystems ingestion uses requests already — no extra dep
