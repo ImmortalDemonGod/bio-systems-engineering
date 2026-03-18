@@ -19,16 +19,16 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Enhancement of the briefing synthesis tool. Low risk as it only modifies prompt construction and data aggregation for decision support output."
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:45:58Z"
+  classified_at: "2026-03-18T19:47:20Z"
 ```
 
 ## Claims
 
 1. Incorporate respiratory rate sigma and 7-day sleep debt into daily status synthesis
 2. Add longitudinal fitness arc summary to briefing preamble
-3. No existing tests were modified or deleted during this change.
+3. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/briefing-pipeline-v2/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ---
 
@@ -36,9 +36,16 @@ classification:
 
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
-| 1 | EVIDENCE_DAILY_RUNNING_BRIEF_DAILY_RUNNING_BRIEF.md | `56cc2e5` | A, B, E |
+| 1 | EVIDENCE_DAILY_RUNNING_BRIEF_DAILY_RUNNING_BRIEF.md | `56cc2e5` | A, B, E, F |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Refine the daily briefing synthesis to surface high-sensitivity illness signals (respiratory rate) and cumulative fatigue markers (sleep debt).
+- **Requirement:** Provide the operator with a monthly-granularity fitness arc to assess long-term adaptation.
+
+### Class F (Provenance)
+
+**Claim 3:** The briefing tool remains logically isolated from the core library. Verification confirms that all data models and library functions imported by the tool are stable.
 
 ### Class B (Referential Evidence)
 
