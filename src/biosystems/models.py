@@ -9,15 +9,15 @@ All metrics, configurations, and contexts are defined here to ensure type safety
 and documentation.
 """
 
-from typing import Optional, Dict, Tuple
-from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class HeartRateZone(BaseModel):
     """
     Definition of a single heart rate training zone.
-    
+
     Attributes
     ----------
     name : str
@@ -27,23 +27,24 @@ class HeartRateZone(BaseModel):
     pace_min_per_km : Tuple[float, float]
         (lower, upper) pace bounds in minutes per kilometer
     """
+
     name: str
-    bpm: Tuple[int, int] = Field(..., description="(lower, upper) HR bounds in bpm")
-    pace_min_per_km: Tuple[float, float] = Field(..., description="(lower, upper) pace in min/km")
-    
-    @field_validator('bpm')
+    bpm: tuple[int, int] = Field(..., description="(lower, upper) HR bounds in bpm")
+    pace_min_per_km: tuple[float, float] = Field(..., description="(lower, upper) pace in min/km")
+
+    @field_validator("bpm")
     @classmethod
-    def validate_bpm_range(cls, v: Tuple[int, int]) -> Tuple[int, int]:
+    def validate_bpm_range(cls, v: tuple[int, int]) -> tuple[int, int]:
         """Ensure HR bounds are valid (lower < upper, both positive)."""
         if v[0] >= v[1]:
             raise ValueError(f"Lower HR ({v[0]}) must be less than upper HR ({v[1]})")
-        if v[0] < 0 or v[1] < 0:
-            raise ValueError("Heart rate values must be positive")
+        if v[0] < 0 or v[1] <= 0:
+            raise ValueError("Heart rate values must be non-negative (lower) and positive (upper)")
         return v
-    
-    @field_validator('pace_min_per_km')
+
+    @field_validator("pace_min_per_km")
     @classmethod
-    def validate_pace_range(cls, v: Tuple[float, float]) -> Tuple[float, float]:
+    def validate_pace_range(cls, v: tuple[float, float]) -> tuple[float, float]:
         """Ensure pace bounds are valid (lower < upper, both positive)."""
         if v[0] >= v[1]:
             raise ValueError(f"Lower pace ({v[0]}) must be less than upper pace ({v[1]})")
@@ -55,7 +56,7 @@ class HeartRateZone(BaseModel):
 class ZoneConfig(BaseModel):
     """
     Complete heart rate zone configuration for an athlete.
-    
+
     Attributes
     ----------
     resting_hr : int
@@ -67,16 +68,17 @@ class ZoneConfig(BaseModel):
     zones : Dict[str, HeartRateZone]
         Dictionary of zone definitions (e.g., {"Z2": HeartRateZone(...)})
     """
+
     resting_hr: int = Field(..., gt=0, description="Resting HR in bpm")
     threshold_hr: int = Field(..., gt=0, description="Lactate threshold HR in bpm")
-    max_hr: Optional[int] = Field(None, gt=0, description="Max HR in bpm")
-    zones: Dict[str, HeartRateZone] = Field(..., description="Zone definitions")
-    
-    @field_validator('threshold_hr')
+    max_hr: int | None = Field(None, gt=0, description="Max HR in bpm")
+    zones: dict[str, HeartRateZone] = Field(..., description="Zone definitions")
+
+    @field_validator("threshold_hr")
     @classmethod
     def validate_threshold_above_resting(cls, v: int, info) -> int:
         """Ensure threshold HR is higher than resting HR."""
-        if 'resting_hr' in info.data and v <= info.data['resting_hr']:
+        if "resting_hr" in info.data and v <= info.data["resting_hr"]:
             raise ValueError("Threshold HR must be greater than resting HR")
         return v
 
@@ -84,10 +86,10 @@ class ZoneConfig(BaseModel):
 class RunContext(BaseModel):
     """
     Environmental and physiological context for a run.
-    
+
     This optional metadata enriches analysis by providing context like weather
     conditions and wellness state.
-    
+
     Attributes
     ----------
     temperature_c : float, optional
@@ -103,20 +105,21 @@ class RunContext(BaseModel):
     hrv_rmssd : float, optional
         Heart Rate Variability RMSSD in ms
     """
-    temperature_c: Optional[float] = Field(None, description="Temperature in °C")
-    weather_code: Optional[int] = Field(None, description="WMO weather code")
-    weather_description: Optional[str] = Field(None, description="Weather description")
-    rest_hr: Optional[int] = Field(None, gt=0, description="Resting HR in bpm")
-    sleep_score: Optional[float] = Field(None, ge=0, le=100, description="Sleep score 0-100")
-    hrv_rmssd: Optional[float] = Field(None, gt=0, description="HRV RMSSD in ms")
+
+    temperature_c: float | None = Field(None, description="Temperature in °C")
+    weather_code: int | None = Field(None, description="WMO weather code")
+    weather_description: str | None = Field(None, description="Weather description")
+    rest_hr: int | None = Field(None, gt=0, description="Resting HR in bpm")
+    sleep_score: float | None = Field(None, ge=0, le=100, description="Sleep score 0-100")
+    hrv_rmssd: float | None = Field(None, gt=0, description="HRV RMSSD in ms")
 
 
 class PhysiologicalMetrics(BaseModel):
     """
     Core physiological metrics for a single run.
-    
+
     These are the primary outputs of the bio-systems pipeline.
-    
+
     Attributes
     ----------
     distance_km : float
@@ -140,6 +143,7 @@ class PhysiologicalMetrics(BaseModel):
     context : RunContext, optional
         Environmental and wellness context
     """
+
     distance_km: float = Field(..., gt=0)
     duration_min: float = Field(..., gt=0)
     avg_pace_min_per_km: float = Field(..., gt=0)
@@ -147,16 +151,17 @@ class PhysiologicalMetrics(BaseModel):
     efficiency_factor: float = Field(..., gt=0)
     decoupling_pct: float = Field(...)
     hr_tss: float = Field(..., ge=0)
-    avg_cadence: Optional[int] = Field(None, gt=0)
-    gap_min_per_km: Optional[float] = Field(None, gt=0, description="Grade Adjusted Pace")
-    context: Optional[RunContext] = None
-    
-    @field_validator('decoupling_pct')
+    avg_cadence: int | None = Field(None, gt=0)
+    gap_min_per_km: float | None = Field(None, gt=0, description="Grade Adjusted Pace")
+    context: RunContext | None = None
+
+    @field_validator("decoupling_pct")
     @classmethod
     def validate_decoupling_reasonable(cls, v: float) -> float:
         """Warn if decoupling is suspiciously high (>50%)."""
         if v > 50:
             import warnings
+
             warnings.warn(f"Decoupling {v:.1f}% is unusually high. Check data quality.")
         return v
 
@@ -164,9 +169,9 @@ class PhysiologicalMetrics(BaseModel):
 class ActivitySummary(BaseModel):
     """
     Complete summary of a processed activity.
-    
+
     Combines metrics with metadata for storage and reporting.
-    
+
     Attributes
     ----------
     activity_id : str
@@ -180,17 +185,18 @@ class ActivitySummary(BaseModel):
     file_source : str, optional
         Original file path
     """
+
     activity_id: str
     timestamp: datetime
     activity_type: str = Field(..., pattern="^(run|walk|mixed)$")
     metrics: PhysiologicalMetrics
-    file_source: Optional[str] = None
+    file_source: str | None = None
 
 
 class WalkSegment(BaseModel):
     """
     A detected walking segment within an activity.
-    
+
     Attributes
     ----------
     segment_id : int
@@ -210,16 +216,17 @@ class WalkSegment(BaseModel):
     tag : str
         Classification ("warm-up", "mid-session", "cool-down")
     """
+
     segment_id: int = Field(..., gt=0)
     start_offset_s: int = Field(..., ge=0)
     end_offset_s: int = Field(..., ge=0)
     duration_s: int = Field(..., gt=0)
     distance_km: float = Field(..., ge=0)
     avg_pace_min_km: float = Field(..., gt=0)
-    avg_hr: Optional[float] = Field(None, gt=0)
-    avg_cad: Optional[float] = Field(None, gt=0)
+    avg_hr: float | None = Field(None, gt=0)
+    avg_cad: float | None = Field(None, gt=0)
     tag: str = Field(..., pattern="^(warm-up|mid-session|cool-down|pause)$")
 
 
 # Type aliases for convenience
-ZoneDict = Dict[str, HeartRateZone]
+ZoneDict = dict[str, HeartRateZone]
