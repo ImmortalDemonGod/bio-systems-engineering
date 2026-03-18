@@ -38,6 +38,7 @@ This matches the schema produced by parse_fit() + add_derived_metrics().
 from __future__ import annotations
 
 import os
+import time
 from datetime import datetime, timezone
 from typing import Any
 
@@ -50,6 +51,51 @@ _BASE_URL = "https://www.strava.com/api/v3"
 
 # Streams to request — order doesn't matter, Strava aligns them by index
 _STREAM_KEYS = "time,distance,latlng,altitude,heartrate,cadence,velocity_smooth,moving"
+
+# ---------------------------------------------------------------------------
+# Rate-limit-aware HTTP helper
+# ---------------------------------------------------------------------------
+
+_RETRYABLE_STATUSES = {429, 500, 502, 503, 504}
+
+
+def _get_with_backoff(
+    url: str,
+    headers: dict[str, str],
+    params: dict[str, Any] | None = None,
+    timeout: int = 15,
+    max_retries: int = 3,
+) -> requests.Response:
+    """
+    GET with automatic retry on transient / rate-limit responses.
+
+    Respects the ``Retry-After`` header when Strava returns 429.
+    Falls back to exponential backoff (1 s, 2 s, 4 s) for 5xx errors.
+
+    Raises
+    ------
+    requests.HTTPError
+        On non-retryable errors (4xx except 429) or exhausted retries.
+    """
+    for attempt in range(max_retries + 1):
+        resp = requests.get(url, headers=headers, params=params, timeout=timeout)
+
+        if resp.status_code not in _RETRYABLE_STATUSES:
+            resp.raise_for_status()
+            return resp
+
+        if attempt == max_retries:
+            resp.raise_for_status()  # Exhausted — let caller handle
+
+        # Respect Retry-After for 429; exponential backoff for 5xx
+        if resp.status_code == 429:
+            retry_after = int(resp.headers.get("Retry-After", 60))
+            time.sleep(retry_after)
+        else:
+            time.sleep(2 ** attempt)
+
+    # Unreachable, but satisfies type checkers
+    raise requests.HTTPError("Retry loop exited unexpectedly")
 
 
 # ---------------------------------------------------------------------------
@@ -144,13 +190,11 @@ def fetch_activity_efforts(
         best_efforts : parsed list matching BestEffort schema
     """
     token = access_token or _refresh_access_token()
-    resp = requests.get(
+    resp = _get_with_backoff(
         f"{_BASE_URL}/activities/{activity_id}",
         headers=_auth_headers(token),
         params={"include_all_efforts": True},
-        timeout=15,
     )
-    resp.raise_for_status()
     activity = resp.json()
     run_date = activity.get("start_date_local", "")[:10]
     efforts = _parse_best_efforts(activity.get("best_efforts") or [])
@@ -191,13 +235,11 @@ def fetch_runs_since(
     page = 1
 
     while True:
-        resp = requests.get(
+        resp = _get_with_backoff(
             f"{_BASE_URL}/athlete/activities",
             headers=_auth_headers(token),
             params={"per_page": 200, "page": page, "after": after_epoch},
-            timeout=15,
         )
-        resp.raise_for_status()
         batch = resp.json()
         if not batch:
             break
@@ -236,13 +278,11 @@ def fetch_recent_runs(n: int = 10, access_token: str | None = None) -> list[dict
     token = access_token or _refresh_access_token()
     per_page = min(n * 2, 200)  # over-fetch to account for non-Run activities
 
-    resp = requests.get(
+    resp = _get_with_backoff(
         f"{_BASE_URL}/athlete/activities",
         headers=_auth_headers(token),
         params={"per_page": per_page, "page": 1},
-        timeout=15,
     )
-    resp.raise_for_status()
 
     run_types = {"Run", "TrailRun", "VirtualRun"}
     activities = [a for a in resp.json() if a.get("sport_type") in run_types]
@@ -438,13 +478,11 @@ def fetch_activity_streams(
     token = access_token or _refresh_access_token()
 
     # Fetch full activity detail (include_all_efforts=True gets best_efforts list)
-    activity_resp = requests.get(
+    activity_resp = _get_with_backoff(
         f"{_BASE_URL}/activities/{activity_id}",
         headers=_auth_headers(token),
         params={"include_all_efforts": True},
-        timeout=15,
     )
-    activity_resp.raise_for_status()
     activity = activity_resp.json()
     start_date = activity["start_date"]  # ISO 8601 UTC
 
@@ -466,13 +504,11 @@ def fetch_activity_streams(
     }
 
     # Fetch streams
-    streams_resp = requests.get(
+    streams_resp = _get_with_backoff(
         f"{_BASE_URL}/activities/{activity_id}/streams",
         headers=_auth_headers(token),
         params={"keys": _STREAM_KEYS, "key_by_type": True},
-        timeout=15,
     )
-    streams_resp.raise_for_status()
 
     # Strava returns a dict keyed by stream type when key_by_type=true
     raw = streams_resp.json()

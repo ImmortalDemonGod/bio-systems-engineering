@@ -214,13 +214,15 @@ def test_fetch_recent_runs_raises_on_http_error():
 
 
 def test_fetch_recent_runs_raises_on_rate_limit_html():
-    """Simulate Strava returning HTML (e.g. rate limit page) instead of JSON."""
+    """Simulate Strava returning 429 on every attempt — should raise after retries."""
     resp = MagicMock(spec=requests.Response)
     resp.status_code = 429
+    resp.headers = {"Retry-After": "0"}  # avoid real sleep in tests
     resp.raise_for_status.side_effect = requests.HTTPError(response=resp)
     with patch("requests.get", return_value=resp):
-        with pytest.raises(requests.HTTPError):
-            strava_mod.fetch_recent_runs(n=5, access_token="tok")
+        with patch("biosystems.ingestion.strava.time.sleep"):  # skip waits
+            with pytest.raises(requests.HTTPError):
+                strava_mod.fetch_recent_runs(n=5, access_token="tok")
 
 
 # ---------------------------------------------------------------------------
