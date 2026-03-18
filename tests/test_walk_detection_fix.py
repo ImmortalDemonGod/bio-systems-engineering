@@ -6,7 +6,7 @@ from biosystems.models import WalkSegment
 def test_walk_block_segments_none_fallback():
     """Verify that walk_block_segments returns None instead of empty strings."""
     # Create a dummy DataFrame with a walk segment
-    times = pd.date_range("2025-01-01", periods=10, freq="1S")
+    times = pd.date_range("2025-01-01", periods=10, freq="1s")
     df = pd.DataFrame({
         "is_walk": [True] * 10,
         "heart_rate": [np.nan] * 10,
