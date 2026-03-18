@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/models.py`
-**Commit:** `c66f7c4`
-**Previous:** `6e294c3`
-**Generated:** 2026-03-18T03:13:45Z
+**Commit:** `086855b`
+**Previous:** `5236596`
+**Generated:** 2026-03-18T05:11:03Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -16,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "src/biosystems/models.py"
-  classification_rationale: "Mypy fix"
+  classification_rationale: "Feature expansion"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T03:13:45Z"
+  classified_at: "2026-03-18T05:11:03Z"
 ```
 
 ## Claim(s)
 
-1. RunContext fields have explicit default=None for strict mypy compliance
+1. Extend data models to support comprehensive Strava-based run reporting and longitudinal tracking
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -32,24 +32,32 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/openclaw-integration](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/openclaw-integration)
-- **Requirements Verified:** Ensure type checker passes on model instantiation
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics)
+- **Requirements Verified:** Maintain type-safe contracts for advanced analytics
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`c66f7c4`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/c66f7c45af5161837a5e89dc8c8192f77c0bdce0))
+**Scope Inventory** (SHA: [`086855b`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/086855b5c6aae405e5674a4ef4071a7cb48eb73a))
 
-- [`src/biosystems/models.py#L109-L114`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/c66f7c45af5161837a5e89dc8c8192f77c0bdce0/src/biosystems/models.py#L109-L114)
+- [`src/biosystems/models.py#L196-L264`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/086855b5c6aae405e5674a4ef4071a7cb48eb73a/src/biosystems/models.py#L196-L264)
+- [`src/biosystems/models.py#L300-L419`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/086855b5c6aae405e5674a4ef4071a7cb48eb73a/src/biosystems/models.py#L300-L419)
 
 ### Class A (Execution Evidence)
 
 **Per-symbol test coverage (AST analysis):**
 
-- **`RunContext`** (L109-L114): PASS -- 2 test(s) call `RunContext` directly
-  - `tests/test_models.py::test_valid_context`
-  - `tests/test_models.py::test_invalid_rest_hr`
+- **`KmSplit`** (L196-L264): FAIL -- WARNING: No tests import or call `KmSplit`
+- **`Lap`** (L300-L419): FAIL -- WARNING: No tests import or call `Lap`
+- **`BestEffort`** (unknown): FAIL -- WARNING: No tests import or call `BestEffort`
+- **`BlockBest`** (unknown): FAIL -- WARNING: No tests import or call `BlockBest`
+- **`ZoneTimeEntry`** (unknown): FAIL -- WARNING: No tests import or call `ZoneTimeEntry`
+- **`WalkSummary`** (unknown): FAIL -- WARNING: No tests import or call `WalkSummary`
+- **`StrideSegment`** (unknown): FAIL -- WARNING: No tests import or call `StrideSegment`
+- **`RunDynamics`** (unknown): FAIL -- WARNING: No tests import or call `RunDynamics`
+- **`DistributionStats`** (unknown): FAIL -- WARNING: No tests import or call `DistributionStats`
+- **`FullRunReport`** (unknown): FAIL -- WARNING: No tests import or call `FullRunReport`
 
-**Coverage summary:** 1/1 symbols verified by tests.
+**Coverage summary:** 0/10 symbols verified by tests.
 
 ### Code Quality (Linting & Types)
 
@@ -60,20 +68,20 @@ classification:
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | RunContext fields have explicit default=None for strict mypy... | symbol | 2 test(s) call `RunContext` | PASS VERIFIED |
+| 1 | Extend data models to support comprehensive Strava-based run... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
 | 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
-**Verdict summary:** 1 verified, 0 unverified, 1 manual review.
+**Verdict summary:** 0 verified, 0 unverified, 2 manual review.
 ---
 
 ## Verification Methodology
 
 **Zero-Touch Mandate:** Verifier inspects artifacts only.
-Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (1/1 symbols verified).
+Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (0/10 symbols verified).
 Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/types, not behavior.
 
 ---
 
 ## Summary
 
-Update RunContext defaults
+Update models for advanced analytics

@@ -193,6 +193,75 @@ class ActivitySummary(BaseModel):
     file_source: str | None = None
 
 
+class KmSplit(BaseModel):
+    """Per-kilometer split from Strava's splits_metric."""
+
+    km: int  # 1-based km number
+    distance_m: float
+    elapsed_time_s: int
+    moving_time_s: int
+    pace_min_per_km: float  # derived from average_speed
+    gap_pace_min_per_km: float | None  # derived from average_grade_adjusted_speed
+    avg_hr: float | None
+    elevation_diff_m: float | None
+    pace_zone: int | None
+
+
+class Lap(BaseModel):
+    """A lap as recorded by the watch lap button."""
+
+    lap_index: int
+    distance_m: float
+    elapsed_time_s: int
+    moving_time_s: int
+    pace_min_per_km: float
+    avg_hr: float | None
+    max_hr: float | None
+    avg_cadence: float | None  # steps/min (doubled from Strava single-foot)
+    elevation_gain_m: float | None
+    pace_zone: int | None
+
+
+class BestEffort(BaseModel):
+    """
+    A Strava-detected best effort for a standard distance within a run.
+
+    Attributes
+    ----------
+    name : str
+        Distance name (e.g. "400m", "1/2 mile", "1 mile", "5K", "10K")
+    distance_m : float
+        Actual segment distance in metres
+    elapsed_time_s : int
+        Wall-clock time for the effort in seconds
+    moving_time_s : int
+        Moving time (pauses excluded) in seconds
+    pr_rank : int or None
+        1 = all-time PR, 2 = 2nd best, None = not a top-10 effort
+    start_offset_s : int or None
+        Seconds from activity start
+    """
+
+    name: str
+    distance_m: float
+    elapsed_time_s: int
+    moving_time_s: int
+    pr_rank: int | None = None
+    start_offset_s: int | None = None
+
+
+class BlockBest(BaseModel):
+    """A best-effort for a standard distance within our own tracking window."""
+
+    name: str  # "1K", "1mi", "5K", etc.
+    elapsed_time_s: int
+    pace_min_per_km: float  # derived
+    prev_best_s: int | None  # previous best in history, None if first ever recorded
+    improvement_s: int | None  # positive = faster than prev best
+    window_days: int | None  # None = all recorded history
+    is_new_best: bool
+
+
 class WalkSegment(BaseModel):
     """
     A detected walking segment within an activity.
@@ -226,6 +295,126 @@ class WalkSegment(BaseModel):
     avg_hr: float | None = Field(None, gt=0)
     avg_cad: float | None = Field(None, gt=0)
     tag: str = Field(..., pattern="^(warm-up|mid-session|cool-down|pause)$")
+
+
+class ZoneTimeEntry(BaseModel):
+    """Time spent in a single training zone."""
+    zone: str
+    seconds: float
+    percent: float
+
+
+class WalkSummary(BaseModel):
+    """Aggregate statistics for all walk segments in a session."""
+    segment_count: int
+    total_time_s: float
+    total_time_pct: float
+    total_distance_km: float
+    avg_pace_min_km: float | None = None
+    avg_hr: float | None = None
+    max_hr: float | None = None
+    avg_cadence: float | None = None
+    avg_hr_recovery_bpm_per_s: float | None = None
+
+
+class StrideSegment(BaseModel):
+    """A detected fast stride burst within a run."""
+    segment_id: int = Field(..., gt=0)
+    start_ts: str
+    duration_s: float
+    avg_pace_min_km: float
+    avg_hr: float | None = None
+
+
+class RunDynamics(BaseModel):
+    """Within-run dynamics: HR drift, pace strategy, HR/pace correlation."""
+    first_half_hr: float
+    second_half_hr: float
+    hr_drift_pct: float
+    first_half_pace_min_km: float
+    second_half_pace_min_km: float
+    pace_strategy: str  # "positive", "negative", or "even"
+    hr_pace_correlation: float | None = None
+
+
+class DistributionStats(BaseModel):
+    """Percentile distribution summary for a metric."""
+    mean: float
+    std: float
+    min: float
+    p10: float
+    p25: float
+    p50: float
+    p75: float
+    p90: float
+    max: float
+
+
+class FullRunReport(BaseModel):
+    """
+    Comprehensive run report combining session and run-only metrics,
+    zone distributions, walk detail, dynamics, strides, and distributions.
+
+    This is the primary output of the bio-systems Strava pipeline.
+    """
+    activity_name: str | None = None
+    start_time: str | None = None
+
+    # Dual-mode: full session vs walk-filtered run
+    session: PhysiologicalMetrics
+    run_only: PhysiologicalMetrics
+
+    # Improvements over original system
+    ef_grade_adjusted: float | None = Field(None, description="GAP-speed / avg_hr")
+    ef_reliability_cv: float | None = Field(None, description="CV of instantaneous EF — lower = steadier effort")
+    aev_pace_min_per_km: float | None = Field(None, description="Pace at reference HR (aerobic efficiency velocity)")
+    aev_ref_hr: int | None = Field(None, description="Reference HR used for AeV calculation")
+
+    # Zone time distributions (run-only)
+    zone_hr: list[ZoneTimeEntry] = Field(default_factory=list)
+    zone_pace: list[ZoneTimeEntry] = Field(default_factory=list)
+
+    # Walk analysis
+    walk_summary: WalkSummary | None = None
+    walk_segments: list[dict] = Field(default_factory=list)
+
+    # Within-run dynamics
+    dynamics: RunDynamics | None = None
+
+    # Stride detection
+    strides: list[StrideSegment] = Field(default_factory=list)
+
+    # Statistical distributions (run-only)
+    hr_distribution: DistributionStats | None = None
+    pace_distribution: DistributionStats | None = None
+    cadence_distribution: DistributionStats | None = None
+
+    # Physical
+    elevation_gain_m: float | None = None
+
+    # Per-km splits
+    splits_km: list[KmSplit] = Field(default_factory=list)
+
+    # Lap button splits (if used)
+    laps: list[Lap] = Field(default_factory=list)
+
+    # Activity-level metadata from Strava
+    max_hr: float | None = None
+    max_speed_mps: float | None = None
+    calories: float | None = None
+    perceived_exertion: float | None = None
+    workout_type: str | None = None  # "race", "long_run", "workout", or None
+    device_name: str | None = None
+    description: str | None = None
+
+    # Personal records / best efforts (from Strava)
+    best_efforts: list[BestEffort] = Field(default_factory=list)
+
+    # Own training-block bests (replaces/supplements Strava all-time best_efforts)
+    block_bests: list[BlockBest] = Field(default_factory=list)
+
+    # Context
+    context: RunContext | None = None
 
 
 # Type aliases for convenience
