@@ -10,12 +10,19 @@ Responsibilities:
   - compute_wellness_context()  raw values + 1d/7d deltas + G/A/R signal
   - load_wellness_df()       public accessor for the full DataFrame
 
-G/A/R logic (delta-first, raw-fallback; thresholds calibrated from personal data):
-  RED    HRV 7d drop > threshold OR RHR 7d spike > threshold
-         OR recovery_score < 34 OR sleep_score < 60 OR body_battery < personal p20
-  AMBER  HRV 7d drop moderate OR RHR 7d spike moderate
-         OR recovery/sleep borderline OR body_battery < personal p40
-  GREEN  all signals stable
+Signal timing (critical for correct interpretation):
+  OVERNIGHT (pre-run valid)  — RHR, sleep duration/score, respiratory rate, HRV
+  DAILY AVERAGE (timing unknown) — Body Battery, Avg Stress
+    HabitDash exports Garmin's intraday Body Battery as a full-day average.
+    The morning peak value is not accessible through this API.  A daily-average
+    BB reflects the run's suppressive effect and CANNOT be used as a pre-run gate.
+
+G/A/R is computed in two flavours:
+  gar            — all signals (reflects how the day went)
+  gar_overnight  — overnight signals only (RHR + sleep; pre-run valid)
+
+Without a Whoop or HRV-capable device synced at waking, gar_overnight is the
+only signal that reliably predicts pre-run readiness.
 """
 
 from __future__ import annotations
@@ -378,6 +385,54 @@ def compute_wellness_context(date_str: str) -> dict[str, Any]:
         gar        = "🟢 GREEN"
         gar_detail = "all signals stable"
 
+    # ── Overnight-only G/A/R (pre-run valid) ─────────────────────────────────
+    # Uses only signals measured during sleep/overnight: RHR, sleep metrics,
+    # HRV, respiratory rate. Excludes Body Battery and Avg Stress (daily avgs).
+    on_red:   list[str] = []
+    on_amber: list[str] = []
+
+    if hrv_7d_pct is not None:
+        if hrv_7d_pct < -hrv_drop_red:
+            on_red.append(f"HRV {hrv_7d_pct:+.0f}% vs 7d mean")
+        elif hrv_7d_pct < -hrv_drop_amber:
+            on_amber.append(f"HRV {hrv_7d_pct:+.0f}% vs 7d mean")
+
+    if rhr_7d_delta is not None:
+        if rhr_7d_delta > rhr_spike_red:
+            on_red.append(f"RHR +{rhr_7d_delta:.0f} bpm vs 7d mean")
+        elif rhr_7d_delta > rhr_spike_amb:
+            on_amber.append(f"RHR +{rhr_7d_delta:.0f} bpm vs 7d mean")
+
+    if recovery_today is not None:
+        if recovery_today < _RECOVERY_RED:
+            on_red.append(f"Recovery {recovery_today:.0f}%")
+        elif recovery_today < _RECOVERY_AMBER:
+            on_amber.append(f"Recovery {recovery_today:.0f}%")
+
+    if sleep_today is not None:
+        if sleep_today < _SLEEP_RED:
+            on_red.append(f"Sleep score {sleep_today:.0f}%")
+        elif sleep_today < _SLEEP_AMBER:
+            on_amber.append(f"Sleep score {sleep_today:.0f}%")
+
+    if resp_rate is not None and rr_thresholds:
+        rr_red_t   = rr_thresholds.get("red")
+        rr_amber_t = rr_thresholds.get("amber")
+        if rr_red_t and resp_rate >= rr_red_t:
+            on_red.append(f"Resp rate {resp_rate:.1f} brpm (+{rr_sigma:.1f}σ)")
+        elif rr_amber_t and resp_rate >= rr_amber_t:
+            on_amber.append(f"Resp rate {resp_rate:.1f} brpm (+{rr_sigma:.1f}σ)")
+
+    if on_red:
+        gar_overnight        = "🔴 RED"
+        gar_overnight_detail = "; ".join(on_red)
+    elif on_amber:
+        gar_overnight        = "🟡 AMBER"
+        gar_overnight_detail = "; ".join(on_amber)
+    else:
+        gar_overnight        = "🟢 GREEN"
+        gar_overnight_detail = "all overnight signals stable"
+
     ctx: dict[str, Any] = {
         # Raw values
         "hrv_rmssd":          hrv_today,
@@ -402,9 +457,15 @@ def compute_wellness_context(date_str: str) -> dict[str, Any]:
         "bb_7d_delta":        round(bb_7d_delta, 1)   if bb_7d_delta   is not None else None,
         "rr_sigma":           rr_sigma,
         "sleep_debt_7d":      sleep_debt_7d,
-        # G/A/R
+        # G/A/R — full day (reflects how the day went, includes daily-avg signals)
         "gar":                gar,
         "gar_detail":         gar_detail,
+        # G/A/R — overnight only (pre-run valid: RHR + sleep + HRV + resp rate)
+        "gar_overnight":         gar_overnight,
+        "gar_overnight_detail":  gar_overnight_detail,
+        # Signal timing metadata
+        "body_battery_timing": "daily_avg",   # HabitDash exports intraday average
+        "avg_stress_timing":   "daily_avg",
         # Personal norms (from calibrated thresholds)
         "norms":              norms,
         "thresholds_calibrated": thresholds.get("calibrated", False),
