@@ -296,6 +296,15 @@ def strava(
             except Exception:
                 pass
 
+    # --- Enrich context with wellness data (HRV, RHR, sleep from local cache) ---
+    try:
+        from biosystems.wellness.cache import enrich_run_context
+        run_date_str = str(df.index[0].date()) if len(df) > 0 else None
+        if run_date_str:
+            context = enrich_run_context(run_date_str, context)
+    except Exception:
+        pass  # wellness cache absent or unreadable — degrade gracefully
+
     # --- Build full run report ---
     from biosystems.physics.report import build_run_report
 
@@ -536,9 +545,13 @@ def backfill_streams(
         help="Skip dates already in history with source=biosystems_strava.",
     ),
     delay: float = typer.Option(
-        1.5,
+        18.0,
         "--delay",
-        help="Seconds to sleep between Strava API calls (rate limit courtesy).",
+        # Each run needs 2 API calls (activity detail + streams).
+        # Strava enforces 100 req / 15 min = 6.67 req/min.
+        # Safe minimum per run: 2 × (900 s / 100 req) = 18 s.
+        # 1.5 s was ~12× too fast and would hit 429 after ~7 runs.
+        help="Seconds to sleep between runs (default 18 s respects Strava 100 req/15 min limit).",
     ),
 ):
     """
@@ -635,11 +648,19 @@ def backfill_streams(
         else:
             df["is_walk"] = (df["pace_min_per_km"] > 8.7) | (df["cadence"].fillna(0) < 128)
 
+        # Enrich context with wellness data for this run's date
+        backfill_context = None
+        try:
+            from biosystems.wellness.cache import enrich_run_context
+            backfill_context = enrich_run_context(run_date, None)
+        except Exception:
+            pass
+
         try:
             report = build_run_report(
                 df,
                 zone_config,
-                context=None,
+                context=backfill_context,
                 activity_name=activity_name,
                 activity_meta=activity_meta,
             )
@@ -1066,6 +1087,242 @@ def trend(
                     f"  {r['date']}  TSS={tss_str:>5}  EF={ef_str}  Dec={dec_str:>6}"
                     f"  {r.get('activity_name') or ''}"
                 )
+
+
+@app.command(name="wellness-sync", rich_help_panel="Wellness")
+def wellness_sync(
+    days: int = typer.Option(7, "--days", "-d", help="Days to sync back from today"),
+    date_start: str = typer.Option(None, "--from", help="Start date YYYY-MM-DD (overrides --days)"),
+    date_end: str = typer.Option(None, "--to", help="End date YYYY-MM-DD (default: today)"),
+    api_key: str = typer.Option(None, "--api-key", envvar="HABITDASH_API_KEY", help="HabitDash API key"),
+) -> None:
+    """
+    Sync wellness metrics from HabitDash (Whoop + Garmin) into the local cache.
+
+    Cache location: ~/.biosystems/wellness.parquet
+
+    Fetches: HRV RMSSD, Resting HR, Recovery Score, Sleep Score, Sleep Duration,
+    Body Battery, Strain Score, VO2max, and more.
+
+    Run nightly after 'biosystems strava' or schedule via cron:
+        0 21 * * * biosystems wellness-sync >> ~/.biosystems/wellness.log 2>&1
+    """
+    from biosystems.wellness.cache import sync_wellness
+
+    try:
+        n = sync_wellness(
+            days=days,
+            date_start=date_start,
+            date_end=date_end,
+            api_key=api_key or None,
+        )
+        typer.secho(f"[wellness-sync] {n} date rows updated → ~/.biosystems/wellness.parquet",
+                    fg=typer.colors.GREEN, err=True)
+    except ValueError as exc:
+        typer.secho(f"[wellness-sync] {exc}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1)
+    except Exception as exc:
+        typer.secho(f"[wellness-sync] Failed: {exc}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1)
+
+
+@app.command(name="wellness-show", rich_help_panel="Wellness")
+def wellness_show(
+    date_str: str = typer.Option(None, "--date", "-d", help="Date YYYY-MM-DD (default: today)"),
+    json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
+) -> None:
+    """
+    Show wellness readiness for a date: G/A/R signal, raw values, and 1d/7d deltas.
+
+    Requires at least 1 day of data from 'biosystems wellness-sync'.
+    """
+    import json as _json
+    from datetime import date as _date
+    from biosystems.wellness.cache import compute_wellness_context
+
+    target = date_str or _date.today().isoformat()
+    ctx = compute_wellness_context(target)
+
+    if not ctx:
+        typer.secho(
+            f"No wellness data for {target}. Run 'biosystems wellness-sync' first.",
+            fg=typer.colors.YELLOW, err=True,
+        )
+        raise typer.Exit(code=1)
+
+    if json_output:
+        typer.echo(_json.dumps(ctx, indent=2))
+        return
+
+    gar = ctx.get("gar", "—")
+    detail = ctx.get("gar_detail", "")
+    typer.secho(f"\nWellness Readiness — {target}", fg=typer.colors.CYAN, bold=True)
+    typer.secho(f"  {gar}  {detail}", bold=True)
+
+    if ctx.get("stale"):
+        typer.secho(
+            f"  ⚠ WARNING: most recent data is {ctx['staleness_days']} day(s) old",
+            fg=typer.colors.YELLOW,
+        )
+
+    typer.echo()
+    typer.secho("  Raw values:", fg=typer.colors.CYAN)
+    _row = lambda label, val, unit="": typer.echo(f"    {label:<28} {val if val is not None else 'n/a'} {unit}".rstrip())
+    _row("HRV RMSSD",           ctx.get("hrv_rmssd"),      "ms")
+    _row("Resting HR",          ctx.get("resting_hr"),     "bpm")
+    _row("Recovery Score",      ctx.get("recovery_score"), "%")
+    _row("Sleep Score",         ctx.get("sleep_score"),    "%")
+    if ctx.get("sleep_duration_s") is not None:
+        hours = ctx["sleep_duration_s"] / 3600
+        typer.echo(f"    {'Sleep Duration':<28} {hours:.1f} h")
+    _row("Body Battery",        ctx.get("body_battery"),   "%")
+    _row("Strain Score",        ctx.get("strain_score"))
+
+    typer.echo()
+    typer.secho("  Deltas:", fg=typer.colors.CYAN)
+    _delta = lambda label, val, unit="": typer.echo(
+        f"    {label:<28} {(f'{val:+.1f}' if val is not None else 'n/a')} {unit}".rstrip()
+    )
+    _delta("HRV 1d Δ",             ctx.get("hrv_1d_delta"),  "ms")
+    _delta("HRV 7d Δ (% of mean)", ctx.get("hrv_7d_pct"),   "%")
+    _delta("RHR 1d Δ",             ctx.get("rhr_1d_delta"),  "bpm")
+    _delta("RHR 7d Δ",             ctx.get("rhr_7d_delta"),  "bpm vs 7d mean")
+    _delta("Body Battery 7d Δ",    ctx.get("bb_7d_delta"),   "%")
+    if ctx.get("avg_stress") is not None:
+        typer.echo(f"    {'Avg Stress':<28} {ctx['avg_stress']:.0f}")
+    if ctx.get("vo2max") is not None:
+        typer.echo(f"    {'VO2max':<28} {ctx['vo2max']:.1f} ml/kg/min")
+    if ctx.get("sleep_hours") is not None:
+        typer.echo(f"    {'Sleep':<28} {ctx['sleep_hours']:.1f} h")
+
+    norms = ctx.get("norms") or {}
+    if any(v is not None for v in norms.values()):
+        typer.echo()
+        typer.secho("  Personal norms:", fg=typer.colors.CYAN)
+        if norms.get("rhr_garmin_mean"):
+            typer.echo(f"    {'RHR mean (Garmin era)':<28} {norms['rhr_garmin_mean']:.1f} bpm")
+        if norms.get("hrv_mean"):
+            typer.echo(f"    {'HRV mean (Whoop era)':<28} {norms['hrv_mean']:.1f} ms")
+        if norms.get("bb_mean"):
+            typer.echo(f"    {'Body Battery mean':<28} {norms['bb_mean']:.1f} %")
+        if norms.get("stress_mean"):
+            typer.echo(f"    {'Avg Stress mean':<28} {norms['stress_mean']:.1f}")
+        if norms.get("vo2max_mean"):
+            typer.echo(f"    {'VO2max mean':<28} {norms['vo2max_mean']:.1f} ml/kg/min")
+        src = "calibrated" if ctx.get("thresholds_calibrated") else "clinical fallback"
+        typer.secho(f"  G/A/R thresholds: {src}", fg=typer.colors.CYAN)
+    typer.echo()
+
+
+@app.command(name="wellness-analyze", rich_help_panel="Wellness")
+def wellness_analyze(
+    json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
+) -> None:
+    """
+    Analyze personal wellness baselines, coverage, correlations, and calibrated thresholds.
+
+    Surfaces the analytics methodology used to understand and calibrate the G/A/R system.
+    """
+    import json as _json
+    from biosystems.wellness.cache import load_wellness_df, wellness_path
+    from biosystems.wellness.analytics import (
+        compute_baselines, compute_coverage, compute_correlations,
+        compute_era_stats, calibrate_thresholds,
+    )
+
+    df = load_wellness_df()
+    if df.empty:
+        typer.secho(
+            "No wellness data found. Run 'biosystems wellness-sync' or import a CSV first.",
+            fg=typer.colors.YELLOW, err=True,
+        )
+        raise typer.Exit(code=1)
+
+    coverage    = compute_coverage(df)
+    era_stats   = compute_era_stats(df)
+    thresholds  = calibrate_thresholds(df)
+
+    # Correlations on the metrics that have overlapping data
+    corr_cols = [c for c in [
+        "hrv_rmssd", "resting_hr_whoop", "resting_hr_garmin",
+        "recovery_score", "sleep_score", "body_battery",
+        "avg_stress", "strain_score",
+    ] if c in df.columns]
+    correlations = compute_correlations(df, cols=corr_cols)
+
+    if json_output:
+        out: dict = {
+            "coverage":     coverage.reset_index().to_dict(orient="records"),
+            "era_stats":    era_stats,
+            "thresholds":   thresholds,
+            "correlations": {
+                c: {c2: round(v, 3) for c2, v in row.items()}
+                for c, row in correlations.to_dict().items()
+            },
+        }
+        typer.echo(_json.dumps(out, indent=2, default=str))
+        return
+
+    # ── Human-readable output ────────────────────────────────────────────────
+    typer.secho(f"\nWellness Analytics — {wellness_path()}", fg=typer.colors.CYAN, bold=True)
+    typer.secho(f"  {len(df)} date rows  |  {df.index.min().date()} → {df.index.max().date()}\n",
+                fg=typer.colors.CYAN)
+
+    typer.secho("── Coverage ──", fg=typer.colors.YELLOW, bold=True)
+    typer.echo(coverage[["n_rows", "date_start", "date_end", "pct_coverage"]].to_string())
+
+    typer.secho("\n── Era Stats ──", fg=typer.colors.YELLOW, bold=True)
+    for era_name in ("whoop_era", "garmin_era"):
+        era = era_stats.get(era_name, {})
+        if not era.get("days"):
+            continue
+        typer.secho(f"\n  {era_name.replace('_', ' ').title()} "
+                    f"({era['start']} → {era['end']}, {era['days']} days)",
+                    fg=typer.colors.CYAN)
+        for metric, stats in era.get("baselines", {}).items():
+            typer.echo(
+                f"    {metric:<30}  mean={stats['mean']:>7.1f}  "
+                f"std={stats['std']:>6.1f}  "
+                f"p25={stats['p25']:>7.1f}  p75={stats['p75']:>7.1f}  "
+                f"n={stats['n']}"
+            )
+
+    typer.secho("\n── Key Correlations (Whoop era) ──", fg=typer.colors.YELLOW, bold=True)
+    if not correlations.empty:
+        typer.echo(correlations.round(2).to_string())
+
+    typer.secho("\n── Calibrated G/A/R Thresholds ──", fg=typer.colors.YELLOW, bold=True)
+    src = "personal data" if thresholds.get("calibrated") else "clinical fallback"
+    typer.secho(f"  Source: {src}  |  Garmin days: {thresholds.get('garmin_days', 0)}\n",
+                fg=typer.colors.CYAN)
+    typer.echo(f"  HRV drop RED:      > {thresholds['hrv_pct_drop_red']:.1f}% below 7d mean")
+    typer.echo(f"  HRV drop AMBER:    > {thresholds['hrv_pct_drop_amber']:.1f}% below 7d mean")
+    typer.echo(f"  RHR spike RED:     > +{thresholds['rhr_spike_red']:.1f} bpm above 7d mean")
+    typer.echo(f"  RHR spike AMBER:   > +{thresholds['rhr_spike_amber']:.1f} bpm above 7d mean")
+    bb = thresholds.get("body_battery", {})
+    if bb:
+        typer.echo(f"  Body Battery RED:  < {bb['red']:.0f}%  (personal p20, n={bb.get('n','?')})")
+        typer.echo(f"  Body Battery AMBER:< {bb['amber']:.0f}%  (personal p40)")
+    stress = thresholds.get("avg_stress", {})
+    if stress:
+        typer.echo(f"  Stress RED:        > {stress['red']:.0f}  (personal p90)")
+        typer.echo(f"  Stress AMBER:      > {stress['amber']:.0f}  (personal p75)")
+
+    norms = thresholds.get("norms", {})
+    if norms:
+        typer.secho("\n── Personal Norms ──", fg=typer.colors.YELLOW, bold=True)
+        pairs = [
+            ("RHR Garmin mean", norms.get("rhr_garmin_mean"), "bpm"),
+            ("HRV mean (Whoop era)", norms.get("hrv_mean"), "ms"),
+            ("Body Battery mean", norms.get("bb_mean"), "%"),
+            ("Avg Stress mean", norms.get("stress_mean"), ""),
+            ("VO2max mean", norms.get("vo2max_mean"), "ml/kg/min"),
+            ("Sleep mean", norms.get("sleep_h_mean"), "h"),
+        ]
+        for label, val, unit in pairs:
+            if val is not None:
+                typer.echo(f"  {label:<28}  {val:.1f} {unit}".rstrip())
+    typer.echo()
 
 
 if __name__ == "__main__":

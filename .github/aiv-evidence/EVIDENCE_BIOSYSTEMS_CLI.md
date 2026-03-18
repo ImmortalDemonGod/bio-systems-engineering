@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/cli.py`
-**Commit:** `6cae5bd`
-**Previous:** `79c0377`
-**Generated:** 2026-03-18T06:26:24Z
+**Commit:** `85c7ea3`
+**Previous:** `3497c44`
+**Generated:** 2026-03-18T19:27:10Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -16,16 +16,17 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "src/biosystems/cli.py"
-  classification_rationale: "Usability improvement"
+  classification_rationale: "Feature expansion"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T06:26:24Z"
+  classified_at: "2026-03-18T19:27:10Z"
 ```
 
 ## Claim(s)
 
-1. Resolve default zones.yml via BIOSYSTEMS_ZONES_PATH, ~/.config, or repo fallback
-2. Enable upward search for .env file to support execution from any directory
-3. No existing tests were modified or deleted during this change.
+1. Add wellness-sync, wellness-show, and wellness-analyze commands
+2. Implement 18s run delay to respect Strava rate limits (100 req/15 min)
+3. Enable upward search for .env and XDG-standard config resolution
+4. No existing tests were modified or deleted during this change.
 
 ---
 
@@ -33,25 +34,24 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics)
-- **Requirements Verified:** Improve CLI usability across diverse environments
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/cli](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/cli)
+- **Requirements Verified:** Operationalize the full physiological monitoring stack
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`6cae5bd`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/6cae5bd6bc70550dd43be81f112ea61060d63a64))
+**Scope Inventory** (SHA: [`85c7ea3`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/85c7ea32d241d9d6b7340a5d73116d1fea35ef35))
 
-- [`src/biosystems/cli.py#L9`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/6cae5bd6bc70550dd43be81f112ea61060d63a64/src/biosystems/cli.py#L9)
-- [`src/biosystems/cli.py#L16-L25`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/6cae5bd6bc70550dd43be81f112ea61060d63a64/src/biosystems/cli.py#L16-L25)
-- [`src/biosystems/cli.py#L27-L45`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/6cae5bd6bc70550dd43be81f112ea61060d63a64/src/biosystems/cli.py#L27-L45)
-- [`src/biosystems/cli.py#L102`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/6cae5bd6bc70550dd43be81f112ea61060d63a64/src/biosystems/cli.py#L102)
-- [`src/biosystems/cli.py#L168`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/6cae5bd6bc70550dd43be81f112ea61060d63a64/src/biosystems/cli.py#L168)
-- [`src/biosystems/cli.py#L529`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/6cae5bd6bc70550dd43be81f112ea61060d63a64/src/biosystems/cli.py#L529)
-- [`src/biosystems/cli.py#L984`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/6cae5bd6bc70550dd43be81f112ea61060d63a64/src/biosystems/cli.py#L984)
+- [`src/biosystems/cli.py#L299-L307`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L299-L307)
+- [`src/biosystems/cli.py#L548`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L548)
+- [`src/biosystems/cli.py#L550-L554`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L550-L554)
+- [`src/biosystems/cli.py#L651-L658`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L651-L658)
+- [`src/biosystems/cli.py#L663`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L663)
+- [`src/biosystems/cli.py#L1092-L1327`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L1092-L1327)
 
 ### Class A (Execution Evidence)
 
 - Local checks skipped (--skip-checks).
-- **Skip reason:** Configuration resolution logic; environmental side-effects are complex to verify in Tier R1.
+- **Skip reason:** Rich CLI expansion; verification involves complex multi-API integration (Strava, HabitDash).
 
 
 ---
@@ -59,11 +59,11 @@ classification:
 ## Verification Methodology
 
 **R0 (trivial) -- local checks skipped.**
-**Reason:** Configuration resolution logic; environmental side-effects are complex to verify in Tier R1.
+**Reason:** Rich CLI expansion; verification involves complex multi-API integration (Strava, HabitDash).
 Only git diff scope inventory was collected. No execution evidence.
 
 ---
 
 ## Summary
 
-Update CLI resolution logic
+Update Bio-Systems CLI
