@@ -1,8 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `pyproject.toml`
-**Commit:** `2c89739`
-**Generated:** 2026-03-18T03:11:20Z
+**Commit:** `92339d1`
+**Previous:** `d2ad841`
+**Generated:** 2026-03-18T05:14:21Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -17,12 +18,12 @@ classification:
   blast_radius: "pyproject.toml"
   classification_rationale: "Dependency update"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T03:11:20Z"
+  classified_at: "2026-03-18T05:14:21Z"
 ```
 
 ## Claim(s)
 
-1. Typer added to project dependencies
+1. Add python-dotenv to dependencies for Strava OAuth support
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -31,14 +32,14 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/openclaw-integration](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/openclaw-integration)
-- **Requirements Verified:** CLI tool requires typer library
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics)
+- **Requirements Verified:** Support .env file loading for Strava credentials
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`2c89739`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/2c8973974d09131467195d85fc1428827bc54372))
+**Scope Inventory** (SHA: [`92339d1`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/92339d1b6a08f64c224f734e67d2da5236fce882))
 
-- [`pyproject.toml#L35`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/2c8973974d09131467195d85fc1428827bc54372/pyproject.toml#L35)
+- [`pyproject.toml#L36`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/92339d1b6a08f64c224f734e67d2da5236fce882/pyproject.toml#L36)
 
 ### Class A (Execution Evidence)
 
@@ -54,7 +55,7 @@ This file has no claim-specific execution evidence.
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | Typer added to project dependencies | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 1 | Add python-dotenv to dependencies for Strava OAuth support | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
 | 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
 **Verdict summary:** 0 verified, 0 unverified, 2 manual review.
@@ -70,4 +71,4 @@ Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/ty
 
 ## Summary
 
-Add typer to pyproject.toml
+Add python-dotenv to pyproject.toml
