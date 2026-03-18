@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `requirements.txt`
-**Commit:** `0b167a8`
-**Previous:** `c66f7c4`
-**Generated:** 2026-03-18T05:14:35Z
+**Commit:** `e7d8eba`
+**Previous:** `81cea7b`
+**Generated:** 2026-03-18T06:01:16Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -18,12 +18,12 @@ classification:
   blast_radius: "requirements.txt"
   classification_rationale: "Dependency update"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T05:14:35Z"
+  classified_at: "2026-03-18T06:01:16Z"
 ```
 
 ## Claim(s)
 
-1. Add python-dotenv to requirements for environment parity
+1. Add filelock and pyarrow to dependencies for environment parity
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -37,9 +37,9 @@ classification:
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`0b167a8`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/0b167a8de6e11c4fdea0bb83b9ade92581c096b0))
+**Scope Inventory** (SHA: [`e7d8eba`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/e7d8eba8a85deb52efe47e7a86fa2ab484b9818a))
 
-- [`requirements.txt#L21`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0b167a8de6e11c4fdea0bb83b9ade92581c096b0/requirements.txt#L21)
+- [`requirements.txt#L23-L28`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/e7d8eba8a85deb52efe47e7a86fa2ab484b9818a/requirements.txt#L23-L28)
 
 ### Class A (Execution Evidence)
 
@@ -48,14 +48,14 @@ This file has no claim-specific execution evidence.
 
 ### Code Quality (Linting & Types)
 
-- **ruff:** 185 error(s)
+- **ruff:** 205 error(s)
 - **mypy:** Found 1 error in 1 file (errors prevented further checking)
 
 ## Claim Verification Matrix
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | Add python-dotenv to requirements for environment parity | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 1 | Add filelock and pyarrow to dependencies for environment par... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
 | 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
 **Verdict summary:** 0 verified, 0 unverified, 2 manual review.
@@ -71,4 +71,4 @@ Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/ty
 
 ## Summary
 
-Add python-dotenv to requirements.txt
+Update requirements.txt
