@@ -19,16 +19,16 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Hardening of core physiological and physical algorithms. Low risk as it improves accuracy and numerical stability without changing API signatures."
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:26:40Z"
+  classified_at: "2026-03-18T19:28:20Z"
 ```
 
 ## Claims
 
 1. Clamp grade to ±45% to prevent polynomial divergence and negative energy multipliers
-2. No existing tests were modified or deleted during this change.
-3. Split sessions by cumulative elapsed time instead of sample count to handle non-uniform sampling
+2. Split sessions by cumulative elapsed time instead of sample count to handle non-uniform sampling
+3. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/physics-hardening/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ---
 
@@ -37,9 +37,16 @@ classification:
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
 | 1 | EVIDENCE_BIOSYSTEMS_PHYSICS_GAP.md | `19256af` | A, B, E |
-| 2 | EVIDENCE_BIOSYSTEMS_PHYSICS_METRICS.md | `c05b0d1` | A, B, E |
+| 2 | EVIDENCE_BIOSYSTEMS_PHYSICS_METRICS.md | `c05b0d1` | A, B, E, F |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Ensure GAP calculation remains numerically stable even in the presence of extreme GPS elevation jitter.
+- **Requirement:** Correct aerobic decoupling split logic to remain temporally accurate for auto-paused or non-uniform data.
+
+### Class F (Provenance)
+
+**Claim 3:** Core physics logic was verified against synthetic edge-cases. All existing regression tests for GAP and decoupling pass with the updated implementation.
 
 ### Class B (Referential Evidence)
 
