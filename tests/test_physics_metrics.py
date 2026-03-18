@@ -195,9 +195,9 @@ class TestComputeTrainingZones:
             hr_array, pace_array, sample_zone_config
         )
         
-        # Should handle NaN gracefully
-        assert zone_hr.iloc[1] is None
-        assert zone_pace.iloc[2] is None
+        # Should handle NaN gracefully (pandas may return None or NaN)
+        assert zone_hr.iloc[1] is None or pd.isna(zone_hr.iloc[1])
+        assert zone_pace.iloc[2] is None or pd.isna(zone_pace.iloc[2])
 
 
 class TestLowerZ2BPM:
