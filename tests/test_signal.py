@@ -185,8 +185,8 @@ class TestWalkBlockSegments:
         n_points = 1000
         
         # Create datetime index
-        idx = pd.date_range('2024-01-01 10:00:00', periods=n_points, freq='S')
-        
+        idx = pd.date_range('2024-01-01 10:00:00', periods=n_points, freq='s')
+
         # First walk starts at 30s (within 60s warm-up window)
         is_walk = [False] * 30 + [True] * 100 + [False] * 770 + [True] * 100
         
@@ -265,7 +265,7 @@ class TestWalkBlockSegments:
     
     def test_no_walk_periods(self):
         """Test handling when no walk periods exist."""
-        idx = pd.date_range('2024-01-01 10:00:00', periods=100, freq='S')
+        idx = pd.date_range('2024-01-01 10:00:00', periods=100, freq='s')
         
         df = pd.DataFrame({
             'is_walk': [False] * 100,
