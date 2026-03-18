@@ -577,8 +577,30 @@ def _build_wellness_section(date_str: str) -> str:
             s += f" (mean {norm_v:.0f})"
         delta_parts.append(s)
 
+    sleep_debt = ctx.get("sleep_debt_7d")
+    if sleep_debt is not None and abs(sleep_debt) >= 0.5:
+        sign = "+" if sleep_debt > 0 else ""
+        label = "debt" if sleep_debt > 0 else "surplus"
+        delta_parts.append(f"7d sleep {label} {sign}{sleep_debt:.1f}h")
+
+    resp_rate = ctx.get("respiratory_rate")
+    rr_sigma  = ctx.get("rr_sigma")
+    if resp_rate is not None and rr_sigma is not None and rr_sigma >= 1.5:
+        emoji = "🔴" if rr_sigma >= 2.5 else "🟡"
+        delta_parts.append(f"Resp rate {resp_rate:.1f} brpm {emoji} (+{rr_sigma:.1f}σ — illness/OTS watch)")
+
     if delta_parts:
         lines.append("\n_" + " · ".join(delta_parts) + "_")
+
+    # Longitudinal fitness arc (one-line summary)
+    try:
+        from biosystems.wellness.analytics import compute_longitudinal_fitness
+        fitness_trends = compute_longitudinal_fitness(full_df)
+        era_summary = fitness_trends.get("era_summary")
+        if era_summary and "Insufficient" not in era_summary:
+            lines.append(f"\n_Fitness arc: {era_summary}_")
+    except Exception:
+        pass
 
     thresh_src = "calibrated from your data" if calibrated else "clinical defaults"
     lines.append(f"\n_Thresholds: {thresh_src}_")
@@ -1487,19 +1509,22 @@ def generate_fitness_preamble(
         _norms = {}
 
     if wellness_ctx:
-        gar     = wellness_ctx.get("gar", "—")
-        detail  = wellness_ctx.get("gar_detail", "")
-        hrv     = wellness_ctx.get("hrv_rmssd")
-        hrv_7d  = wellness_ctx.get("hrv_7d_pct")
-        rhr     = wellness_ctx.get("resting_hr")
-        rhr_7d  = wellness_ctx.get("rhr_7d_delta")
-        rec     = wellness_ctx.get("recovery_score")
-        slp     = wellness_ctx.get("sleep_score")
-        bb      = wellness_ctx.get("body_battery")
-        bb_7d   = wellness_ctx.get("bb_7d_delta")
-        stress  = wellness_ctx.get("avg_stress")
-        slp_h   = wellness_ctx.get("sleep_hours")
-        vo2max  = wellness_ctx.get("vo2max")
+        gar          = wellness_ctx.get("gar", "—")
+        detail       = wellness_ctx.get("gar_detail", "")
+        hrv          = wellness_ctx.get("hrv_rmssd")
+        hrv_7d       = wellness_ctx.get("hrv_7d_pct")
+        rhr          = wellness_ctx.get("resting_hr")
+        rhr_7d       = wellness_ctx.get("rhr_7d_delta")
+        rec          = wellness_ctx.get("recovery_score")
+        slp          = wellness_ctx.get("sleep_score")
+        bb           = wellness_ctx.get("body_battery")
+        bb_7d        = wellness_ctx.get("bb_7d_delta")
+        stress       = wellness_ctx.get("avg_stress")
+        slp_h        = wellness_ctx.get("sleep_hours")
+        vo2max       = wellness_ctx.get("vo2max")
+        sleep_debt   = wellness_ctx.get("sleep_debt_7d")
+        resp_rate    = wellness_ctx.get("respiratory_rate")
+        rr_sigma     = wellness_ctx.get("rr_sigma")
 
         # Build personal-context strings
         def _norm_line(label, val, norm_key, unit="", fmt=".0f"):
@@ -1526,6 +1551,32 @@ def generate_fitness_preamble(
         if rhr and rhr_7d:
             rhr_line = rhr_line.rstrip("\n") + f"  (7d Δ: {rhr_7d:+.0f} bpm)\n"
 
+        # Sleep debt
+        sleep_debt_line = ""
+        if sleep_debt is not None and abs(sleep_debt) >= 0.5:
+            label = "debt" if sleep_debt > 0 else "surplus"
+            sleep_debt_line = f"  7-day sleep {label}: {sleep_debt:+.1f}h cumulative\n"
+
+        # Respiratory rate (only show when elevated)
+        rr_line = ""
+        if resp_rate is not None and rr_sigma is not None and rr_sigma >= 1.5:
+            flag = "⚠ illness/OTS watch" if rr_sigma >= 2.5 else "early warning"
+            rr_line = f"  Resp Rate: {resp_rate:.1f} brpm (+{rr_sigma:.1f}σ — {flag})\n"
+
+        # Longitudinal fitness arc
+        fitness_arc_line = ""
+        try:
+            import importlib.util as _ilu2
+            if _ilu2.find_spec("biosystems") is not None:
+                from biosystems.wellness.analytics import compute_longitudinal_fitness
+                from biosystems.wellness.cache import load_wellness_df as _lwdf
+                _ft = compute_longitudinal_fitness(_lwdf())
+                _era = _ft.get("era_summary", "")
+                if _era and "Insufficient" not in _era:
+                    fitness_arc_line = f"  Fitness arc (longitudinal): {_era}\n"
+        except Exception:
+            pass
+
         wellness_block = (
             "Pre-run wellness signals (authoritative — use for fatigue/readiness answer):\n"
             f"  Readiness: {gar} — {detail}\n"
@@ -1533,11 +1584,16 @@ def generate_fitness_preamble(
             + rhr_line
             + (f"  Recovery Score: {rec:.0f}%\n" if rec else "")
             + slp_line
+            + sleep_debt_line
             + bb_line
             + (f"  Avg Stress: {stress:.0f}"
                + (f"  (mean {_norms['stress_mean']:.0f})" if _norms.get("stress_mean") else "")
                + "\n" if stress else "")
             + vo2_line
+            + rr_line
+            + fitness_arc_line
+            + "  NOTE: BB→EF correlation r≈0.00 — readiness doesn't predict performance "
+              "but predicts adaptation capacity and injury risk.\n"
             + "  CRITICAL: If readiness is RED, explicitly note athlete should not push hard "
               "regardless of EF performance signals."
         )
