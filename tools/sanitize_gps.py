@@ -52,6 +52,17 @@ def sanitize_dataframe(
     
     # Find truncation points
     total_distance = df['distance_cumulative_m'].iloc[-1]
+    
+    if total_distance <= (truncate_start_m + truncate_end_m):
+        import warnings
+        warnings.warn(
+            f"Activity total distance ({total_distance:.1f}m) is shorter than truncation "
+            f"total ({truncate_start_m + truncate_end_m}m). Returning empty DataFrame."
+        )
+        # Drop privacy columns even for empty DF
+        privacy_columns = ['lat', 'lon', 'latitude', 'longitude']
+        return pd.DataFrame(columns=[c for c in df.columns if c not in privacy_columns])
+
     start_cutoff = truncate_start_m
     end_cutoff = total_distance - truncate_end_m
     
@@ -78,7 +89,7 @@ def sanitize_dataframe(
     
     print(f"  Original points: {len(df)}")
     print(f"  After truncation: {len(df_truncated)}")
-    print(f"  Removed: {len(df) - len(df_truncated)} points ({len(df) - len(df_truncated)}/len(df)*100:.1f}%)")
+    print(f"  Removed: {len(df) - len(df_truncated)} points ({(len(df) - len(df_truncated))/len(df)*100:.1f}%)")
     print(f"  Distance preserved: {df_truncated['distance_cumulative_m'].iloc[-1]/1000:.2f} km")
     
     return df_truncated
@@ -101,6 +112,9 @@ def create_safe_summary(df: pd.DataFrame) -> dict:
     dict
         Safe summary statistics
     """
+    if df.empty:
+        return {'data_points': 0}
+
     summary = {
         'total_distance_km': round(df['distance_cumulative_m'].iloc[-1] / 1000, 2) if 'distance_cumulative_m' in df.columns else None,
         'duration_min': round(df['dt'].sum() / 60, 1) if 'dt' in df.columns else None,
