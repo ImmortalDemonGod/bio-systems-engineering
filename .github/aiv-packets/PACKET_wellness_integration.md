@@ -19,16 +19,16 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "New functional module for wellness analytics. Low risk as it is an additive feature with no breaking changes to core ingestion or physics."
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:24:56Z"
+  classified_at: "2026-03-18T19:26:20Z"
 ```
 
 ## Claims
 
 1. Add HabitDash integration, parquet caching, and automated G/A/R readiness scoring
 2. Implement personal norm calibration and correlation analytics
-3. No existing tests were modified or deleted during this change.
+3. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/wellness-integration/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ---
 
@@ -36,9 +36,16 @@ classification:
 
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
-| 1 | EVIDENCE_BIOSYSTEMS_WELLNESS___INIT__.md | `f1ea3af` | A, B, E |
+| 1 | EVIDENCE_BIOSYSTEMS_WELLNESS___INIT__.md | `f1ea3af` | A, B, E, F |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Integrate multi-source wellness data (Whoop, Garmin) to provide context for physiological monitoring.
+- **Requirement:** Implement robust local caching and calibration to ensure personal physiological norms are respected.
+
+### Class F (Provenance)
+
+**Claim 3:** The wellness module is implemented as a standalone package with no side-effects on existing run analysis logic. All existing library tests were preserved and pass.
 
 ### Class B (Referential Evidence)
 
