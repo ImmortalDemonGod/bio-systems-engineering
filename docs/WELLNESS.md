@@ -24,6 +24,59 @@ biosystems strava {id}          daily_running_brief.py
 | Whoop | HRV RMSSD, Resting HR, Recovery Score, Sleep Score, Sleep Duration, Strain Score, Respiratory Rate, Skin Temp, Sleep Disturbances/hr, Sleep Consistency |
 | Garmin | Resting HR, Body Battery, VO2max, Steps, Active Time, Avg Stress, Respiratory Rate |
 
+## Signal Timing — Critical for Readiness Interpretation
+
+Not all signals are measured at the same time of day. This matters when using them
+to make pre-run decisions.
+
+| Signal | Source | Timing | Pre-run valid? |
+|--------|--------|--------|----------------|
+| Resting HR | Garmin (overnight) | Overnight | ✅ Yes |
+| Sleep duration / score | Garmin / Whoop (overnight) | Overnight | ✅ Yes |
+| Sleep respiratory rate | Garmin / Whoop (overnight) | Overnight | ✅ Yes |
+| HRV RMSSD | Whoop only | Overnight | ✅ Yes (Whoop era only) |
+| Recovery Score | Whoop only | Morning | ✅ Yes (Whoop era only) |
+| **Body Battery** | **Garmin (intraday avg)** | **Full-day average** | **❌ No** |
+| **Avg Stress** | **Garmin (intraday avg)** | **Full-day average** | **❌ No** |
+
+**Body Battery limitation**: HabitDash exports Garmin's Body Battery as a daily average
+of intraday readings. This value includes the run's suppressive effect. A low end-of-day
+BB does not tell you what your BB was at 7am. The morning peak is not accessible through
+the HabitDash API. Do not use Body Battery as a pre-activity gate.
+
+**Without Whoop**: The only pre-run signals available are RHR and sleep metrics.
+The `gar_overnight` field in `compute_wellness_context()` classifies readiness using
+only these overnight signals and is the correct signal to use for pre-activity decisions.
+
+## G/A/R Readiness Signal
+
+Two classifications are computed and returned by `compute_wellness_context()`:
+
+### `gar` — Full day (reflects how the day went)
+Uses all signals including Body Battery and Avg Stress. Appropriate for recovery
+accounting after the fact, but **NOT** for pre-activity gating.
+
+### `gar_overnight` — Overnight only (pre-run valid)
+Uses only signals measured during sleep: RHR, sleep metrics, HRV (when available),
+respiratory rate. This is the only signal that validly reflects pre-run readiness
+in the current Garmin-only era.
+
+| Signal | RED | AMBER | Timing |
+|--------|-----|-------|--------|
+| HRV (7d drop) | > personal 2σ | > personal 1σ | Overnight ✅ |
+| RHR (7d spike) | > personal 2.5σ | > personal 1.5σ | Overnight ✅ |
+| Recovery Score | < 34% | 34–67% | Overnight ✅ (Whoop only) |
+| Sleep Score | < 60% | 60–80% | Overnight ✅ (Whoop only) |
+| Resp Rate | > +2.5σ | > +1.5σ | Overnight ✅ |
+| Body Battery | < personal p20 | < personal p40 | Daily avg ❌ |
+| Avg Stress | > personal p90 | > personal p75 | Daily avg ❌ |
+
+Priority: any RED → 🔴 RED. No RED but any AMBER → 🟡 AMBER. All clear → 🟢 GREEN.
+
+### Calibration
+Thresholds are derived from personal data distribution via `calibrate_thresholds()` in
+`analytics.py`. Falls back to clinical constants when < 30 Garmin days of data.
+
 ## Cache
 
 - **Location**: `~/.biosystems/wellness.parquet` (respects `BIOSYSTEMS_HOME` env var)
@@ -47,20 +100,13 @@ biosystems wellness-show --date 2026-03-15
 
 # JSON output for scripting
 biosystems wellness-show --json
+
+# Full analytics: coverage, era stats, correlations, calibrated thresholds
+biosystems wellness-analyze
+
+# Longitudinal fitness arc: RHR + VO2max monthly trends
+biosystems wellness-trends
 ```
-
-## G/A/R Readiness Signal
-
-Delta-first classification (7-day rolling mean as baseline):
-
-| Signal | RED | AMBER |
-|--------|-----|-------|
-| HRV (7d drop) | > 20% | 10–20% |
-| RHR (7d spike) | > 8 bpm | 5–8 bpm |
-| Recovery Score | < 34% | 34–67% |
-| Sleep Score | < 60% | 60–80% |
-
-Priority: any RED signal → 🔴 RED. No RED but any AMBER → 🟡 AMBER. All clear → 🟢 GREEN.
 
 ## Rate Limiting
 
@@ -82,6 +128,11 @@ Log file: `~/.biosystems/wellness-sync.log`
 
 The brief cron (20:00) runs hours later and reads from the already-warm cache — zero live API calls at brief time.
 
+**Note on preemptive gating**: The 6:43am sync pulls yesterday's data. Even if run
+immediately, today's Body Battery doesn't exist yet. A true morning gate would require
+RHR + sleep metrics only, which are available. Body Battery cannot be used for morning
+gating regardless of sync timing.
+
 ## Initial Backfill
 
 When setting up for the first time or after an API key rotation:
@@ -98,6 +149,7 @@ With 17 metrics × 15s = ~4.25 minutes. Do not interrupt.
 | File | Purpose |
 |------|---------|
 | `src/biosystems/wellness/habitdash.py` | HabitDash API client, field ID registry, column map |
-| `src/biosystems/wellness/cache.py` | Parquet I/O, delta math, G/A/R classification |
-| `src/biosystems/cli.py` | `wellness-sync` and `wellness-show` CLI commands |
+| `src/biosystems/wellness/cache.py` | Parquet I/O, delta math, dual G/A/R classification |
+| `src/biosystems/wellness/analytics.py` | Pure-computation: baselines, coverage, calibration, trends, sleep debt, recovery model |
+| `src/biosystems/cli.py` | `wellness-sync`, `wellness-show`, `wellness-analyze`, `wellness-trends` CLI commands |
 | `/Volumes/Totallynotaharddrive/bio-systems-engineering/.env` | API keys (not committed to git) |
