@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/cli.py`
-**Commit:** `85c7ea3`
-**Previous:** `3497c44`
-**Generated:** 2026-03-18T19:27:10Z
+**Commit:** `e7feb24`
+**Previous:** `52bed6f`
+**Generated:** 2026-03-18T20:45:28Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -18,14 +18,14 @@ classification:
   blast_radius: "src/biosystems/cli.py"
   classification_rationale: "Feature expansion"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:27:10Z"
+  classified_at: "2026-03-18T20:45:28Z"
 ```
 
 ## Claim(s)
 
-1. Add wellness-sync, wellness-show, and wellness-analyze commands
-2. Implement 18s run delay to respect Strava rate limits (100 req/15 min)
-3. Enable upward search for .env and XDG-standard config resolution
+1. Add wellness-trends command to visualize longitudinal fitness arc
+2. Enrich wellness-show with sleep debt and respiratory rate signals
+3. Enhance wellness-analyze with respiratory rate thresholds
 4. No existing tests were modified or deleted during this change.
 
 ---
@@ -35,23 +35,20 @@ classification:
 ### Class E (Intent Alignment)
 
 - **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/cli](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/cli)
-- **Requirements Verified:** Operationalize the full physiological monitoring stack
+- **Requirements Verified:** Operationalize longitudinal wellness monitoring
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`85c7ea3`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/85c7ea32d241d9d6b7340a5d73116d1fea35ef35))
+**Scope Inventory** (SHA: [`e7feb24`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/e7feb2449fa1963ee66277d12581d7d7f847fc5f))
 
-- [`src/biosystems/cli.py#L299-L307`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L299-L307)
-- [`src/biosystems/cli.py#L548`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L548)
-- [`src/biosystems/cli.py#L550-L554`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L550-L554)
-- [`src/biosystems/cli.py#L651-L658`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L651-L658)
-- [`src/biosystems/cli.py#L663`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L663)
-- [`src/biosystems/cli.py#L1092-L1327`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/85c7ea32d241d9d6b7340a5d73116d1fea35ef35/src/biosystems/cli.py#L1092-L1327)
+- [`src/biosystems/cli.py#L1197-L1206`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/e7feb2449fa1963ee66277d12581d7d7f847fc5f/src/biosystems/cli.py#L1197-L1206)
+- [`src/biosystems/cli.py#L1320-L1323`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/e7feb2449fa1963ee66277d12581d7d7f847fc5f/src/biosystems/cli.py#L1320-L1323)
+- [`src/biosystems/cli.py#L1342-L1391`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/e7feb2449fa1963ee66277d12581d7d7f847fc5f/src/biosystems/cli.py#L1342-L1391)
 
 ### Class A (Execution Evidence)
 
 - Local checks skipped (--skip-checks).
-- **Skip reason:** Rich CLI expansion; verification involves complex multi-API integration (Strava, HabitDash).
+- **Skip reason:** Rich CLI expansion; verification involves complex multi-API data (HabitDash).
 
 
 ---
@@ -59,11 +56,11 @@ classification:
 ## Verification Methodology
 
 **R0 (trivial) -- local checks skipped.**
-**Reason:** Rich CLI expansion; verification involves complex multi-API integration (Strava, HabitDash).
+**Reason:** Rich CLI expansion; verification involves complex multi-API data (HabitDash).
 Only git diff scope inventory was collected. No execution evidence.
 
 ---
 
 ## Summary
 
-Update Bio-Systems CLI
+Update CLI for wellness trends

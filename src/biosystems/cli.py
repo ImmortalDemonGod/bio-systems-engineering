@@ -1194,6 +1194,16 @@ def wellness_show(
         typer.echo(f"    {'VO2max':<28} {ctx['vo2max']:.1f} ml/kg/min")
     if ctx.get("sleep_hours") is not None:
         typer.echo(f"    {'Sleep':<28} {ctx['sleep_hours']:.1f} h")
+    if ctx.get("sleep_debt_7d") is not None:
+        debt = ctx["sleep_debt_7d"]
+        sign = "+" if debt > 0 else ""
+        label = "debt" if debt > 0 else "surplus"
+        typer.echo(f"    {'7-day Sleep Debt':<28} {sign}{debt:.1f} h ({label})")
+    if ctx.get("respiratory_rate") is not None:
+        rr_str = f"{ctx['respiratory_rate']:.1f} brpm"
+        if ctx.get("rr_sigma") is not None:
+            rr_str += f"  ({ctx['rr_sigma']:+.1f}σ vs personal mean)"
+        typer.echo(f"    {'Respiratory Rate':<28} {rr_str}")
 
     norms = ctx.get("norms") or {}
     if any(v is not None for v in norms.values()):
@@ -1307,6 +1317,10 @@ def wellness_analyze(
     if stress:
         typer.echo(f"  Stress RED:        > {stress['red']:.0f}  (personal p90)")
         typer.echo(f"  Stress AMBER:      > {stress['amber']:.0f}  (personal p75)")
+    rr = thresholds.get("respiratory_rate", {})
+    if rr:
+        typer.echo(f"  Resp Rate RED:     > {rr['red']:.1f} brpm  (+2.5σ, mean={rr['mean']:.1f}, n={rr.get('n','?')})")
+        typer.echo(f"  Resp Rate AMBER:   > {rr['amber']:.1f} brpm  (+1.5σ)")
 
     norms = thresholds.get("norms", {})
     if norms:
@@ -1323,6 +1337,56 @@ def wellness_analyze(
             if val is not None:
                 typer.echo(f"  {label:<28}  {val:.1f} {unit}".rstrip())
     typer.echo()
+
+
+@app.command(name="wellness-trends", rich_help_panel="Wellness")
+def wellness_trends(
+    json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
+) -> None:
+    """
+    Show longitudinal fitness arc: RHR and VO2max monthly trends since tracking began.
+
+    Highlights: RHR improvement over time, VO2max trajectory, training adaptation.
+    """
+    import json as _json
+    from biosystems.wellness.cache import load_wellness_df
+    from biosystems.wellness.analytics import compute_longitudinal_fitness
+
+    df = load_wellness_df()
+    if df.empty:
+        typer.secho(
+            "No wellness data found. Run 'biosystems wellness-sync' first.",
+            fg=typer.colors.YELLOW, err=True,
+        )
+        raise typer.Exit(code=1)
+
+    trends = compute_longitudinal_fitness(df)
+    if not trends:
+        typer.secho("Insufficient data for trend analysis (need ≥2 months).",
+                    fg=typer.colors.YELLOW)
+        raise typer.Exit(code=0)
+
+    if json_output:
+        typer.echo(_json.dumps(trends, indent=2, default=str))
+        return
+
+    typer.secho("\nLongitudinal Fitness Arc", fg=typer.colors.CYAN, bold=True)
+    typer.secho(f"  {trends.get('era_summary', '')}\n", fg=typer.colors.CYAN)
+
+    for metric_key, metric_label, unit in [
+        ("rhr",    "Resting Heart Rate",  "bpm"),
+        ("vo2max", "VO2max",              "ml/kg/min"),
+    ]:
+        data = trends.get(metric_key)
+        if not data:
+            continue
+        typer.secho(f"── {metric_label} ──", fg=typer.colors.YELLOW, bold=True)
+        typer.secho(f"  {data['trend_label']}\n", fg=typer.colors.GREEN)
+        typer.echo(f"  {'Month':<10} {'Mean':>8} {'N':>5}")
+        typer.echo(f"  {'-'*10} {'-'*8} {'-'*5}")
+        for row in data["monthly_means"]:
+            typer.echo(f"  {row['month']:<10} {row['mean']:>8.1f} {unit:<12} n={row['n']}")
+        typer.echo()
 
 
 if __name__ == "__main__":
