@@ -134,7 +134,7 @@ def parse_fit(path: str | Path) -> pd.DataFrame:
     df = pd.DataFrame(data_records)
 
     # Convert timestamp to datetime and set as index
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
     df = df.sort_values("timestamp").set_index("timestamp")
 
     # Standardize column names for consistency with GPX parser
