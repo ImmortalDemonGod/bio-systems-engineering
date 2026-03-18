@@ -19,9 +19,9 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Introduction of advanced wellness analytics functions. Low risk as these are pure computational functions with no side-effects on existing monitoring paths."
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:45:13Z"
+  classified_at: "2026-03-18T19:46:20Z"
 ```
 
 ## Claims
@@ -29,7 +29,7 @@ classification:
 1. Add compute_longitudinal_fitness for monthly RHR and VO2max trends
 2. Add compute_sleep_debt for 7-day rolling cumulative deficit tracking
 3. Add compute_recovery_model to link training load (TSS) to next-day Body Battery
-4. No existing tests were modified or deleted during this change.
+4. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/advanced-wellness/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ---
 
@@ -37,9 +37,16 @@ classification:
 
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
-| 1 | EVIDENCE_BIOSYSTEMS_WELLNESS_ANALYTICS.md | `d1a47bb` | A, B, E |
+| 1 | EVIDENCE_BIOSYSTEMS_WELLNESS_ANALYTICS.md | `d1a47bb` | A, B, E, F |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Implement longitudinal tracking of fitness markers (RHR, VO2max) to assess training adaptation.
+- **Requirement:** Model the recovery relationship between training stress (TSS) and autonomic nervous system response (Body Battery).
+
+### Class F (Provenance)
+
+**Claim 4:** The new analytics are pure functions. Existing regression tests for the wellness cache and base analytics pass, ensuring the core data pipeline remains intact.
 
 ### Class B (Referential Evidence)
 
