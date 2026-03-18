@@ -14,6 +14,7 @@ haversine>=2.8.0
 
 # Configuration
 pyyaml>=6.0
+typer>=0.9.0
 
 # API Integration
 requests>=2.31.0
