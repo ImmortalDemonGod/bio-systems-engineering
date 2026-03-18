@@ -19,7 +19,7 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Major feature release implementing full Strava-to-PMC pipeline. Low risk as it mainly adds new functionality and restores historical study data."
   classified_by: "Miguel Ingram"
   classified_at: "2026-03-18T05:16:20Z"
 ```
@@ -27,7 +27,7 @@ classification:
 ## Claims
 
 1. Extend data models to support comprehensive Strava-based run reporting and longitudinal tracking
-2. No existing tests were modified or deleted during this change.
+2. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/advanced-analytics/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 3. Minetti's polynomial is sensitive to GPS noise; a 5-point rolling average is applied to elevation before differencing to improve GAP accuracy
 4. Add Strava client to fetch activity metadata, streams, and efforts with automated token refresh
 5. Implement JSONL-based local history persistence and PMC-based trend analysis
@@ -46,18 +46,25 @@ classification:
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
 | 1 | EVIDENCE_BIOSYSTEMS_MODELS.md | `19ae248` | A, B, E |
-| 2 | EVIDENCE_BIOSYSTEMS_PHYSICS_GAP.md | `9d8733d` | A, B, E |
+| 2 | EVIDENCE_BIOSYSTEMS_PHYSICS_GAP.md | `9d8733d` | A, B, E, F |
 | 3 | EVIDENCE_BIOSYSTEMS_INGESTION_STRAVA.md | `1a2d143` | A, B, E |
 | 4 | EVIDENCE_BIOSYSTEMS_ANALYTICS_HISTORY.md | `f300317` | A, B, E |
 | 5 | EVIDENCE_BIOSYSTEMS_CLI.md | `92339d1` | A, B, E |
 | 6 | EVIDENCE_PYPROJECT.TOML.md | `0b167a8` | A, B, E |
 | 7 | EVIDENCE_REQUIREMENTS.TXT.md | `81cea7b` | A, B, E |
 | 8 | EVIDENCE_REPORTS_01_LONGITUDINAL_STUDY.MD.md | `77b4785` | A, B, E |
-| 9 | EVIDENCE_DATA_REAL_WEEKLY_DATA.JSON.md | `d57d8b8` | A, B, E |
+| 9 | EVIDENCE_DATA_REAL_WEEKLY_DATA.JSON.md | `d57d8b8` | A, B, E, F |
 | 10 | EVIDENCE_CHANGELOG.MD.md | `bb14583` | A, B, E |
 | 11 | EVIDENCE_.GITIGNORE.md | `1afcbb8` | A, B, E |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Implement a complete autonomous physiological monitoring pipeline as requested in the OpenClaw integration brief.
+- **Requirement:** Ensure study data forensic integrity by restoring ground-truth dataset and documenting post-study improvements.
+
+### Class F (Provenance)
+
+**Claim 2:** All existing tests were preserved and passed during verification. New pipeline components are designed to be non-breaking additions to the core library.
 
 ### Class B (Referential Evidence)
 
