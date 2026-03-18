@@ -106,12 +106,12 @@ class RunContext(BaseModel):
         Heart Rate Variability RMSSD in ms
     """
 
-    temperature_c: float | None = Field(None, description="Temperature in °C")
-    weather_code: int | None = Field(None, description="WMO weather code")
-    weather_description: str | None = Field(None, description="Weather description")
-    rest_hr: int | None = Field(None, gt=0, description="Resting HR in bpm")
-    sleep_score: float | None = Field(None, ge=0, le=100, description="Sleep score 0-100")
-    hrv_rmssd: float | None = Field(None, gt=0, description="HRV RMSSD in ms")
+    temperature_c: float | None = Field(default=None, description="Temperature in °C")
+    weather_code: int | None = Field(default=None, description="WMO weather code")
+    weather_description: str | None = Field(default=None, description="Weather description")
+    rest_hr: int | None = Field(default=None, gt=0, description="Resting HR in bpm")
+    sleep_score: float | None = Field(default=None, ge=0, le=100, description="Sleep score 0-100")
+    hrv_rmssd: float | None = Field(default=None, gt=0, description="HRV RMSSD in ms")
 
 
 class PhysiologicalMetrics(BaseModel):
