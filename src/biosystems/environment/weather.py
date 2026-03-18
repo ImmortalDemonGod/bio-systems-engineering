@@ -7,6 +7,7 @@ context for activities.
 """
 
 import json
+import sys
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -316,14 +317,14 @@ def fetch_weather_open_meteo(
                                     cache.set(lat, lon, date_str, result)
                                 return result, offset.total_seconds() / 3600
                     except Exception as e:
-                        print(f"[Weather] Error: {e} (lat={lat_try}, lon={lon_try}, time={hour_iso})")
+                        print(f"[Weather] Error: {e} (lat={lat_try}, lon={lon_try}, time={hour_iso})", file=sys.stderr)
 
         # If we reach here, all variations failed for this attempt
         if all_failed:
             backoff = min(max_backoff, 0.2 * (2**attempt))
-            print(f"[Weather][Backoff] Attempt {attempt + 1} failed, retrying in {backoff:.2f}s...")
+            print(f"[Weather][Backoff] Attempt {attempt + 1} failed, retrying in {backoff:.2f}s...", file=sys.stderr)
             time.sleep(backoff)
         attempt += 1
 
-    print(f"[Weather] Failed to fetch weather after {max_retries} retries for lat={lat}, lon={lon}, time={dt}")
+    print(f"[Weather] Failed to fetch weather after {max_retries} retries for lat={lat}, lon={lon}, time={dt}", file=sys.stderr)
     return None, None
