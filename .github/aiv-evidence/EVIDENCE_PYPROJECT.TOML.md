@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `pyproject.toml`
-**Commit:** `92339d1`
-**Previous:** `d2ad841`
-**Generated:** 2026-03-18T05:14:21Z
+**Commit:** `bfdf0f5`
+**Previous:** `0b167a8`
+**Generated:** 2026-03-18T06:00:38Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -16,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "pyproject.toml"
-  classification_rationale: "Dependency update"
+  classification_rationale: "Infrastructure update"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T05:14:21Z"
+  classified_at: "2026-03-18T06:00:38Z"
 ```
 
 ## Claim(s)
 
-1. Add python-dotenv to dependencies for Strava OAuth support
+1. Add filelock and pyarrow dependencies; add biosystems CLI entry point
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -33,13 +33,14 @@ classification:
 ### Class E (Intent Alignment)
 
 - **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics)
-- **Requirements Verified:** Support .env file loading for Strava credentials
+- **Requirements Verified:** Support infrastructure for advanced analytics
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`92339d1`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/92339d1b6a08f64c224f734e67d2da5236fce882))
+**Scope Inventory** (SHA: [`bfdf0f5`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/bfdf0f578ed5271276b4063864c5f7dbf8cb4ca8))
 
-- [`pyproject.toml#L36`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/92339d1b6a08f64c224f734e67d2da5236fce882/pyproject.toml#L36)
+- [`pyproject.toml#L37-L38`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/bfdf0f578ed5271276b4063864c5f7dbf8cb4ca8/pyproject.toml#L37-L38)
+- [`pyproject.toml#L57-L59`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/bfdf0f578ed5271276b4063864c5f7dbf8cb4ca8/pyproject.toml#L57-L59)
 
 ### Class A (Execution Evidence)
 
@@ -55,7 +56,7 @@ This file has no claim-specific execution evidence.
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | Add python-dotenv to dependencies for Strava OAuth support | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 1 | Add filelock and pyarrow dependencies; add biosystems CLI en... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
 | 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
 **Verdict summary:** 0 verified, 0 unverified, 2 manual review.
@@ -71,4 +72,4 @@ Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/ty
 
 ## Summary
 
-Add python-dotenv to pyproject.toml
+Update pyproject.toml dependencies
