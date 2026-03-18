@@ -148,14 +148,22 @@ def calculate_gap_from_dataframe(
     Notes
     -----
     - First point has no grade (uses actual pace)
-    - Grade is calculated as elevation change / horizontal distance
+    - Grade is calculated from smoothed elevation to suppress GPS noise
+    - Raw GPS elevation accuracy is ±5-10m; noise is amplified by the 5th-degree
+      polynomial at steep apparent grades. A 5-point rolling average is applied
+      before differencing, preserving real terrain features while eliminating jitter.
     - Handles NaN values gracefully
     """
     # Initialize with actual pace
     gap = df[pace_col].copy()
 
-    # Calculate elevation change between points
-    ele_diff = df[ele_col].diff()
+    # Smooth elevation before differencing to suppress GPS vertical noise.
+    # Raw GPS elevation has ±5-10m accuracy; unsmoothed diffs produce spurious
+    # grades that Minetti's polynomial amplifies into unrealistic adjustments.
+    ele_smoothed = df[ele_col].rolling(window=5, min_periods=1, center=True).mean()
+
+    # Calculate elevation change between smoothed points
+    ele_diff = ele_smoothed.diff()
 
     # Calculate grade for each segment
     grades = []
