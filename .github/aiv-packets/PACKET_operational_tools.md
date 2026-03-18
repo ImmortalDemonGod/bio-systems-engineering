@@ -19,16 +19,16 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Addition of operational support scripts and raw data. Low risk as these tools are designed for local execution and do not modify core library runtime."
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:28:01Z"
+  classified_at: "2026-03-18T19:29:20Z"
 ```
 
 ## Claims
 
 1. Add LLM-powered briefing tool to synthesize run and wellness data
 2. Add HabitDash raw data and extraction scripts
-3. No existing tests were modified or deleted during this change.
+3. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/operational-tools/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ---
 
@@ -36,9 +36,16 @@ classification:
 
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
-| 1 | EVIDENCE_SCRIPTS_NIGHTLY_TRAINING_BRIEF.md | `e9ef3ae` | A, B, E |
+| 1 | EVIDENCE_SCRIPTS_NIGHTLY_TRAINING_BRIEF.md | `e9ef3ae` | A, B, E, F |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Automate the daily status synthesis to provide the Sovereign Operator with high-level physiological insights.
+- **Requirement:** Preserve raw data artifacts from HabitDash to enable future re-analysis and calibration.
+
+### Class F (Provenance)
+
+**Claim 3:** New operational scripts follow the project's standard structure. Core library functions imported by these scripts are verified via existing unit tests which continue to pass.
 
 ### Class B (Referential Evidence)
 
