@@ -12,7 +12,10 @@ import dotenv
 import typer
 import yaml
 
-dotenv.load_dotenv()
+# Resolve package root regardless of CWD so the CLI works when invoked from
+# any directory (e.g. an OpenClaw workspace or a CI runner).
+_PKG_ROOT = Path(__file__).resolve().parents[2]
+dotenv.load_dotenv(_PKG_ROOT / ".env")
 from pydantic import ValidationError
 
 from biosystems.ingestion.fit import add_derived_metrics, parse_fit
@@ -20,7 +23,18 @@ from biosystems.ingestion.gpx import parse_gpx
 from biosystems.models import HeartRateZone, RunContext, ZoneConfig
 from biosystems.physics.metrics import run_metrics
 
-app = typer.Typer(help="Bio-Systems Engineering CLI")
+app = typer.Typer(
+    help=(
+        "Running performance analytics pipeline.\n\n"
+        "[bold]Quick start — answer common questions:[/bold]\n\n"
+        "  How have I been trending?     [cyan]biosystems summary[/cyan]\n"
+        "  What are my best runs?        [cyan]biosystems top --by ef[/cyan]\n"
+        "  Process today's Strava run?   [cyan]biosystems strava[/cyan]\n"
+        "  Catch up on missed runs?      [cyan]biosystems backfill-streams[/cyan]\n"
+        "  PMC / fatigue curve?          [cyan]biosystems trend[/cyan]"
+    ),
+    rich_markup_mode="rich",
+)
 
 
 def load_zone_config(yaml_path: Path) -> ZoneConfig:
@@ -54,11 +68,11 @@ def load_zone_config(yaml_path: Path) -> ZoneConfig:
     )
 
 
-@app.command()
+@app.command(rich_help_panel="Data Ingestion")
 def analyze(
     file_path: Path = typer.Argument(..., help="Path to activity file (.fit or .gpx)"),
     zones_path: Path = typer.Option(
-        Path("data/zones_personal.yml"),
+        _PKG_ROOT / "data/zones_personal.yml",
         "--zones", "-z",
         help="Path to zones configuration YAML"
     ),
@@ -118,13 +132,13 @@ def analyze(
         raise typer.Exit(code=1)
 
 
-@app.command()
+@app.command(rich_help_panel="Data Ingestion")
 def strava(
     activity_id: int | None = typer.Argument(
         None, help="Strava activity ID. Omit to use the most recent run."
     ),
     zones_path: Path = typer.Option(
-        Path("data/zones_personal.yml"),
+        _PKG_ROOT / "data/zones_personal.yml",
         "--zones", "-z",
         help="Path to zones configuration YAML",
     ),
@@ -164,16 +178,34 @@ def strava(
             raise typer.Exit(code=1)
 
         if not runs:
-            typer.echo("No recent runs found.")
+            if json_output:
+                typer.echo("[]")
+            else:
+                typer.echo("No recent runs found.")
             raise typer.Exit()
 
-        for r in runs:
-            dist_km = r.get("distance", 0) / 1000
-            moving_min = r.get("moving_time", 0) / 60
-            typer.echo(
-                f"  {r['id']}  {r['start_date_local'][:10]}  "
-                f"{r['name']:<30}  {dist_km:.1f}km  {moving_min:.0f}min"
-            )
+        if json_output:
+            import json as _json
+            payload = [
+                {
+                    "id": r["id"],
+                    "date": r.get("start_date_local", "")[:10],
+                    "name": r.get("name", ""),
+                    "distance_km": round(r.get("distance", 0) / 1000, 2),
+                    "moving_time_min": round(r.get("moving_time", 0) / 60, 1),
+                    "sport_type": r.get("sport_type", ""),
+                }
+                for r in runs
+            ]
+            typer.echo(_json.dumps(payload, indent=2))
+        else:
+            for r in runs:
+                dist_km = r.get("distance", 0) / 1000
+                moving_min = r.get("moving_time", 0) / 60
+                typer.echo(
+                    f"  {r['id']}  {r['start_date_local'][:10]}  "
+                    f"{r['name']:<30}  {dist_km:.1f}km  {moving_min:.0f}min"
+                )
         raise typer.Exit()
 
     # Fetch streams
@@ -271,6 +303,8 @@ def strava(
             "activity_name": activity_name_str,
             "source": "biosystems_strava",
         }
+        if activity_id is not None:
+            history_entry["strava_activity_id"] = activity_id
         strava_efforts_store: dict[str, int] = {
             e["name"]: e["elapsed_time_s"]
             for e in activity_meta.get("best_efforts", [])
@@ -278,8 +312,13 @@ def strava(
         }
         try:
             append_run(history_entry, strava_efforts=strava_efforts_store or None)
-        except Exception:
-            pass  # never block output due to history write failure
+        except Exception as exc:
+            typer.secho(f"WARNING: history write failed — {exc}", fg=typer.colors.YELLOW, err=True)
+            if not json_output:
+                raise typer.Exit(code=1)
+            # In JSON mode: emit the report (stdout is clean) but signal failure via exit code
+            typer.echo(report.model_dump_json(indent=2))
+            raise typer.Exit(code=2)  # 2 = analysis OK, persistence failed
 
     if json_output:
         typer.echo(report.model_dump_json(indent=2))
@@ -378,7 +417,7 @@ def strava(
                 typer.echo(f"  lap{lap.lap_index:<3}  {dist_str:>7}  {pace_str:>8}  {hr_str:>6}  {max_hr_str:>6}  {cad_str:>5}  {ele_str:>6}")
 
 
-@app.command(name="backfill-efforts")
+@app.command(name="backfill-efforts", rich_help_panel="Data Ingestion")
 def backfill_efforts(
     n: int = typer.Argument(50, help="Number of recent runs to backfill efforts for"),
 ):
@@ -452,7 +491,7 @@ def backfill_efforts(
     typer.secho(f"\nUpdated {updated}/{len(runs)} entries with effort data.", fg=typer.colors.GREEN)
 
 
-@app.command(name="backfill-streams")
+@app.command(name="backfill-streams", rich_help_panel="Data Ingestion")
 def backfill_streams(
     after: str = typer.Option(
         "2025-09-08",
@@ -460,7 +499,7 @@ def backfill_streams(
         help="Fetch all runs on or after this date (YYYY-MM-DD). Default: day after study end.",
     ),
     zones_path: Path = typer.Option(
-        Path("data/zones_personal.yml"),
+        _PKG_ROOT / "data/zones_personal.yml",
         "--zones", "-z",
         help="Path to zones configuration YAML",
     ),
@@ -518,12 +557,17 @@ def backfill_streams(
 
     typer.secho(f"Found {len(runs)} runs to process.\n", fg=typer.colors.CYAN, err=True)
 
-    # Build set of already-processed dates for fast skip checks
+    # Build set of already-processed activity IDs (and dates as fallback)
+    existing_stream_ids: set[int] = set()
     existing_stream_dates: set[str] = set()
     if skip_existing:
         for entry in load_history():
             if entry.get("source") == "biosystems_strava":
-                existing_stream_dates.add(entry["date"])
+                aid = entry.get("strava_activity_id")
+                if aid:
+                    existing_stream_ids.add(int(aid))
+                else:
+                    existing_stream_dates.add(entry["date"])
 
     processed = 0
     skipped = 0
@@ -539,7 +583,10 @@ def backfill_streams(
 
         label = f"{run_date}  {activity_name:<28}  {dist_km:.1f}km  {moving_min:.0f}min"
 
-        if skip_existing and run_date in existing_stream_dates:
+        if skip_existing and (
+            activity_id in existing_stream_ids
+            or (not existing_stream_ids and run_date in existing_stream_dates)
+        ):
             typer.echo(f"  [skip]  {label}")
             skipped += 1
             continue
@@ -578,6 +625,7 @@ def backfill_streams(
         m = report.run_only
         history_entry: dict = {
             "date": run_date,
+            "strava_activity_id": activity_id,
             "hrTSS": round(m.hr_tss, 1),
             "distance_km": round(m.distance_km, 2),
             "avg_hr": round(m.avg_hr, 1),
@@ -595,8 +643,11 @@ def backfill_streams(
         }
         try:
             append_run(history_entry, strava_efforts=strava_efforts_store or None)
-        except Exception:
-            pass
+        except Exception as exc:
+            typer.secho(f"  [warn]  {label}  — history write failed: {exc}", fg=typer.colors.YELLOW, err=True)
+            failed += 1
+            time.sleep(delay)
+            continue
 
         ef_str = f"EF={m.efficiency_factor:.5f}"
         dec_str = f"Dec={m.decoupling_pct:+.1f}%"
@@ -610,10 +661,300 @@ def backfill_streams(
     )
 
 
-@app.command()
+@app.command(rich_help_panel="Analytics")
+def summary(
+    since: str | None = typer.Option(None, "--since", help="Start date YYYY-MM-DD (default: all history)"),
+    group: str = typer.Option("month", "--group", "-g", help="Group by: month | week | all"),
+    min_dist: float = typer.Option(3.0, "--min-dist", help="Minimum run distance in km to include"),
+    source: str | None = typer.Option(None, "--source", help="Filter by source (e.g. biosystems_strava)"),
+    json_output: bool = typer.Option(False, "--json/--no-json", help="Output as JSON array"),
+):
+    """
+    How have I been improving? EF / decoupling / HR / pace by period.
+
+    Groups all recorded runs and prints aggregate stats per month (default),
+    week, or overall. Use --since to scope to post-study data only.
+
+    Examples:
+
+      biosystems summary                          # all time, by month
+      biosystems summary --since 2025-09-08       # post-study only
+      biosystems summary --group week --since 2026-01-01
+    """
+    from biosystems.analytics.history import load_history
+    from collections import defaultdict
+
+    entries = load_history()
+
+    # Filters
+    if since:
+        entries = [e for e in entries if e.get("date", "") >= since]
+    if source:
+        entries = [e for e in entries if e.get("source") == source]
+    entries = [e for e in entries if e.get("distance_km", 0) >= min_dist]
+
+    if not entries:
+        typer.echo("No entries match the given filters.")
+        raise typer.Exit()
+
+    def _group_key(date_str: str) -> str:
+        if group == "week":
+            from datetime import datetime
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            iso = dt.isocalendar()
+            return f"{iso[0]}-W{iso[1]:02d}"
+        elif group == "all":
+            return "all"
+        else:  # month
+            return date_str[:7]
+
+    by_group: dict[str, list[dict]] = defaultdict(list)
+    for e in entries:
+        by_group[_group_key(e["date"])].append(e)
+
+    # Build period rows
+    period_rows = []
+    for period in sorted(by_group):
+        runs = by_group[period]
+        efs = [e["ef"] for e in runs if e.get("ef")]
+        decs = [e["decoupling_pct"] for e in runs if e.get("decoupling_pct") is not None]
+        hrs = [e["avg_hr"] for e in runs if e.get("avg_hr")]
+        paces = [e["avg_pace_min_per_km"] for e in runs if e.get("avg_pace_min_per_km")]
+        tss_total = sum(e.get("hrTSS", 0) for e in runs)
+        period_rows.append({
+            "period": period,
+            "run_count": len(runs),
+            "ef_mean": round(sum(efs) / len(efs), 5) if efs else None,
+            "ef_best": round(max(efs), 5) if efs else None,
+            "decoupling_mean": round(sum(decs) / len(decs), 2) if decs else None,
+            "avg_hr": round(sum(hrs) / len(hrs), 1) if hrs else None,
+            "avg_pace_min_per_km": round(sum(paces) / len(paces), 2) if paces else None,
+            "total_tss": round(tss_total, 1),
+        })
+
+    if json_output:
+        import json as _json
+        typer.echo(_json.dumps(period_rows, indent=2))
+        return
+
+    typer.secho(f"\n{'Period':<12}  {'Runs':>4}  {'EF mean':>8}  {'EF best':>8}  {'Decoup':>8}  {'avg HR':>7}  {'avg pace':>10}  {'TSS':>6}", bold=True)
+    typer.echo("-" * 78)
+
+    for row in period_rows:
+        ef_mean_str = f"{row['ef_mean']:.5f}" if row["ef_mean"] is not None else "  —    "
+        ef_best_str = f"{row['ef_best']:.5f}" if row["ef_best"] is not None else "  —    "
+        dec_str = f"{row['decoupling_mean']:+.1f}%" if row["decoupling_mean"] is not None else "  —   "
+        hr_str = f"{row['avg_hr']:.0f}" if row["avg_hr"] is not None else " — "
+        pace_str = f"{row['avg_pace_min_per_km']:.2f}/km" if row["avg_pace_min_per_km"] is not None else "  —    "
+        typer.echo(f"{row['period']:<12}  {row['run_count']:>4}  {ef_mean_str:>8}  {ef_best_str:>8}  {dec_str:>8}  {hr_str:>7}  {pace_str:>10}  {row['total_tss']:>6.0f}")
+
+    typer.echo()
+    all_efs = [e["ef"] for e in entries if e.get("ef")]
+    all_decs = [e["decoupling_pct"] for e in entries if e.get("decoupling_pct") is not None]
+    if all_efs:
+        typer.secho(
+            f"Overall  {len(entries):>4} runs  EF {sum(all_efs)/len(all_efs):.5f} mean / {max(all_efs):.5f} best  "
+            f"Decoupling {sum(all_decs)/len(all_decs):.1f}% avg",
+            fg=typer.colors.CYAN,
+        )
+
+
+@app.command(rich_help_panel="Analytics")
+def efforts(
+    since: str | None = typer.Option(None, "--since", help="Only include runs on or after this date (YYYY-MM-DD)"),
+    distances: str = typer.Option(
+        "400m,1K,1 mile,5K,10K,Half-Marathon",
+        "--distances", "-d",
+        help="Comma-separated distances to report",
+    ),
+    json_output: bool = typer.Option(False, "--json/--no-json", help="Output as JSON array"),
+):
+    """
+    How have my race times progressed? First recorded → current best per distance.
+
+    Shows each standard effort distance with the first recorded time, the current
+    best, the improvement, and the dates of both. Reads from own recorded history
+    (not Strava all-time PRs).
+
+    Examples:
+
+      biosystems efforts                          # all time, all standard distances
+      biosystems efforts --since 2025-09-08       # post-study only
+      biosystems efforts --distances 5K,10K       # specific distances
+    """
+    from biosystems.analytics.history import load_history
+
+    dist_km_map = {
+        "400m": 0.4,
+        "1/2 mile": 0.805,
+        "1K": 1.0,
+        "1 mile": 1.609,
+        "2 mile": 3.219,
+        "5K": 5.0,
+        "10K": 10.0,
+        "15K": 15.0,
+        "10 mile": 16.093,
+        "20K": 20.0,
+        "Half-Marathon": 21.098,
+        "Marathon": 42.195,
+    }
+
+    target_distances = [d.strip() for d in distances.split(",")]
+
+    entries = load_history()
+    if since:
+        entries = [e for e in entries if e.get("date", "") >= since]
+
+    # Collect all recorded times per distance, sorted by date
+    from collections import defaultdict
+    by_distance: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    for e in entries:
+        for dist, t in (e.get("strava_efforts") or {}).items():
+            if isinstance(t, int) and t > 0:
+                by_distance[dist].append((e["date"], t))
+
+    effort_rows = []
+    for dist in target_distances:
+        times = sorted(by_distance.get(dist, []))  # sort by date
+        if not times:
+            continue
+
+        best_date, best_t = min(times, key=lambda x: x[1])
+        first_date, first_t = times[0]
+        dk = dist_km_map.get(dist, 0)
+        best_pace = round(best_t / 60 / dk, 2) if dk else None
+        improvement_s = first_t - best_t if first_date != best_date or first_t != best_t else None
+        recent = [{"date": d, "elapsed_time_s": t} for d, t in times[-3:]] if len(times) >= 4 else []
+
+        effort_rows.append({
+            "distance": dist,
+            "best_elapsed_s": best_t,
+            "best_date": best_date,
+            "best_pace_min_per_km": best_pace,
+            "first_elapsed_s": first_t,
+            "first_date": first_date,
+            "improvement_s": improvement_s,
+            "recording_count": len(times),
+            "recent": recent,
+        })
+
+    if json_output:
+        import json as _json
+        typer.echo(_json.dumps(effort_rows, indent=2))
+        return
+
+    typer.secho("\nBest Effort Progression (own recorded history)\n", bold=True)
+
+    if not effort_rows:
+        typer.echo("No effort data found for the requested distances.")
+        return
+
+    for row in effort_rows:
+        dist = row["distance"]
+        bm, bs = row["best_elapsed_s"] // 60, row["best_elapsed_s"] % 60
+        fm, fs = row["first_elapsed_s"] // 60, row["first_elapsed_s"] % 60
+        typer.secho(f"  {dist}", bold=True)
+        typer.echo(f"    Best:  {bm}:{bs:02d}  ({row['best_pace_min_per_km']:.2f} min/km)  on {row['best_date']}")
+
+        if row["improvement_s"] is None:
+            typer.echo(f"    First: {fm}:{fs:02d}  on {row['first_date']}  (only recording)")
+        elif row["improvement_s"] > 0:
+            dm, ds = row["improvement_s"] // 60, row["improvement_s"] % 60
+            typer.secho(
+                f"    First: {fm}:{fs:02d}  on {row['first_date']}  →  improved {dm}:{ds:02d}",
+                fg=typer.colors.GREEN,
+            )
+        else:
+            typer.echo(f"    First: {fm}:{fs:02d}  on {row['first_date']}  (no improvement yet)")
+
+        if row["recent"]:
+            progression = "  ".join(
+                f"{r['elapsed_time_s']//60}:{r['elapsed_time_s']%60:02d} ({r['date']})"
+                for r in row["recent"]
+            )
+            typer.echo(f"    Recent: {progression}")
+        typer.echo()
+
+
+@app.command(rich_help_panel="Analytics")
+def top(
+    by: str = typer.Option("ef", "--by", "-b", help="Sort metric: ef | decoupling | pace | tss | distance"),
+    n: int = typer.Option(15, "--count", "-n", help="Number of results to show"),
+    min_dist: float = typer.Option(3.0, "--min-dist", help="Minimum run distance in km"),
+    since: str | None = typer.Option(None, "--since", help="Start date YYYY-MM-DD"),
+    asc: bool = typer.Option(False, "--asc", help="Sort ascending instead of descending"),
+    json_output: bool = typer.Option(False, "--json/--no-json", help="Output as JSON array"),
+):
+    """
+    What are my best runs? Rank by EF, pace, decoupling, TSS, or distance.
+
+    Examples:
+      biosystems top                            # top 15 runs by EF
+      biosystems top --by ef           # best Efficiency Factor runs
+      biosystems top --by decoupling --asc   # most aerobically stable runs
+      biosystems top --by pace         # fastest average paces
+      biosystems top --by distance     # longest runs
+    """
+    from biosystems.analytics.history import load_history
+
+    entries = load_history()
+    if since:
+        entries = [e for e in entries if e.get("date", "") >= since]
+    entries = [e for e in entries if e.get("distance_km", 0) >= min_dist]
+
+    metric_map = {
+        "ef": "ef",
+        "decoupling": "decoupling_pct",
+        "pace": "avg_pace_min_per_km",
+        "tss": "hrTSS",
+        "distance": "distance_km",
+    }
+    field = metric_map.get(by, "ef")
+
+    # Filter to entries that have the metric
+    entries = [e for e in entries if e.get(field) is not None]
+    if not entries:
+        typer.echo(f"No entries with metric '{by}' found.")
+        raise typer.Exit()
+
+    # Default sort: descending for ef/tss/distance, ascending for pace/decoupling
+    default_asc = by in ("pace", "decoupling")
+    sort_asc = asc if asc else default_asc
+    entries = sorted(entries, key=lambda e: e[field], reverse=not sort_asc)[:n]
+
+    if json_output:
+        import json as _json
+        typer.echo(_json.dumps(entries, indent=2))
+        return
+
+    typer.secho(f"\nTop {n} runs by {by} (min {min_dist}km{', since ' + since if since else ''}):\n", bold=True)
+    typer.secho(
+        f"  {'#':<3}  {'Date':<12}  {'Activity':<28}  {by.upper():>9}  {'EF':>8}  {'HR':>5}  {'Pace':>9}  {'km':>6}  {'Dec':>8}",
+        fg=typer.colors.CYAN,
+    )
+    typer.echo("  " + "-" * 96)
+
+    for i, e in enumerate(entries, 1):
+        name = (e.get("activity_name") or "")[:26]
+        ef_str = f"{e['ef']:.5f}" if e.get("ef") else "  —    "
+        hr_str = f"{e['avg_hr']:.0f}" if e.get("avg_hr") else " — "
+        pace_str = f"{e['avg_pace_min_per_km']:.2f}/km" if e.get("avg_pace_min_per_km") else "  —    "
+        dist_str = f"{e.get('distance_km', 0):.1f}"
+        dec_str = f"{e['decoupling_pct']:+.1f}%" if e.get("decoupling_pct") is not None else "  — "
+        val = e[field]
+        val_str = (
+            f"{val:.5f}" if by == "ef" else
+            f"{val:+.1f}%" if by == "decoupling" else
+            f"{val:.2f}/km" if by == "pace" else
+            f"{val:.1f}"
+        )
+        typer.echo(f"  {i:<3}  {e['date']:<12}  {name:<28}  {val_str:>9}  {ef_str:>8}  {hr_str:>5}  {pace_str:>9}  {dist_str:>6}  {dec_str:>8}")
+
+
+@app.command(rich_help_panel="Analytics")
 def trend(
     zones_path: Path = typer.Option(
-        Path("data/zones_personal.yml"),
+        _PKG_ROOT / "data/zones_personal.yml",
         "--zones", "-z",
         help="Path to zones configuration YAML",
     ),
