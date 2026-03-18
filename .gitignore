@@ -66,3 +66,4 @@ weather_cache.parquet
 
 # OS
 Thumbs.db
+.cache/
