@@ -277,10 +277,11 @@ def compute_wellness_context(date_str: str) -> dict[str, Any]:
 
     # ── Calibrated thresholds ─────────────────────────────────────────────────
     try:
-        from biosystems.wellness.analytics import calibrate_thresholds
+        from biosystems.wellness.analytics import calibrate_thresholds, compute_sleep_debt
         thresholds = calibrate_thresholds(full_df)
     except Exception:
         thresholds = {}
+        compute_sleep_debt = None  # type: ignore[assignment]
 
     hrv_drop_red   = thresholds.get("hrv_pct_drop_red",   _HRV_DROP_RED)
     hrv_drop_amber = thresholds.get("hrv_pct_drop_amber", _HRV_DROP_AMBER)
@@ -291,6 +292,33 @@ def compute_wellness_context(date_str: str) -> dict[str, Any]:
     str_red        = thresholds.get("avg_stress",   {}).get("red",   55.0)
     str_amber      = thresholds.get("avg_stress",   {}).get("amber", 40.0)
     norms          = thresholds.get("norms", {})
+    rr_thresholds  = thresholds.get("respiratory_rate", {})
+
+    # ── Sleep debt ────────────────────────────────────────────────────────────
+    sleep_debt_7d: float | None = None
+    if compute_sleep_debt is not None:
+        try:
+            personal_sleep_mean = norms.get("sleep_h_mean")
+            debt_series = compute_sleep_debt(full_df, personal_mean_h=personal_sleep_mean)
+            if not debt_series.empty and today_ts in debt_series.index:
+                v = debt_series[today_ts]
+                sleep_debt_7d = round(float(v), 1) if not pd.isna(v) else None
+        except Exception:
+            pass
+
+    # ── Respiratory rate + sigma ──────────────────────────────────────────────
+    resp_rate: float | None = None
+    rr_sigma:  float | None = None
+    for rr_col in ["respiratory_rate_garmin", "respiratory_rate_whoop"]:
+        v = _val(today_row, rr_col)
+        if v is not None:
+            resp_rate = v
+            if rr_thresholds:
+                rr_mean = rr_thresholds.get("mean")
+                rr_std  = rr_thresholds.get("std")
+                if rr_mean and rr_std and rr_std > 0:
+                    rr_sigma = round((resp_rate - rr_mean) / rr_std, 2)
+            break
 
     # ── G/A/R classification ──────────────────────────────────────────────────
     red_signals:   list[str] = []
@@ -332,6 +360,14 @@ def compute_wellness_context(date_str: str) -> dict[str, Any]:
         elif avg_stress > str_amber:
             amber_signals.append(f"Stress {avg_stress:.0f}")
 
+    if resp_rate is not None and rr_thresholds:
+        rr_red   = rr_thresholds.get("red")
+        rr_amber = rr_thresholds.get("amber")
+        if rr_red and resp_rate >= rr_red:
+            red_signals.append(f"Resp rate {resp_rate:.1f} brpm (+{rr_sigma:.1f}σ)")
+        elif rr_amber and resp_rate >= rr_amber:
+            amber_signals.append(f"Resp rate {resp_rate:.1f} brpm (+{rr_sigma:.1f}σ)")
+
     if red_signals:
         gar        = "🔴 RED"
         gar_detail = "; ".join(red_signals)
@@ -344,36 +380,140 @@ def compute_wellness_context(date_str: str) -> dict[str, Any]:
 
     ctx: dict[str, Any] = {
         # Raw values
-        "hrv_rmssd":        hrv_today,
-        "resting_hr":       rhr_today,
-        "recovery_score":   recovery_today,
-        "sleep_score":      sleep_today,
-        "sleep_duration_s": sleep_dur_s,
-        "sleep_hours":      sleep_hours,
-        "body_battery":     body_battery,
-        "strain_score":     strain_today,
-        "avg_stress":       avg_stress,
-        "vo2max":           vo2max,
+        "hrv_rmssd":          hrv_today,
+        "resting_hr":         rhr_today,
+        "recovery_score":     recovery_today,
+        "sleep_score":        sleep_today,
+        "sleep_duration_s":   sleep_dur_s,
+        "sleep_hours":        sleep_hours,
+        "body_battery":       body_battery,
+        "strain_score":       strain_today,
+        "avg_stress":         avg_stress,
+        "vo2max":             vo2max,
+        "respiratory_rate":   resp_rate,
         # Deltas
-        "hrv_1d_delta":     round(hrv_1d_delta, 1)  if hrv_1d_delta  is not None else None,
-        "hrv_7d_pct":       round(hrv_7d_pct, 1)    if hrv_7d_pct    is not None else None,
-        "hrv_7d_mean":      round(hrv_7d_mean, 1)   if hrv_7d_mean   is not None else None,
-        "rhr_1d_delta":     round(rhr_1d_delta, 1)  if rhr_1d_delta  is not None else None,
-        "rhr_7d_delta":     round(rhr_7d_delta, 1)  if rhr_7d_delta  is not None else None,
-        "rhr_7d_mean":      round(rhr_7d_mean, 1)   if rhr_7d_mean   is not None else None,
-        "bb_7d_mean":       round(bb_7d_mean, 1)    if bb_7d_mean    is not None else None,
-        "bb_7d_delta":      round(bb_7d_delta, 1)   if bb_7d_delta   is not None else None,
+        "hrv_1d_delta":       round(hrv_1d_delta, 1)  if hrv_1d_delta  is not None else None,
+        "hrv_7d_pct":         round(hrv_7d_pct, 1)    if hrv_7d_pct    is not None else None,
+        "hrv_7d_mean":        round(hrv_7d_mean, 1)   if hrv_7d_mean   is not None else None,
+        "rhr_1d_delta":       round(rhr_1d_delta, 1)  if rhr_1d_delta  is not None else None,
+        "rhr_7d_delta":       round(rhr_7d_delta, 1)  if rhr_7d_delta  is not None else None,
+        "rhr_7d_mean":        round(rhr_7d_mean, 1)   if rhr_7d_mean   is not None else None,
+        "bb_7d_mean":         round(bb_7d_mean, 1)    if bb_7d_mean    is not None else None,
+        "bb_7d_delta":        round(bb_7d_delta, 1)   if bb_7d_delta   is not None else None,
+        "rr_sigma":           rr_sigma,
+        "sleep_debt_7d":      sleep_debt_7d,
         # G/A/R
-        "gar":              gar,
-        "gar_detail":       gar_detail,
+        "gar":                gar,
+        "gar_detail":         gar_detail,
         # Personal norms (from calibrated thresholds)
-        "norms":            norms,
+        "norms":              norms,
         "thresholds_calibrated": thresholds.get("calibrated", False),
         # Metadata
-        "stale":            stale,
-        "staleness_days":   staleness_days if stale else 0,
+        "stale":              stale,
+        "staleness_days":     staleness_days if stale else 0,
     }
     return ctx
+
+
+# ── Recovery prediction ───────────────────────────────────────────────────────
+
+def predict_recovery_status(
+    date_str: str,
+    recent_run_tss: float | None,
+) -> dict[str, Any]:
+    """
+    Compare actual Body Battery to what the recovery model predicts after a run.
+
+    Parameters
+    ----------
+    date_str        : the date to evaluate (YYYY-MM-DD)
+    recent_run_tss  : hrTSS of the most recent run (None if no run yesterday)
+
+    Returns
+    -------
+    {
+      "status":      "better_than_expected" | "as_expected" | "worse_than_expected" | "no_model",
+      "expected_bb_delta": float | None,
+      "actual_bb_delta":   float | None,
+      "explanation": str,
+    }
+    """
+    from biosystems.wellness.analytics import compute_recovery_model
+
+    full_df = _load_df()
+    if full_df.empty or recent_run_tss is None:
+        return {
+            "status": "no_model",
+            "expected_bb_delta": None,
+            "actual_bb_delta": None,
+            "explanation": "No run TSS provided or no wellness data.",
+        }
+
+    # Build a minimal run DataFrame from the most recent run
+    yesterday = (pd.Timestamp(date_str) - pd.Timedelta(days=1)).normalize()
+    run_df = pd.DataFrame(
+        [{"hr_tss": recent_run_tss}],
+        index=[yesterday],
+    )
+
+    model = compute_recovery_model(run_df, full_df)
+    bins = model.get("bins", {})
+
+    # Find which bin this TSS falls into
+    tss = recent_run_tss
+    expected_delta: float | None = None
+    if tss < 40 and "easy (0-40)" in bins:
+        expected_delta = bins["easy (0-40)"]["mean_bb_delta"]
+    elif tss < 70 and "moderate (40-70)" in bins:
+        expected_delta = bins["moderate (40-70)"]["mean_bb_delta"]
+    elif tss < 100 and "hard (70-100)" in bins:
+        expected_delta = bins["hard (70-100)"]["mean_bb_delta"]
+    elif "very_hard (100+)" in bins:
+        expected_delta = bins["very_hard (100+)"]["mean_bb_delta"]
+
+    # Actual BB delta: today_bb - yesterday_bb
+    actual_delta: float | None = None
+    if "body_battery" in full_df.columns:
+        bb = full_df["body_battery"].dropna()
+        today_ts = pd.Timestamp(date_str).normalize()
+        if today_ts in bb.index and yesterday in bb.index:
+            actual_delta = round(float(bb[today_ts]) - float(bb[yesterday]), 1)
+
+    if expected_delta is None or actual_delta is None:
+        return {
+            "status": "no_model",
+            "expected_bb_delta": expected_delta,
+            "actual_bb_delta": actual_delta,
+            "explanation": "Insufficient data to compare expected vs actual recovery.",
+        }
+
+    diff = actual_delta - expected_delta
+    if diff >= 5:
+        status = "better_than_expected"
+        explanation = (
+            f"After a {tss:.0f} TSS run, expected BB Δ {expected_delta:+.1f}; "
+            f"actual Δ {actual_delta:+.1f} — recovering better than typical."
+        )
+    elif diff <= -5:
+        status = "worse_than_expected"
+        explanation = (
+            f"After a {tss:.0f} TSS run, expected BB Δ {expected_delta:+.1f}; "
+            f"actual Δ {actual_delta:+.1f} — deeper suppression than typical. "
+            "Consider cumulative fatigue or illness."
+        )
+    else:
+        status = "as_expected"
+        explanation = (
+            f"After a {tss:.0f} TSS run, expected BB Δ {expected_delta:+.1f}; "
+            f"actual Δ {actual_delta:+.1f} — recovery tracking as expected."
+        )
+
+    return {
+        "status": status,
+        "expected_bb_delta": round(expected_delta, 1),
+        "actual_bb_delta": actual_delta,
+        "explanation": explanation,
+    }
 
 
 # ── RunContext helper ─────────────────────────────────────────────────────────

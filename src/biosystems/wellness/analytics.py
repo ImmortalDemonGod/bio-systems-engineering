@@ -6,11 +6,14 @@ Pure-computation analytics over the wellness parquet DataFrame.
 No biosystems imports — accepts only a pd.DataFrame, returns plain Python dicts.
 
 Functions:
-  compute_coverage(df)       → coverage table per metric
-  compute_baselines(df)      → mean/std/percentiles per metric
-  compute_correlations(df)   → cross-metric correlation matrix
-  compute_era_stats(df)      → Whoop-era vs Garmin-era breakdown
-  calibrate_thresholds(df)   → personal G/A/R thresholds from data distribution
+  compute_coverage(df)              → coverage table per metric
+  compute_baselines(df)             → mean/std/percentiles per metric
+  compute_correlations(df)          → cross-metric correlation matrix
+  compute_era_stats(df)             → Whoop-era vs Garmin-era breakdown
+  calibrate_thresholds(df)          → personal G/A/R thresholds (incl. resp rate)
+  compute_longitudinal_fitness(df)  → RHR and VO2max trend over time
+  compute_sleep_debt(df)            → 7-day rolling cumulative sleep debt (hours)
+  compute_recovery_model(run_df, wellness_df)  → TSS→next-day BB lookup table
 
 Era boundary: Whoop data ends 2025-12-25; Garmin-only era begins 2026-01-01.
 """
@@ -259,6 +262,36 @@ def calibrate_thresholds(
         result["rhr_spike_red"]   = round(rhr_std * 2.5, 1)   # ~2.5 sigma spike
         result["rhr_spike_amber"] = round(rhr_std * 1.5, 1)   # ~1.5 sigma spike
 
+    # ── Respiratory Rate: sigma-based illness/overtraining warning ────────────
+    # Prefer Garmin-era; fall back to whoop-era column if absent
+    rr_col = next(
+        (c for c in ["respiratory_rate_garmin", "respiratory_rate_whoop"]
+         if c in garmin_df.columns),
+        None,
+    )
+    if rr_col is None:
+        rr_col = next(
+            (c for c in ["respiratory_rate_garmin", "respiratory_rate_whoop"]
+             if c in df.columns),
+            None,
+        )
+        rr_src = df
+    else:
+        rr_src = garmin_df
+
+    if rr_col is not None:
+        rr = rr_src[rr_col].dropna()
+        if len(rr) >= min_garmin_days:
+            rr_mean = float(rr.mean())
+            rr_std  = float(rr.std())
+            result["respiratory_rate"] = {
+                "mean":  round(rr_mean, 2),
+                "std":   round(rr_std,  2),
+                "amber": round(rr_mean + 1.5 * rr_std, 2),  # 1.5σ = early warning
+                "red":   round(rr_mean + 2.5 * rr_std, 2),  # 2.5σ = illness/OTS flag
+                "n":     int(len(rr)),
+            }
+
     result["calibrated"] = True
     return result
 
@@ -287,4 +320,251 @@ def _compute_norms(df: pd.DataFrame, garmin_df: pd.DataFrame) -> dict[str, Any]:
         "stress_mean":     _mean(garmin_df, "avg_stress"),
         "vo2max_mean":     _mean(garmin_df, "vo2max"),
         "sleep_h_mean":    sleep_h,
+    }
+
+
+# ── Longitudinal Fitness ───────────────────────────────────────────────────────
+
+def compute_longitudinal_fitness(df: pd.DataFrame) -> dict[str, Any]:
+    """
+    Track long-term fitness arc: RHR and VO2max monthly trends.
+
+    Returns:
+      {
+        "rhr": {
+          "monthly_means": [{"month": "2023-11", "mean": 60.1, "n": int}, ...],
+          "total_delta":   float,   # latest_month - first_month (negative = improvement)
+          "trend_label":   str,     # e.g. "-14 bpm over 28 months"
+          "n_months":      int,
+        },
+        "vo2max": {
+          "monthly_means": [...],
+          "total_delta":   float,
+          "trend_label":   str,
+          "n_months":      int,
+        },
+        "era_summary": str,  # one-line narrative
+      }
+    """
+    if df.empty:
+        return {}
+
+    result: dict[str, Any] = {}
+
+    def _monthly_trend(col: str, label: str, unit: str, higher_is_better: bool) -> dict[str, Any] | None:
+        # Prefer Garmin resting_hr_garmin for RHR; fall back to whoop
+        cols_to_try = [col]
+        if col == "resting_hr_garmin":
+            cols_to_try = ["resting_hr_garmin", "resting_hr_whoop"]
+
+        series = pd.Series(dtype=float)
+        for c in cols_to_try:
+            if c in df.columns:
+                s = df[c].dropna()
+                if not s.empty:
+                    series = s
+                    break
+
+        if len(series) < 10:
+            return None
+
+        # Group by calendar month
+        monthly = series.groupby(series.index.to_period("M")).agg(["mean", "count"])
+        monthly = monthly[monthly["count"] >= 5]  # need ≥5 readings/month
+        if len(monthly) < 2:
+            return None
+
+        monthly_means = [
+            {"month": str(p), "mean": round(float(row["mean"]), 1), "n": int(row["count"])}
+            for p, row in monthly.iterrows()
+        ]
+
+        first_mean = monthly_means[0]["mean"]
+        last_mean  = monthly_means[-1]["mean"]
+        delta      = round(last_mean - first_mean, 1)
+        n_months   = len(monthly_means)
+
+        sign = "+" if delta > 0 else ""
+        # improvement: delta<0 for lower-is-better metrics, delta>0 for higher-is-better
+        direction = "improvement" if (delta < 0) != higher_is_better else "decline"
+        trend_label = (
+            f"{sign}{delta} {unit} over {n_months} months ({direction})"
+        )
+
+        return {
+            "monthly_means": monthly_means,
+            "total_delta":   delta,
+            "trend_label":   trend_label,
+            "n_months":      n_months,
+        }
+
+    rhr_trend    = _monthly_trend("resting_hr_garmin", "RHR",    "bpm", higher_is_better=False)
+    vo2max_trend = _monthly_trend("vo2max",            "VO2max", "ml/kg/min", higher_is_better=True)
+
+    if rhr_trend:
+        result["rhr"] = rhr_trend
+    if vo2max_trend:
+        result["vo2max"] = vo2max_trend
+
+    # Build narrative summary
+    parts = []
+    if rhr_trend:
+        parts.append(f"RHR {rhr_trend['trend_label']}")
+    if vo2max_trend:
+        parts.append(f"VO2max {vo2max_trend['trend_label']}")
+    result["era_summary"] = " · ".join(parts) if parts else "Insufficient data for trend"
+
+    return result
+
+
+# ── Sleep Debt ─────────────────────────────────────────────────────────────────
+
+def compute_sleep_debt(
+    df: pd.DataFrame,
+    personal_mean_h: float | None = None,
+) -> pd.Series:
+    """
+    Compute 7-day rolling cumulative sleep debt in hours.
+
+    Positive = debt (slept less than baseline); negative = surplus.
+    Uses personal_mean_h if provided; otherwise derives from full-history mean.
+
+    Returns:
+      pd.Series indexed by date, values = cumulative 7-day debt in hours.
+      Empty Series if insufficient data.
+    """
+    if df.empty:
+        return pd.Series(dtype=float)
+
+    # Merge Whoop and Garmin sleep columns into a single best-available series.
+    # Garmin wins when both exist for a date; Whoop fills earlier history.
+    sleep_s: pd.Series | None = None
+    if "sleep_duration_s" in df.columns and "sleep_duration_s_garmin" in df.columns:
+        combined = df["sleep_duration_s"].combine_first(df["sleep_duration_s_garmin"])
+        s = combined.dropna()
+        if not s.empty:
+            sleep_s = s
+    else:
+        for col in ["sleep_duration_s", "sleep_duration_s_garmin"]:
+            if col in df.columns:
+                s = df[col].dropna()
+                if not s.empty:
+                    sleep_s = s
+                    break
+
+    if sleep_s is None or len(sleep_s) < 7:
+        return pd.Series(dtype=float)
+
+    sleep_h = sleep_s / 3600.0
+
+    if personal_mean_h is None:
+        personal_mean_h = float(sleep_h.mean())
+
+    # Daily deficit (positive = slept less than mean)
+    daily_deficit = personal_mean_h - sleep_h
+
+    # 7-day rolling cumulative sum (sum of deficits over last 7 days)
+    rolling_debt = daily_deficit.rolling(window=7, min_periods=3).sum()
+    return rolling_debt.round(2)
+
+
+# ── Recovery Model ─────────────────────────────────────────────────────────────
+
+def compute_recovery_model(
+    run_df: pd.DataFrame,
+    wellness_df: pd.DataFrame,
+) -> dict[str, Any]:
+    """
+    Model how training load (hrTSS) affects next-day Body Battery.
+
+    run_df:      DataFrame with DatetimeIndex and 'hr_tss' column (or 'hrTSS').
+    wellness_df: The full wellness parquet DataFrame.
+
+    Returns lookup table by TSS bucket:
+      {
+        "bins": {
+          "easy (0-40)":        {"mean_bb_delta": float, "std": float, "n": int},
+          "moderate (40-70)":   {...},
+          "hard (70-100)":      {...},
+          "very_hard (100+)":   {...},
+        },
+        "overall_correlation": float | None,  # r between hrTSS and next-day BB delta
+        "n_pairs":             int,
+        "note":                str,
+      }
+    """
+    if run_df.empty or wellness_df.empty:
+        return {"bins": {}, "overall_correlation": None, "n_pairs": 0,
+                "note": "Insufficient data"}
+
+    if "body_battery" not in wellness_df.columns:
+        return {"bins": {}, "overall_correlation": None, "n_pairs": 0,
+                "note": "No Body Battery data"}
+
+    # Normalise TSS column name
+    tss_col = next((c for c in ["hr_tss", "hrTSS", "tss"] if c in run_df.columns), None)
+    if tss_col is None:
+        return {"bins": {}, "overall_correlation": None, "n_pairs": 0,
+                "note": "No TSS column found in run_df"}
+
+    # Build (date, hrTSS, next_day_bb_delta) triplets
+    bb = wellness_df["body_battery"].dropna()
+    pairs: list[dict[str, float]] = []
+
+    for run_date, run_row in run_df.iterrows():
+        tss = run_row[tss_col]
+        if pd.isna(tss):
+            continue
+        run_ts      = pd.Timestamp(run_date).normalize()
+        next_ts     = run_ts + pd.Timedelta(days=1)
+        if run_ts not in bb.index or next_ts not in bb.index:
+            continue
+        bb_delta = float(bb[next_ts]) - float(bb[run_ts])
+        pairs.append({"tss": float(tss), "bb_delta": bb_delta})
+
+    if not pairs:
+        return {"bins": {}, "overall_correlation": None, "n_pairs": 0,
+                "note": "No matching run/wellness date pairs"}
+
+    pairs_df = pd.DataFrame(pairs)
+    n_pairs  = len(pairs_df)
+
+    # Overall correlation
+    if n_pairs >= 5:
+        overall_r = round(float(pairs_df["tss"].corr(pairs_df["bb_delta"])), 3)
+    else:
+        overall_r = None
+
+    # Bin by TSS
+    bins_def = [
+        ("easy (0-40)",       0,   40),
+        ("moderate (40-70)",  40,  70),
+        ("hard (70-100)",     70,  100),
+        ("very_hard (100+)",  100, float("inf")),
+    ]
+    bins: dict[str, Any] = {}
+    for name, lo, hi in bins_def:
+        subset = pairs_df[(pairs_df["tss"] >= lo) & (pairs_df["tss"] < hi)]
+        if len(subset) >= 3:
+            bins[name] = {
+                "mean_bb_delta": round(float(subset["bb_delta"].mean()), 1),
+                "std":           round(float(subset["bb_delta"].std()),  1),
+                "n":             int(len(subset)),
+            }
+
+    # Interpretation note
+    if overall_r is not None:
+        note = (
+            f"r={overall_r:.3f} — training load explains "
+            f"{overall_r**2*100:.0f}% of next-day BB variance. "
+            "Use bins as expected ranges; actual BB also reflects sleep and stress."
+        )
+    else:
+        note = "Too few pairs for correlation; bin estimates available."
+
+    return {
+        "bins":                bins,
+        "overall_correlation": overall_r,
+        "n_pairs":             n_pairs,
+        "note":                note,
     }
