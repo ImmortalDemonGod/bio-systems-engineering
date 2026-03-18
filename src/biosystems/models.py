@@ -415,3 +415,4 @@ class FullRunReport(BaseModel):
 
 # Type aliases for convenience
 ZoneDict = dict[str, HeartRateZone]
+# Final polish
