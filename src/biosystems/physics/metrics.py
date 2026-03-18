@@ -188,10 +188,15 @@ def calculate_decoupling(df: pd.DataFrame, zone_config: ZoneConfig) -> float:
     if work_df.empty or len(work_df) < 120:  # < 2 min
         work_df = hr_df if not hr_df.empty else base_df
 
-    # Split at midpoint by index (time-based)
-    midpoint = work_df.index[0] + (work_df.index[-1] - work_df.index[0]) / 2
-    first_half = work_df[work_df.index <= midpoint]
-    second_half = work_df[work_df.index > midpoint]
+    # Split by cumulative elapsed time so the midpoint is always temporal,
+    # regardless of whether the index is a DatetimeIndex (Strava) or an
+    # integer RangeIndex (GPX/FIT). Index arithmetic on integers counts
+    # samples, not seconds — wrong when sampling rate is non-uniform or the
+    # watch auto-paused.
+    elapsed = work_df["dt"].cumsum()
+    midpoint_s = elapsed.iloc[-1] / 2.0
+    first_half = work_df[elapsed <= midpoint_s]
+    second_half = work_df[elapsed > midpoint_s]
 
     # Calculate EF for each half
     ef_1 = (
