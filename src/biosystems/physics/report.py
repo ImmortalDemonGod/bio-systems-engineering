@@ -210,6 +210,11 @@ def _compute_aev(
     hr_sub = hr_vals[mask]
     pace_sub = pace_vals[mask]
 
+    # Guard against zero-variance HR (e.g. stuck sensor) which makes polyfit
+    # numerically degenerate and raises RankWarning with unreliable coefficients.
+    if np.std(hr_sub) == 0:
+        return None, None
+
     coeffs = np.polyfit(hr_sub, pace_sub, 1)
     predicted_pace = float(coeffs[0] * ref_hr + coeffs[1])
 

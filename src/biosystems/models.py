@@ -158,11 +158,7 @@ class PhysiologicalMetrics(BaseModel):
     @field_validator("decoupling_pct")
     @classmethod
     def validate_decoupling_reasonable(cls, v: float) -> float:
-        """Warn if decoupling is suspiciously high (>50%)."""
-        if v > 50:
-            import warnings
-
-            warnings.warn(f"Decoupling {v:.1f}% is unusually high. Check data quality.")
+        """Accept any decoupling value; callers inspect the field directly."""
         return v
 
 
