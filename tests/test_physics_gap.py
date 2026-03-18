@@ -15,7 +15,47 @@ from biosystems.physics.gap import (
     calculate_gap_segment,
     calculate_gap_from_dataframe,
     calculate_average_gap,
+    check_elevation_quality,
 )
+
+
+class TestElevationQuality:
+    """Test elevation data quality checks."""
+
+    def test_reliable_elevation(self):
+        """Test ok signal for reasonable grade variation."""
+        df = pd.DataFrame({
+            'ele': [100.0, 101.0, 102.0, 103.0, 104.0, 105.0, 106.0, 107.0, 108.0, 109.0, 110.0],
+            'dist': [10.0] * 11
+        })
+        is_ok, reason = check_elevation_quality(df)
+        assert is_ok is True
+        assert reason == "ok"
+
+    def test_corrupted_jitter(self):
+        """Test detection of extreme vertical jitter (>45% grade spikes)."""
+        # Create a series with huge elevation jumps relative to distance
+        df = pd.DataFrame({
+            'ele': [100.0, 150.0, 100.0, 150.0, 100.0, 150.0, 100.0, 150.0, 100.0, 150.0, 100.0],
+            'dist': [1.0] * 11  # 50m jump over 1m distance = 5000% grade
+        })
+        is_ok, reason = check_elevation_quality(df)
+        assert is_ok is False
+        assert "elevation data likely corrupted" in reason
+
+    def test_insufficient_data(self):
+        """Test failure on too few points."""
+        df = pd.DataFrame({'ele': [100, 101], 'dist': [10, 10]})
+        is_ok, reason = check_elevation_quality(df)
+        assert is_ok is False
+        assert "insufficient elevation data" in reason
+
+    def test_missing_columns(self):
+        """Test failure on missing columns."""
+        df = pd.DataFrame({'foo': [1, 2, 3]})
+        is_ok, reason = check_elevation_quality(df)
+        assert is_ok is False
+        assert "column missing" in reason
 
 
 class TestCalculateGradePercent:
