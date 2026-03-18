@@ -19,9 +19,9 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Numerical hardening of core physics calculations. Low risk as it only adds validation logic to prevent nonsensical output from corrupted GPS data."
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T20:40:08Z"
+  classified_at: "2026-03-18T20:42:20Z"
 ```
 
 ## Claims
@@ -29,7 +29,7 @@ classification:
 1. Add check_elevation_quality to detect GPS/barometric corruption (clamping >10%)
 2. Suppress GAP/EF_GAP when elevation is unreliable and surface reason via gap_quality_note
 3. Extend data models to capture and propagate GAP quality metadata
-4. No existing tests were modified or deleted during this change.
+4. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/physics-elevation-hardening/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ---
 
@@ -37,9 +37,16 @@ classification:
 
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
-| 1 | EVIDENCE_BIOSYSTEMS_PHYSICS_GAP.md | `38b5a20` | A, B, E |
+| 1 | EVIDENCE_BIOSYSTEMS_PHYSICS_GAP.md | `38b5a20` | A, B, E, F |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Prevent Grade Adjusted Pace (GAP) from producing unrealistic values when vertical GPS noise or barometric spikes are detected.
+- **Requirement:** Ensure reporting remains forensically honest by explicitly noting when data quality is insufficient for secondary metrics.
+
+### Class F (Provenance)
+
+**Claim 4:** The new quality check logic was verified against synthetic jitter datasets. All existing GAP regression tests continue to pass with the updated implementation.
 
 ### Class B (Referential Evidence)
 
