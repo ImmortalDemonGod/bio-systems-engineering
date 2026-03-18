@@ -75,6 +75,15 @@ classification:
 Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (1/1 symbols verified).
 Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/types, not behavior.
 
+### Class F (Provenance Evidence)
+
+**Test file chain-of-custody:**
+
+| File | Commits | Created By | Last Modified By | Assertions |
+|------|---------|------------|------------------|------------|
+| `tests/test_signal.py` | 1 | openhands | openhands | 15 |
+| `tests/test_walk_detection_fix.py` | 1 | Miguel Ingram | Miguel Ingram | 5 |
+
 ---
 
 ## Summary

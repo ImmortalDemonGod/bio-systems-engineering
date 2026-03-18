@@ -19,7 +19,7 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Introduces new CLI and enhances existing parsers for OpenClaw integration. These enhancements improve data consistency and robustness for autonomous monitoring."
   classified_by: "Miguel Ingram"
   classified_at: "2026-03-18T03:17:49Z"
 ```
@@ -27,18 +27,19 @@ classification:
 ## Claims
 
 1. Walk metrics fallback to None to satisfy Pydantic models
-2. No existing tests were modified or deleted during this change.
-3. FIT timestamps use utc=True to match GPX parser
-4. Sanitization handles activities shorter than truncation distance
-5. Fixed SyntaxError in f-string
-6. Typer added to project dependencies
-7. Typer added to requirements file
-8. RunContext fields have explicit default=None for strict mypy compliance
-9. CLI provides physiological metrics in JSON format
-10. Supports FIT and GPX activity files
-11. Verifies walk_block_segments returns None for missing data
-12. Verifies sanitize_dataframe handles short activities
-13. Verifies CLI analyze works on real GPX files
+2. Existing tests were preserved. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/openclaw-integration/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
+3. No existing tests were modified or deleted during this change. Verified by link to the [test file diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/openclaw-integration/files) and [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
+4. FIT timestamps use utc=True to match GPX parser
+5. Sanitization handles activities shorter than truncation distance
+6. Fixed SyntaxError in f-string
+7. Typer added to project dependencies
+8. Typer added to requirements file
+9. RunContext fields have explicit default=None for strict mypy compliance
+10. CLI provides physiological metrics in JSON format
+11. Supports FIT and GPX activity files
+12. Verifies walk_block_segments returns None for missing data
+13. Verifies sanitize_dataframe handles short activities
+14. Verifies CLI analyze works on real GPX files
 
 ---
 
@@ -46,9 +47,9 @@ classification:
 
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
-| 1 | EVIDENCE_BIOSYSTEMS_SIGNAL_WALK_DETECTION.md | `7427955` | A, B, E |
-| 2 | EVIDENCE_BIOSYSTEMS_INGESTION_FIT.md | `056b46d` | A, B, E |
-| 3 | EVIDENCE_TOOLS_SANITIZE_GPS.md | `2c89739` | A, B, E |
+| 1 | EVIDENCE_BIOSYSTEMS_SIGNAL_WALK_DETECTION.md | `7427955` | A, B, E, F |
+| 2 | EVIDENCE_BIOSYSTEMS_INGESTION_FIT.md | `056b46d` | A, B, E, F |
+| 3 | EVIDENCE_TOOLS_SANITIZE_GPS.md | `2c89739` | A, B, E, F |
 | 4 | EVIDENCE_PYPROJECT.TOML.md | `d2ad841` | A, B, E |
 | 5 | EVIDENCE_REQUIREMENTS.TXT.md | `c66f7c4` | A, B, E |
 | 6 | EVIDENCE_BIOSYSTEMS_MODELS.md | `5236596` | A, B, E |
@@ -57,7 +58,14 @@ classification:
 | 9 | EVIDENCE_TESTS_TEST_SANITIZE_GPS_FIX.md | `1b4ddbc` | A, B, E |
 | 10 | EVIDENCE_TESTS_TEST_CLI_INTEGRATION.md | `a781661` | A, B, E |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Integration with OpenClaw requires a JSON-native CLI and robust data contracts to enable autonomous physiological monitoring.
+- **Requirement:** Standardize timezone handling and harden data sanitization to ensure forensic integrity of the analysis pipeline.
+
+### Class F (Provenance)
+
+**Claim 2-3:** All existing tests in `tests/test_ingestion_gpx.py` were preserved and passed. New tests provide additional coverage for all introduced fixes. Verified by [test preservation diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/openclaw-integration/files) and [local CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ### Class B (Referential Evidence)
 
