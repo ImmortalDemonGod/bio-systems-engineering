@@ -6,16 +6,43 @@ Command-line interface for analyzing human performance metrics.
 Provides a JSON-native output for integration with OpenClaw.
 """
 
+import os
 from pathlib import Path
 
 import dotenv
 import typer
 import yaml
 
-# Resolve package root regardless of CWD so the CLI works when invoked from
-# any directory (e.g. an OpenClaw workspace or a CI runner).
+# Load .env using python-dotenv's upward search (CWD → parents).
+# This works for both editable installs (repo root .env) and bare
+# environment injection (OpenClaw / CI), where load_dotenv() is a safe no-op.
+dotenv.load_dotenv()
+
+# _PKG_ROOT is the editable-install repo root, used only as a last-resort
+# fallback for zones_path when neither BIOSYSTEMS_ZONES_PATH nor the
+# XDG config path exists. Under a regular pip install this resolves to
+# site-packages/../../.. (not useful), so _default_zones_path() always
+# tries env var and XDG first.
 _PKG_ROOT = Path(__file__).resolve().parents[2]
-dotenv.load_dotenv(_PKG_ROOT / ".env")
+
+
+def _default_zones_path() -> Path:
+    """
+    Resolve the default zones configuration file in priority order:
+
+    1. ``BIOSYSTEMS_ZONES_PATH`` environment variable (explicit override)
+    2. ``~/.config/biosystems/zones.yml`` (XDG standard user config)
+    3. ``<repo-root>/data/zones_personal.yml`` (editable-install fallback)
+    """
+    env_override = os.environ.get("BIOSYSTEMS_ZONES_PATH")
+    if env_override:
+        return Path(env_override)
+
+    xdg_path = Path.home() / ".config" / "biosystems" / "zones.yml"
+    if xdg_path.exists():
+        return xdg_path
+
+    return _PKG_ROOT / "data" / "zones_personal.yml"
 from pydantic import ValidationError
 
 from biosystems.ingestion.fit import add_derived_metrics, parse_fit
@@ -72,7 +99,7 @@ def load_zone_config(yaml_path: Path) -> ZoneConfig:
 def analyze(
     file_path: Path = typer.Argument(..., help="Path to activity file (.fit or .gpx)"),
     zones_path: Path = typer.Option(
-        _PKG_ROOT / "data/zones_personal.yml",
+        _default_zones_path(),
         "--zones", "-z",
         help="Path to zones configuration YAML"
     ),
@@ -138,7 +165,7 @@ def strava(
         None, help="Strava activity ID. Omit to use the most recent run."
     ),
     zones_path: Path = typer.Option(
-        _PKG_ROOT / "data/zones_personal.yml",
+        _default_zones_path(),
         "--zones", "-z",
         help="Path to zones configuration YAML",
     ),
@@ -499,7 +526,7 @@ def backfill_streams(
         help="Fetch all runs on or after this date (YYYY-MM-DD). Default: day after study end.",
     ),
     zones_path: Path = typer.Option(
-        _PKG_ROOT / "data/zones_personal.yml",
+        _default_zones_path(),
         "--zones", "-z",
         help="Path to zones configuration YAML",
     ),
@@ -954,7 +981,7 @@ def top(
 @app.command(rich_help_panel="Analytics")
 def trend(
     zones_path: Path = typer.Option(
-        _PKG_ROOT / "data/zones_personal.yml",
+        _default_zones_path(),
         "--zones", "-z",
         help="Path to zones configuration YAML",
     ),
