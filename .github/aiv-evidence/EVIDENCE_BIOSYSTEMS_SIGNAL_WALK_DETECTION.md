@@ -1,8 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/signal/walk_detection.py`
-**Commit:** `03ed8ce`
-**Generated:** 2026-03-18T03:09:58Z
+**Commit:** `36f6c0c`
+**Previous:** `086855b`
+**Generated:** 2026-03-18T06:01:58Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -15,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "src/biosystems/signal/walk_detection.py"
-  classification_rationale: "Bug fix for type safety"
+  classification_rationale: "Technical debt"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T03:09:58Z"
+  classified_at: "2026-03-18T06:01:58Z"
 ```
 
 ## Claim(s)
 
-1. Walk metrics fallback to None to satisfy Pydantic models
+1. Redirect sanity debug prints to sys.stderr to prevent JSON corruption
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -31,20 +32,21 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/openclaw-integration](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/openclaw-integration)
-- **Requirements Verified:** Align walk detection output with WalkSegment schema
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics)
+- **Requirements Verified:** Maintain clean interface for automated tool ingestion
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`03ed8ce`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/03ed8ce80c4c69583c4ad2131176cad17d286189))
+**Scope Inventory** (SHA: [`36f6c0c`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/36f6c0c6631f53ea595eab5928e62258899cc650))
 
-- [`src/biosystems/signal/walk_detection.py#L299-L302`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/03ed8ce80c4c69583c4ad2131176cad17d286189/src/biosystems/signal/walk_detection.py#L299-L302)
+- [`src/biosystems/signal/walk_detection.py#L10-L11`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/36f6c0c6631f53ea595eab5928e62258899cc650/src/biosystems/signal/walk_detection.py#L10-L11)
+- [`src/biosystems/signal/walk_detection.py#L273-L274`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/36f6c0c6631f53ea595eab5928e62258899cc650/src/biosystems/signal/walk_detection.py#L273-L274)
 
 ### Class A (Execution Evidence)
 
 **Per-symbol test coverage (AST analysis):**
 
-- **`walk_block_segments`** (L299-L302): PASS -- 6 test(s) call `walk_block_segments` directly
+- **`walk_block_segments`** (L10-L11): PASS -- 6 test(s) call `walk_block_segments` directly
   - `tests/test_signal.py::test_detects_walk_blocks`
   - `tests/test_signal.py::test_classifies_warmup`
   - `tests/test_signal.py::test_classifies_cooldown`
@@ -56,14 +58,14 @@ classification:
 
 ### Code Quality (Linting & Types)
 
-- **ruff:** 24 error(s)
+- **ruff:** 26 error(s)
 - **mypy:** Success: no issues found in 1 source file
 
 ## Claim Verification Matrix
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | Walk metrics fallback to None to satisfy Pydantic models | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 1 | Redirect sanity debug prints to sys.stderr to prevent JSON c... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
 | 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
 **Verdict summary:** 0 verified, 0 unverified, 2 manual review.
@@ -75,17 +77,8 @@ classification:
 Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (1/1 symbols verified).
 Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/types, not behavior.
 
-### Class F (Provenance Evidence)
-
-**Test file chain-of-custody:**
-
-| File | Commits | Created By | Last Modified By | Assertions |
-|------|---------|------------|------------------|------------|
-| `tests/test_signal.py` | 1 | openhands | openhands | 15 |
-| `tests/test_walk_detection_fix.py` | 1 | Miguel Ingram | Miguel Ingram | 5 |
-
 ---
 
 ## Summary
 
-Refactor walk detection fallbacks
+Redirect walk detection prints to stderr

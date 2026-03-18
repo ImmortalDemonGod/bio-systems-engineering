@@ -7,6 +7,8 @@ within running activities. Uses pace and cadence thresholds to identify
 recovery intervals.
 """
 
+import sys
+
 import numpy as np
 import pandas as pd
 from typing import Any, cast
@@ -268,7 +270,8 @@ def walk_block_segments(
         # Sanity check: skip bad segments (long duration, zero distance)
         if dur_s >= 60 and (pd.isnull(dist_km) or dist_km <= 0):
             print(
-                f"[SANITY DEBUG] SKIPPING BAD SEGMENT seg_id={seg_id}, dur_s={dur_s}, dist_km={dist_km}"
+                f"[SANITY DEBUG] SKIPPING BAD SEGMENT seg_id={seg_id}, dur_s={dur_s}, dist_km={dist_km}",
+                file=sys.stderr,
             )
             continue
 
