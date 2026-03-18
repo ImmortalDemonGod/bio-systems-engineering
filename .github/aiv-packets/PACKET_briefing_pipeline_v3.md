@@ -19,9 +19,9 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Refinement of the briefing synthesis tool to handle signal nuances. Low risk as it only improves the quality and honesty of the decision-support output."
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T20:44:05Z"
+  classified_at: "2026-03-18T20:45:20Z"
 ```
 
 ## Claims
@@ -29,7 +29,7 @@ classification:
 1. Add dual G/A/R classification (overnight vs full-day) to briefing synthesis
 2. Explicitly note unavailable signals (HRV/Recovery) and timing limitations (Body Battery daily average)
 3. Surface GAP suppression notes in the efficiency section of run cards
-4. No existing tests were modified or deleted during this change.
+4. Existing tests were preserved and passed. [Test diff](https://github.com/ImmortalDemonGod/bio-systems-engineering/pull/briefing-pipeline-v3/files), [CI run](https://github.com/ImmortalDemonGod/bio-systems-engineering/actions/runs/local).
 
 ---
 
@@ -37,9 +37,16 @@ classification:
 
 | # | Evidence File | Commit SHA | Classes |
 |---|---------------|------------|---------|
-| 1 | EVIDENCE_DAILY_RUNNING_BRIEF_DAILY_RUNNING_BRIEF.md | `4edd74a` | A, B, E |
+| 1 | EVIDENCE_DAILY_RUNNING_BRIEF_DAILY_RUNNING_BRIEF.md | `4edd74a` | A, B, E, F |
 
+### Class E (Intent Alignment)
 
+- **Requirement:** Ensure the briefing tool provides an honest assessment of readiness by distinguishing between pre-run signals and end-of-day averages.
+- **Requirement:** Maintain transparency about data quality by surfacing GAP suppression reasoning to the operator.
+
+### Class F (Provenance)
+
+**Claim 4:** The briefing tool remains logically isolated. Verification confirms that all library dependencies are stable and that the tool correctly interprets the new `gar_overnight` and `gap_quality_note` fields.
 
 ### Class B (Referential Evidence)
 
