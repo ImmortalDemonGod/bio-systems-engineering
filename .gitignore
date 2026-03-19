@@ -45,9 +45,13 @@ htmlcov/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Data - CRITICAL: Protect raw GPS data
+# Data - CRITICAL: Protect raw GPS data and processed outputs
 data/raw/**
 !data/raw/.gitkeep
+data/processed/
+data/habitdash_raw/
+data/*.parquet
+data/*.zip
 
 # Private data files (NEVER COMMIT)
 *.fit
@@ -60,10 +64,7 @@ data/raw/**
 *.key
 secrets/
 
-# Cache
+# Cache and runtime artifacts
 *.parquet.cache
 weather_cache.parquet
-
-# OS
-Thumbs.db
 .cache/
