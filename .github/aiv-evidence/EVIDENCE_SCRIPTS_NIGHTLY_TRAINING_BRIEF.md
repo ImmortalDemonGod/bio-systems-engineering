@@ -1,62 +1,19 @@
-# AIV Evidence File (v1.0)
+# AIV Evidence — scripts/nightly_training_brief.py (deletion)
 
-**File:** `scripts/nightly_training_brief.py`
-**Commit:** `6de5197`
-**Generated:** 2026-03-18T19:27:56Z
-**Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
+## Change
+Deleted `scripts/nightly_training_brief.py` (586 lines, 1 commit: e9ef3ae).
 
----
+## Rationale
+Superseded ancestor of the canonical brief. Operational brief lives at
+`~/.openclaw/workspace/scripts/daily_running_brief.py` (1909 lines),
+scheduled via launchd at 20:00, and contains all capabilities of the
+deleted file plus dual G/A/R, walk analysis, EF_GAP quality suppression,
+wellness dual-signal, sleep debt, fitness arc, and LLM synthesis pipeline.
 
-## Classification (required)
+## Risk
+R0 — deletion of dead code. No production logic altered. No tests reference
+this file. No imports in the biosystems package depend on it.
 
-```yaml
-classification:
-  risk_tier: R0
-  sod_mode: S0
-  critical_surfaces: []
-  blast_radius: "scripts/nightly_training_brief.py"
-  classification_rationale: "New operational tool"
-  classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:27:56Z"
-```
-
-## Claim(s)
-
-1. Add LLM-powered briefing tool to synthesize run and wellness data
-2. Add HabitDash raw data and extraction scripts
-3. No existing tests were modified or deleted during this change.
-
----
-
-## Evidence
-
-### Class E (Intent Alignment)
-
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/ops](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/ops)
-- **Requirements Verified:** Automate daily status synthesis for Sovereign Operator decision support
-
-### Class B (Referential Evidence)
-
-**Scope Inventory** (SHA: [`6de5197`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/6de5197a53342c2d066bc9b75fa29505d2be3882))
-
-- [`scripts/nightly_training_brief.py#L1-L586`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/6de5197a53342c2d066bc9b75fa29505d2be3882/scripts/nightly_training_brief.py#L1-L586)
-
-### Class A (Execution Evidence)
-
-- Local checks skipped (--skip-checks).
-- **Skip reason:** Operational scripts and raw data; briefing tool requires OpenAI/Anthropic API keys not present in local Tier R1 environment.
-
-
----
-
-## Verification Methodology
-
-**R0 (trivial) -- local checks skipped.**
-**Reason:** Operational scripts and raw data; briefing tool requires OpenAI/Anthropic API keys not present in local Tier R1 environment.
-Only git diff scope inventory was collected. No execution evidence.
-
----
-
-## Summary
-
-Add briefing pipeline
+## Verification
+- grep -r "nightly_training_brief" src/ tests/ → 0 matches
+- File had 0 importers in the codebase
