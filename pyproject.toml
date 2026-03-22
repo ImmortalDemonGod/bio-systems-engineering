@@ -49,10 +49,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/bio-systems-engineering"
-Documentation = "https://github.com/yourusername/bio-systems-engineering/blob/main/README.md"
-Repository = "https://github.com/yourusername/bio-systems-engineering"
-Issues = "https://github.com/yourusername/bio-systems-engineering/issues"
+Homepage = "https://github.com/ImmortalDemonGod/bio-systems-engineering"
+Documentation = "https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/main/README.md"
+Repository = "https://github.com/ImmortalDemonGod/bio-systems-engineering"
+Issues = "https://github.com/ImmortalDemonGod/bio-systems-engineering/issues"
 
 [project.scripts]
 biosystems = "biosystems.cli:app"
