@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `pyproject.toml`
-**Commit:** `bfdf0f5`
-**Previous:** `0b167a8`
-**Generated:** 2026-03-18T06:00:38Z
+**Commit:** `a7bbe84`
+**Previous:** `e7d8eba`
+**Generated:** 2026-03-22T03:05:41Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -12,18 +12,18 @@
 
 ```yaml
 classification:
-  risk_tier: R1
+  risk_tier: R0
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "pyproject.toml"
-  classification_rationale: "Infrastructure update"
+  classification_rationale: "Trivial placeholder substitution in project metadata — zero runtime impact"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T06:00:38Z"
+  classified_at: "2026-03-22T03:05:41Z"
 ```
 
 ## Claim(s)
 
-1. Add filelock and pyarrow dependencies; add biosystems CLI entry point
+1. pyproject.toml [project.urls] all four entries point to ImmortalDemonGod/bio-systems-engineering
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -32,44 +32,31 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/advanced-analytics)
-- **Requirements Verified:** Support infrastructure for advanced analytics
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
+- **Requirements Verified:** Package metadata must reference the real repository for PyPI and pip install discovery
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`bfdf0f5`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/bfdf0f578ed5271276b4063864c5f7dbf8cb4ca8))
+**Scope Inventory** (SHA: [`a7bbe84`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/a7bbe8488506442610accfb5625f9a99a777fcfd))
 
-- [`pyproject.toml#L37-L38`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/bfdf0f578ed5271276b4063864c5f7dbf8cb4ca8/pyproject.toml#L37-L38)
-- [`pyproject.toml#L57-L59`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/bfdf0f578ed5271276b4063864c5f7dbf8cb4ca8/pyproject.toml#L57-L59)
+- [`pyproject.toml#L52-L55`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/a7bbe8488506442610accfb5625f9a99a777fcfd/pyproject.toml#L52-L55)
 
 ### Class A (Execution Evidence)
 
-**WARNING:** No tests found that directly import or reference the changed file.
-This file has no claim-specific execution evidence.
+- Local checks skipped (--skip-checks).
+- **Skip reason:** URL-only change in metadata table, no installable logic affected
 
-### Code Quality (Linting & Types)
 
-- **ruff:** All checks passed
-- **mypy:** Found 1 error in 1 file (errors prevented further checking)
-
-## Claim Verification Matrix
-
-| # | Claim | Type | Evidence | Verdict |
-|---|-------|------|----------|---------|
-| 1 | Add filelock and pyarrow dependencies; add biosystems CLI en... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
-| 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
-
-**Verdict summary:** 0 verified, 0 unverified, 2 manual review.
 ---
 
 ## Verification Methodology
 
-**Zero-Touch Mandate:** Verifier inspects artifacts only.
-Evidence collected by `aiv commit` running: git diff (scope inventory), pytest (no claim-specific tests found).
-Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/types, not behavior.
+**R0 (trivial) -- local checks skipped.**
+**Reason:** URL-only change in metadata table, no installable logic affected
+Only git diff scope inventory was collected. No execution evidence.
 
 ---
 
 ## Summary
 
-Update pyproject.toml dependencies
+Replace yourusername with ImmortalDemonGod in all four pyproject.toml project URLs
