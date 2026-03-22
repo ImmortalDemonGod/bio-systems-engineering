@@ -64,7 +64,7 @@ All data were captured via an automated ETL pipeline implementing:
 ```python
 lz2 = lower_z2_bpm(zone_config)  # Zone 2 lower bound
 work_df = df[df['hr'] >= lz2]    # Filter to aerobic work only
-ef = (work_df['speed'].mean() / work_df['hr'].mean())
+ef = (work_df['dist'].sum() / work_df['dt'].sum()) / work_df['hr'].mean()
 ```
 
 **Validation:** Week 23 analysis confirmed filter isolated **39.0 minutes of high-intensity work** from a **59-minute total session**, removing 20 minutes of warm-up/recovery.
