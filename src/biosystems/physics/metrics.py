@@ -286,6 +286,10 @@ def run_metrics(
     total_dist_m = float(df["dist"].sum())
     secs = float(df["dt"].sum())
     avg_hr = float(df["hr"].mean())
+    if secs <= 0:
+        raise ValueError("Activity has zero elapsed time — cannot compute metrics")
+    if not (avg_hr > 0):
+        raise ValueError("Activity has no valid heart rate data — cannot compute metrics")
     avg_speed = total_dist_m / secs  # m/s
     avg_pace = 1000 / avg_speed / 60  # min/km
 
@@ -294,13 +298,10 @@ def run_metrics(
     decouple_pct = calculate_decoupling(df, zone_config)
     hr_tss = calculate_hr_tss(df, zone_config)
 
-    # Optionally calculate zone distributions (adds columns to df)
+    # Calculate zone distributions without mutating the caller's DataFrame
     zone_hr, zone_pace, zone_effective = compute_training_zones(
         df["hr"], df["pace_sec_km"], zone_config
     )
-    df["zone_hr"] = zone_hr
-    df["zone_pace"] = zone_pace
-    df["zone_effective"] = zone_effective
 
     # Calculate average cadence if available
     avg_cadence = None

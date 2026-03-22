@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/physics/metrics.py`
-**Commit:** `19256af`
-**Previous:** `0f705ab`
-**Generated:** 2026-03-18T19:26:19Z
+**Commit:** `a19f95c`
+**Previous:** `c05b0d1`
+**Generated:** 2026-03-22T03:06:23Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -16,15 +16,17 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "src/biosystems/physics/metrics.py"
-  classification_rationale: "Algorithmic fix"
+  classification_rationale: "Low-risk correctness fix in core analytics path — no API surface change, guards edge cases that produce invalid Pydantic output"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T19:26:19Z"
+  classified_at: "2026-03-22T03:06:23Z"
 ```
 
 ## Claim(s)
 
-1. Split sessions by cumulative elapsed time instead of sample count to handle non-uniform sampling
-2. No existing tests were modified or deleted during this change.
+1. run_metrics raises ValueError when secs <= 0 instead of producing inf EF
+2. run_metrics raises ValueError when avg_hr is NaN/zero instead of producing inf EF
+3. run_metrics no longer adds zone_hr/zone_pace/zone_effective columns to the caller's DataFrame
+4. No existing tests were modified or deleted during this change.
 
 ---
 
@@ -32,39 +34,43 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/physics](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/physics)
-- **Requirements Verified:** Ensure accurate aerobic drift calculation for auto-paused sessions
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
+- **Requirements Verified:** Core metric function must not silently produce inf/NaN and must not have hidden side-effects on inputs
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`19256af`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/19256afa4c02dab82abf79193cbc3358cb1cde3c))
+**Scope Inventory** (SHA: [`a19f95c`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/a19f95ccf09c1d309267cfae9116cdd07872ee57))
 
-- [`src/biosystems/physics/metrics.py#L191-L199`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/19256afa4c02dab82abf79193cbc3358cb1cde3c/src/biosystems/physics/metrics.py#L191-L199)
+- [`src/biosystems/physics/metrics.py#L289-L292`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/a19f95ccf09c1d309267cfae9116cdd07872ee57/src/biosystems/physics/metrics.py#L289-L292)
+- [`src/biosystems/physics/metrics.py#L301`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/a19f95ccf09c1d309267cfae9116cdd07872ee57/src/biosystems/physics/metrics.py#L301)
 
 ### Class A (Execution Evidence)
 
 **Per-symbol test coverage (AST analysis):**
 
-- **`calculate_decoupling`** (L191-L199): PASS -- 3 test(s) call `calculate_decoupling` directly
-  - `tests/test_physics_metrics.py::test_no_drift`
-  - `tests/test_physics_metrics.py::test_positive_drift`
-  - `tests/test_physics_metrics.py::test_negative_drift`
+- **`run_metrics`** (L289-L292): PASS -- 4 test(s) call `run_metrics` directly
+  - `tests/test_physics_metrics.py::test_complete_analysis`
+  - `tests/test_physics_metrics.py::test_with_cadence`
+  - `tests/test_physics_metrics.py::test_without_elevation`
+  - `tests/test_readme_examples.py::test_quick_start_example`
 
 **Coverage summary:** 1/1 symbols verified by tests.
 
 ### Code Quality (Linting & Types)
 
-- **ruff:** All checks passed
+- **ruff:** 24 error(s)
 - **mypy:** Success: no issues found in 1 source file
 
 ## Claim Verification Matrix
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | Split sessions by cumulative elapsed time instead of sample ... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
-| 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
+| 1 | run_metrics raises ValueError when secs <= 0 instead of prod... | symbol | 4 test(s) call `run_metrics` | PASS VERIFIED |
+| 2 | run_metrics raises ValueError when avg_hr is NaN/zero instea... | symbol | 4 test(s) call `run_metrics` | PASS VERIFIED |
+| 3 | run_metrics no longer adds zone_hr/zone_pace/zone_effective ... | symbol | 4 test(s) call `run_metrics` | PASS VERIFIED |
+| 4 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
-**Verdict summary:** 0 verified, 0 unverified, 2 manual review.
+**Verdict summary:** 3 verified, 0 unverified, 1 manual review.
 ---
 
 ## Verification Methodology
@@ -77,4 +83,4 @@ Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/ty
 
 ## Summary
 
-Temporal decoupling split
+Add secs/avg_hr zero-guards and remove DataFrame mutation in run_metrics()
