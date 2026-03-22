@@ -104,7 +104,10 @@ def parse_gpx(path: str | Path) -> pd.DataFrame:
         ele = float(ele_node.text) if ele_node is not None else np.nan
 
         # Timestamp (required)
-        ts = pd.to_datetime(pt.find("g:time", ns).text, utc=True)
+        time_node = pt.find("g:time", ns)
+        if time_node is None or time_node.text is None:
+            continue  # skip malformed trackpoints with no timestamp
+        ts = pd.to_datetime(time_node.text, utc=True)
 
         # Heart rate (from Garmin extensions)
         hr_node = pt.find(".//gpxtpx:hr", ns)
