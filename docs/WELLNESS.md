@@ -63,19 +63,25 @@ in the current Garmin-only era.
 
 | Signal | RED | AMBER | Timing |
 |--------|-----|-------|--------|
-| HRV (7d drop) | > personal 2σ | > personal 1σ | Overnight ✅ |
-| RHR (7d spike) | > personal 2.5σ | > personal 1.5σ | Overnight ✅ |
+| HRV (7d drop) | > 20% drop from 7d mean | > 10% drop from 7d mean | Overnight ✅ |
+| RHR (7d spike) | > +8 bpm above 7d mean | > +5 bpm above 7d mean | Overnight ✅ |
 | Recovery Score | < 34% | 34–67% | Overnight ✅ (Whoop only) |
 | Sleep Score | < 60% | 60–80% | Overnight ✅ (Whoop only) |
-| Resp Rate | > +2.5σ | > +1.5σ | Overnight ✅ |
-| Body Battery | < personal p20 | < personal p40 | Daily avg ❌ |
-| Avg Stress | > personal p90 | > personal p75 | Daily avg ❌ |
+| Resp Rate | > calibrated +2.5σ above personal mean | > calibrated +1.5σ | Overnight ✅ |
+| Body Battery | < 30 (fallback) / < personal p20 (calibrated) | < 45 / < personal p40 | Daily avg ❌ |
+| Avg Stress | > 55 (fallback) / > personal p90 (calibrated) | > 40 / > personal p75 | Daily avg ❌ |
 
 Priority: any RED → 🔴 RED. No RED but any AMBER → 🟡 AMBER. All clear → 🟢 GREEN.
 
 ### Calibration
 Thresholds are derived from personal data distribution via `calibrate_thresholds()` in
-`analytics.py`. Falls back to clinical constants when < 30 Garmin days of data.
+`analytics.py` once ≥ 30 days of Garmin data exist. **Before calibration**, the system
+falls back to absolute constants defined in `cache.py`:
+- HRV: −20% / −10% drop from 7-day mean
+- RHR: +8 bpm / +5 bpm above 7-day mean
+- Body Battery: < 30 / < 45 (absolute)
+- Avg Stress: > 55 / > 40 (absolute)
+- Resp Rate: σ-based thresholds from `calibrate_thresholds()` (no absolute fallback)
 
 ## Cache
 
