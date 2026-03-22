@@ -12,20 +12,18 @@ A single 45-minute running session with synthetic GPS, HR, and cadence data.
 
 **Usage:**
 ```python
-from biosystems.ingestion.gpx import parse_gpx
 import pandas as pd
+from biosystems.models import ZoneConfig, HeartRateZone
+from biosystems.physics.metrics import run_metrics
 
 # Load sample data
 df = pd.read_csv('data/sample/sample_run.csv', parse_dates=['time'])
 
-# Process with bio-systems pipeline
-from biosystems.physics.metrics import run_metrics
-from biosystems.models import ZoneConfiguration
-
-zones = ZoneConfiguration(
+# Configure zones (match your personal HR profile)
+zones = ZoneConfig(
     resting_hr=50,
     threshold_hr=186,
-    zones={"Z2": {"bpm": (145, 165), "pace_min_per_km": (9.0, 9.4)}}
+    zones={"Z2": HeartRateZone(name="Z2 (Aerobic)", bpm=(145, 165), pace_min_per_km=(4.5, 6.0))}
 )
 
 metrics = run_metrics(df, zones)
@@ -47,12 +45,14 @@ Temporal patterns and physiological data are representative of actual training p
 # Process sample run
 python -c "
 import pandas as pd
+from biosystems.models import ZoneConfig, HeartRateZone
 from biosystems.physics.metrics import run_metrics
-from biosystems.models import ZoneConfiguration
 
 df = pd.read_csv('data/sample/sample_run.csv', parse_dates=['time'])
-zones = ZoneConfiguration(resting_hr=50, threshold_hr=186,
-                          zones={'Z2': {'bpm': (145, 165), 'pace_min_per_km': (9.0, 9.4)}})
+zones = ZoneConfig(
+    resting_hr=50, threshold_hr=186,
+    zones={'Z2': HeartRateZone(name='Z2 (Aerobic)', bpm=(145, 165), pace_min_per_km=(4.5, 6.0))}
+)
 metrics = run_metrics(df, zones)
 print(f'EF: {metrics.efficiency_factor:.5f}')
 print(f'Decoupling: {metrics.decoupling_pct:.2f}%')
