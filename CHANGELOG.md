@@ -20,14 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - GPS jitter filtering
   - Walk segment analysis
 - **Models Module**: Pydantic models for type-safe data validation
-  - `ActivityData`: Validated GPS/HR time-series
-  - `ZoneConfiguration`: Heart rate and pace zone definitions
+  - `ZoneConfig`: Heart rate and pace zone definitions
   - `PhysiologicalMetrics`: Calculated summary metrics
-- **Environment Module**: Weather data integration via OpenWeatherMap API
+  - `FullRunReport`: Comprehensive run report with dual-mode session/run-only metrics
+- **Environment Module**: Weather data integration via Open-Meteo API
 - **Tools**:
   - `sanitize_gps.py`: Privacy-preserving GPS data sanitization
   - `verify_installation.py`: Installation verification script
-- Comprehensive test suite with 85% code coverage
+- Comprehensive test suite with 77% code coverage
 - Docker support for reproducible environments
 - Complete API documentation
 

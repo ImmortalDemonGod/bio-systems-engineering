@@ -16,10 +16,10 @@ Example
 -------
 >>> from biosystems.ingestion.gpx import parse_gpx
 >>> from biosystems.physics.metrics import calculate_efficiency_factor
->>> 
+>>>
 >>> # Parse activity file
 >>> df = parse_gpx("my_run.gpx")
->>> 
+>>>
 >>> # Calculate metrics
 >>> ef = calculate_efficiency_factor(df, zones)
 >>> print(f"Efficiency Factor: {ef:.5f}")

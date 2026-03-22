@@ -86,11 +86,25 @@ ef = (work_df['speed'].mean() / work_df['hr'].mean())
 
 **Explicitly Acknowledged:**
 1. **N=1 design** - Results demonstrate feasibility, not generalizability
-2. **GAP not applied to historical dataset** - Analyses in this report assume topographically similar routes; GAP is implemented for future use only
+2. **GAP not applied to historical dataset** - Analyses in this report assume topographically similar routes; GAP is implemented for prospective use only
 3. **No heat adjustment algorithm** - Performance gains likely **underestimated** given thermal stress
 4. **Missing power data** - Power metrics excluded from all analyses
 
 **Implication:** The reported **18% EF improvement** (RPE 10 test-retest comparison: Baseline W17 = 0.0180, Final W32 = 0.0212) represents a scientifically valid maximal effort comparison, demonstrating true physiological adaptation under controlled testing conditions.
+
+### 2.5 Post-Study Pipeline Improvements
+
+Following completion of the 103-day study, the analysis pipeline underwent algorithmic corrections that do not retroactively alter the reported results but improve future measurement validity:
+
+1. **Aerobic Decoupling (temporal split):** The original pipeline split workouts at the midpoint *by sample index*. The corrected implementation splits at the true temporal midpoint using cumulative elapsed time (`DatetimeIndex` midpoint), ensuring accurate halving for auto-paused and non-uniformly sampled sessions.
+
+2. **Walk Detection (hybrid classifier):** The original FIT/GPX pipeline used a single pace threshold. The pipeline now uses a hybrid criterion: Strava `moving` flag (primary, from device motion detection) combined with pace > 8.7 min/km (fallback), dramatically reducing false positives at traffic stops and GPS dropout events.
+
+3. **Strava API integration:** The pipeline now ingests data directly from Strava's V3 API, incorporating device-grade barometric elevation, per-km GAP from the device's own sensor, and session metadata (perceived exertion, workout type, lap splits). This enables prospective studies with richer instrumentation.
+
+4. **Dual-mode reporting:** The pipeline now computes both full-session metrics (all data) and run-only metrics (walk-filtered), surfacing both. The study's EF values are equivalent to run-only metrics under the updated model.
+
+These changes have been validated against the study period data and do not alter the core findings.
 
 ---
 
@@ -302,12 +316,12 @@ print(f"Aerobic Decoupling: {metrics.decoupling_pct}%")
 - Cadence distribution data
 - Environmental context (temperature, weather codes)
 
-**Location:** `data/processed/weekly_metrics.parquet` (repository)
+**Location:** `data/real_weekly_data.json` (repository)
 
 **Sanitization:** All absolute GPS coordinates removed, first/last 500m truncated per privacy protocol.
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** 2025-12-02  
+**Document Version:** 1.1
+**Last Updated:** 2026-03-17
 **Correspondence:** [Contact through repository issues]

@@ -15,7 +15,47 @@ from biosystems.physics.gap import (
     calculate_gap_segment,
     calculate_gap_from_dataframe,
     calculate_average_gap,
+    check_elevation_quality,
 )
+
+
+class TestElevationQuality:
+    """Test elevation data quality checks."""
+
+    def test_reliable_elevation(self):
+        """Test ok signal for reasonable grade variation."""
+        df = pd.DataFrame({
+            'ele': [100.0, 101.0, 102.0, 103.0, 104.0, 105.0, 106.0, 107.0, 108.0, 109.0, 110.0],
+            'dist': [10.0] * 11
+        })
+        is_ok, reason = check_elevation_quality(df)
+        assert is_ok is True
+        assert reason == "ok"
+
+    def test_corrupted_jitter(self):
+        """Test detection of extreme vertical jitter (>45% grade spikes)."""
+        # Create a series with huge elevation jumps relative to distance
+        df = pd.DataFrame({
+            'ele': [100.0, 150.0, 100.0, 150.0, 100.0, 150.0, 100.0, 150.0, 100.0, 150.0, 100.0],
+            'dist': [1.0] * 11  # 50m jump over 1m distance = 5000% grade
+        })
+        is_ok, reason = check_elevation_quality(df)
+        assert is_ok is False
+        assert "elevation data likely corrupted" in reason
+
+    def test_insufficient_data(self):
+        """Test failure on too few points."""
+        df = pd.DataFrame({'ele': [100, 101], 'dist': [10, 10]})
+        is_ok, reason = check_elevation_quality(df)
+        assert is_ok is False
+        assert "insufficient elevation data" in reason
+
+    def test_missing_columns(self):
+        """Test failure on missing columns."""
+        df = pd.DataFrame({'foo': [1, 2, 3]})
+        is_ok, reason = check_elevation_quality(df)
+        assert is_ok is False
+        assert "column missing" in reason
 
 
 class TestCalculateGradePercent:
@@ -110,21 +150,27 @@ class TestCalculateGAPFromDataFrame:
     """Test DataFrame GAP calculation."""
     
     def test_simple_dataframe(self):
-        """Test GAP calculation on simple DataFrame."""
+        """Test GAP calculation on simple DataFrame.
+
+        Uses 10 points so the 5-point rolling elevation smoother has enough
+        context to preserve the grade signal (3-point series collapses to a
+        flat average under the centered window).
+        """
+        n = 10
         df = pd.DataFrame({
-            'pace_sec_km': [300, 300, 300],
-            'ele': [100, 105, 110],  # 5m elevation gain per segment
-            'dist': [100, 100, 100]   # 100m per segment
+            'pace_sec_km': [300.0] * n,
+            'ele': [100.0 + 5.0 * i for i in range(n)],  # 5m gain per segment
+            'dist': [100.0] * n,  # 100m per segment → 5% grade
         })
-        
+
         gap_series = calculate_gap_from_dataframe(df)
-        
-        # First point should be same (no grade)
+
+        # First point has no grade (prev diff is NaN)
         assert gap_series.iloc[0] == pytest.approx(300, rel=0.01)
-        
-        # Subsequent points should adjust for ~5% grade
-        assert gap_series.iloc[1] < 300  # Faster GAP
-        assert gap_series.iloc[2] < 300
+
+        # Interior points should adjust for ~5% uphill → GAP faster than pace
+        assert gap_series.iloc[5] < 300
+        assert gap_series.iloc[-1] < 300
     
     def test_flat_dataframe(self):
         """Test GAP on flat terrain matches actual pace."""
@@ -137,7 +183,7 @@ class TestCalculateGAPFromDataFrame:
         gap_series = calculate_gap_from_dataframe(df)
         
         # All points should be same as original
-        assert all(gap_series == pytest.approx(300, rel=0.01))
+        assert gap_series.tolist() == pytest.approx([300, 300, 300], rel=0.01)
     
     def test_missing_values(self):
         """Test handling of NaN values."""

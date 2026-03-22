@@ -116,10 +116,10 @@ class TestCalculateDecoupling:
             'hr': [160.0] * 300 + [170.0] * 300,
             'pace_sec_km': [300.0] * 600,  # Same pace
         })
-        df.index = pd.date_range('2024-01-01', periods=600, freq='S')
-        
+        df.index = pd.date_range('2024-01-01', periods=600, freq='s')
+
         decoupling = calculate_decoupling(df, sample_zone_config)
-        
+
         # Should show positive decoupling (HR went up)
         assert decoupling > 0
     
@@ -132,8 +132,8 @@ class TestCalculateDecoupling:
             'hr': [170.0] * 300 + [160.0] * 300,
             'pace_sec_km': [300.0] * 600,
         })
-        df.index = pd.date_range('2024-01-01', periods=600, freq='S')
-        
+        df.index = pd.date_range('2024-01-01', periods=600, freq='s')
+
         decoupling = calculate_decoupling(df, sample_zone_config)
         
         # Should show decoupling (absolute value)
@@ -195,9 +195,9 @@ class TestComputeTrainingZones:
             hr_array, pace_array, sample_zone_config
         )
         
-        # Should handle NaN gracefully
-        assert zone_hr.iloc[1] is None
-        assert zone_pace.iloc[2] is None
+        # Should handle NaN gracefully (pandas may return None or NaN)
+        assert zone_hr.iloc[1] is None or pd.isna(zone_hr.iloc[1])
+        assert zone_pace.iloc[2] is None or pd.isna(zone_pace.iloc[2])
 
 
 class TestLowerZ2BPM:

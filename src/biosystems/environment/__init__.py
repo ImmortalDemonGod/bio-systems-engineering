@@ -11,9 +11,9 @@ Features:
 """
 
 from biosystems.environment.weather import (
+    WeatherCache,
     fetch_weather_open_meteo,
     get_weather_description,
-    WeatherCache,
 )
 
 __all__ = [

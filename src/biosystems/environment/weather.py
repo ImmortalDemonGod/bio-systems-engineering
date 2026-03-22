@@ -6,19 +6,19 @@ Fetch and cache weather data from Open-Meteo API to provide environmental
 context for activities.
 """
 
-import requests
-import time
 import json
-from datetime import datetime, timedelta
+import sys
+import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, Optional, Union, Tuple
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
-
+import requests
 
 # WMO Weather interpretation codes (WW) mapping
-WMO_WEATHER_CODES: Dict[int, str] = {
+WMO_WEATHER_CODES: dict[int, str] = {
     0: "Clear sky",
     1: "Mainly clear",
     2: "Partly cloudy",
@@ -46,19 +46,19 @@ WMO_WEATHER_CODES: Dict[int, str] = {
     86: "Heavy snow showers",
     95: "Thunderstorm",
     96: "Thunderstorm with slight hail",
-    99: "Thunderstorm with heavy hail"
+    99: "Thunderstorm with heavy hail",
 }
 
 
-def get_weather_description(code: Optional[Union[int, float, str]]) -> str:
+def get_weather_description(code: int | float | str | None) -> str:
     """
     Convert WMO weather code to human-readable description.
-    
+
     Parameters
     ----------
     code : int, float, str, or None
         WMO weather code
-        
+
     Returns
     -------
     str
@@ -66,7 +66,7 @@ def get_weather_description(code: Optional[Union[int, float, str]]) -> str:
     """
     if code is None:
         return "Unknown"
-    
+
     try:
         code_int = int(float(code))
         return WMO_WEATHER_CODES.get(code_int, f"Unknown weather code: {code_int}")
@@ -74,15 +74,15 @@ def get_weather_description(code: Optional[Union[int, float, str]]) -> str:
         return f"Invalid weather code: {code}"
 
 
-def make_json_serializable(obj):
+def make_json_serializable(obj: Any) -> Any:
     """
     Recursively convert numpy arrays in dicts/lists to lists for JSON serialization.
-    
+
     Parameters
     ----------
     obj : any
         Object to convert
-        
+
     Returns
     -------
     any
@@ -101,7 +101,7 @@ def make_json_serializable(obj):
 class WeatherCache:
     """
     Simple weather data cache using Parquet file storage.
-    
+
     Attributes
     ----------
     cache_path : Path
@@ -109,38 +109,44 @@ class WeatherCache:
     cache : pd.DataFrame
         In-memory cache
     """
-    
-    def __init__(self, cache_path: Optional[Path] = None):
+
+    def __init__(self, cache_path: Path | None = None):
         """
         Initialize weather cache.
-        
+
         Parameters
         ----------
         cache_path : Path, optional
-            Path to cache file. If None, caching is disabled.
+            Path to cache file. If None, caching is memory-only.
         """
         self.cache_path = cache_path
-        
+
         # Load existing cache if available
         if cache_path and cache_path.exists():
-            self.cache = pd.read_parquet(cache_path)
-            # Ensure weather column is always a string (JSON)
-            if 'weather' in self.cache.columns:
-                def safe_serialize(x):
-                    if isinstance(x, dict):
-                        try:
-                            return json.dumps(make_json_serializable(x))
-                        except Exception:
-                            return None
-                    return x if pd.notnull(x) else None
-                self.cache['weather'] = self.cache['weather'].apply(safe_serialize)
+            try:
+                self.cache = pd.read_parquet(cache_path)
+                # Ensure weather column is always a string (JSON)
+                if "weather" in self.cache.columns:
+
+                    def safe_serialize(x):
+                        if isinstance(x, dict):
+                            try:
+                                return json.dumps(make_json_serializable(x))
+                            except Exception:
+                                return None
+                        return x if pd.notnull(x) else None
+
+                    self.cache["weather"] = self.cache["weather"].apply(safe_serialize)
+            except Exception:
+                # If reading fails (e.g. empty file), start fresh
+                self.cache = pd.DataFrame(columns=["lat", "lon", "date", "weather"])
         else:
-            self.cache = pd.DataFrame(columns=['lat', 'lon', 'date', 'weather'])
-    
-    def get(self, lat: float, lon: float, date_str: str) -> Optional[dict]:
+            self.cache = pd.DataFrame(columns=["lat", "lon", "date", "weather"])
+
+    def get(self, lat: float, lon: float, date_str: str) -> dict[Any, Any] | None:
         """
         Get cached weather data.
-        
+
         Parameters
         ----------
         lat : float
@@ -149,7 +155,7 @@ class WeatherCache:
             Longitude
         date_str : str
             Date in YYYY-MM-DD format
-            
+
         Returns
         -------
         dict or None
@@ -157,28 +163,28 @@ class WeatherCache:
         """
         if self.cache.empty:
             return None
-        
+
         cached = self.cache[
-            (self.cache['lat'] == lat) &
-            (self.cache['lon'] == lon) &
-            (self.cache['date'] == date_str)
+            (self.cache["lat"] == lat)
+            & (self.cache["lon"] == lon)
+            & (self.cache["date"] == date_str)
         ]
-        
+
         if not cached.empty:
-            weather = cached.iloc[0]['weather']
+            weather = cached.iloc[0]["weather"]
             if isinstance(weather, str):
                 try:
-                    return json.loads(weather)
+                    return cast(dict[Any, Any], json.loads(weather))
                 except Exception:
                     pass
-            return weather
-        
+            return cast(dict[Any, Any], weather)
+
         return None
-    
-    def set(self, lat: float, lon: float, date_str: str, weather: dict):
+
+    def set(self, lat: float, lon: float, date_str: str, weather: dict[Any, Any]):
         """
         Save weather data to cache.
-        
+
         Parameters
         ----------
         lat : float
@@ -190,39 +196,69 @@ class WeatherCache:
         weather : dict
             Weather data to cache
         """
-        if not self.cache_path:
-            return  # Caching disabled
-        
         # Add to in-memory cache
-        self.cache = pd.concat([
-            self.cache,
-            pd.DataFrame([{
-                'lat': lat,
-                'lon': lon,
-                'date': date_str,
-                'weather': json.dumps(weather)
-            }])
-        ], ignore_index=True)
-        
-        # Save to disk
-        self.cache.to_parquet(self.cache_path, index=False)
+        new_row = pd.DataFrame(
+            [
+                {
+                    "lat": lat,
+                    "lon": lon,
+                    "date": date_str,
+                    "weather": json.dumps(make_json_serializable(weather)),
+                }
+            ]
+        )
+
+        if self.cache.empty:
+            self.cache = new_row
+        else:
+            self.cache = pd.concat([self.cache, new_row], ignore_index=True)
+
+        # Save to disk if path provided
+        if self.cache_path:
+            self.cache.to_parquet(self.cache_path, index=False)
+
+
+def _weather_base_url(dt: datetime) -> str:
+    """
+    Return the appropriate Open-Meteo base URL for the given datetime.
+
+    Open-Meteo exposes two distinct endpoints:
+    - ``/v1/forecast``  — real-time + up to 16 days ahead (also serves the
+      most recent ~3 days of historical data, but not further back).
+    - ``/v1/archive``   — historical archive from 1940 to ~5 days ago.
+
+    Using the forecast endpoint for activities from months ago silently
+    returns an empty or mismatched hourly series, which is the root cause
+    of the previous ~891-request search loop.
+    """
+    now = datetime.utcnow()
+    age_days = (now.date() - dt.date()).days if dt.tzinfo is None else (
+        now.replace(tzinfo=timezone.utc) - dt.replace(tzinfo=timezone.utc)
+    ).days
+    if age_days > 3:
+        return "https://archive-api.open-meteo.com/v1/archive"
+    return "https://api.open-meteo.com/v1/forecast"
 
 
 def fetch_weather_open_meteo(
     lat: float,
     lon: float,
     dt: datetime,
-    cache: Optional[WeatherCache] = None,
-    max_retries: int = 6,
-    max_backoff: float = 2.0
-) -> Tuple[Optional[dict], Optional[float]]:
+    cache: WeatherCache | None = None,
+    max_retries: int = 3,
+    max_backoff: float = 2.0,
+) -> tuple[dict[Any, Any] | None, float | None]:
     """
-    Robustly fetch weather for a given latitude, longitude, and datetime (UTC).
-    
-    Implements exponential backoff on network/API errors.
-    Tries variations in time (±0 to ±5 hours) on the same day and location
-    (rounded, nudged lat/lon) until data is found.
-    
+    Fetch weather for a given latitude, longitude, and datetime (UTC).
+
+    Uses the Open-Meteo archive endpoint for historical dates (>3 days ago)
+    and the forecast endpoint for recent/future dates. Open-Meteo maps any
+    lat/lon to the nearest grid cell automatically, so lat/lon nudging is
+    unnecessary and has been removed.
+
+    Tries the target hour and ±1 hour offsets (3 requests per attempt at
+    most) with exponential backoff on transient errors.
+
     Parameters
     ----------
     lat : float
@@ -230,69 +266,73 @@ def fetch_weather_open_meteo(
     lon : float
         Longitude (degrees)
     dt : datetime
-        Target datetime (UTC)
+        Target datetime (UTC). May be tz-naive or tz-aware.
     cache : WeatherCache, optional
-        Cache instance for storing/retrieving data
+        Cache instance for storing/retrieving data.
     max_retries : int
-        Maximum number of retry attempts
+        Maximum number of retry attempts on network error.
     max_backoff : float
-        Maximum backoff time in seconds
-        
+        Maximum backoff duration in seconds.
+
     Returns
     -------
     weather : dict or None
-        Weather data if successful
+        Parsed Open-Meteo hourly response dict, or None on failure.
     offset_hours : float or None
-        Time offset in hours if successful
+        Hour offset used (0.0 on cache hit or exact match).
     """
-    # Check cache first
-    date_str = pd.to_datetime(dt).strftime('%Y-%m-%d')
-    
+    from datetime import timezone as _tz
+
+    date_str = pd.to_datetime(dt).strftime("%Y-%m-%d")
+
     if cache:
         cached = cache.get(lat, lon, date_str)
         if cached:
-            return cached, 0
-    
-    # Try variations in time and location
-    time_offsets = [timedelta(hours=h) for h in range(-5, 6)]
-    lat_variations = [lat, round(lat, 3), round(lat, 2), lat+0.01, lat-0.01, lat+0.05, lat-0.05, lat+0.1, lat-0.1]
-    lon_variations = [lon, round(lon, 3), round(lon, 2), lon+0.01, lon-0.01, lon+0.05, lon-0.05, lon+0.1, lon-0.1]
-    
+            return cached, 0.0
+
+    base_url = _weather_base_url(dt)
+    lat_r = round(lat, 4)
+    lon_r = round(lon, 4)
+    hourly_vars = "temperature_2m,precipitation,weathercode,windspeed_10m,windgusts_10m,winddirection_10m"
+
+    # Try exact hour first, then ±1 hour — 3 requests max per attempt
+    time_offsets = [timedelta(hours=h) for h in (0, 1, -1)]
+
     attempt = 0
     while attempt < max_retries:
-        all_failed = True
-        
-        for lat_try in lat_variations:
-            for lon_try in lon_variations:
-                for offset in time_offsets:
-                    hour_iso = (dt + offset).replace(minute=0, second=0, microsecond=0).isoformat()
-                    
-                    try:
-                        url = (
-                            f"https://api.open-meteo.com/v1/forecast?"
-                            f"latitude={lat_try}&longitude={lon_try}&"
-                            f"hourly=temperature_2m,precipitation,weathercode,windspeed_10m,windgusts_10m,winddirection_10m&"
-                            f"start={hour_iso}&end={hour_iso}&timezone=UTC"
-                        )
-                        resp = requests.get(url, timeout=6)
-                        
-                        if resp.status_code == 200:
-                            weather = resp.json()
-                            if 'hourly' in weather and weather['hourly']['temperature_2m']:
-                                result = weather
-                                # Save to cache
-                                if cache:
-                                    cache.set(lat, lon, date_str, result)
-                                return result, offset.total_seconds() / 3600
-                    except Exception as e:
-                        print(f"[Weather] Error: {e} (lat={lat_try}, lon={lon_try}, time={hour_iso})")
-        
-        # If we reach here, all variations failed for this attempt
-        if all_failed:
-            backoff = min(max_backoff, 0.2 * (2 ** attempt))
-            print(f"[Weather][Backoff] Attempt {attempt+1} failed, retrying in {backoff:.2f}s...")
-            time.sleep(backoff)
+        for offset in time_offsets:
+            target = dt + offset
+            if target.tzinfo is None:
+                target = target.replace(tzinfo=_tz.utc)
+            hour_str = target.strftime("%Y-%m-%dT%H:00")
+
+            try:
+                resp = requests.get(
+                    base_url,
+                    params={
+                        "latitude": lat_r,
+                        "longitude": lon_r,
+                        "hourly": hourly_vars,
+                        "start_hour": hour_str,
+                        "end_hour": hour_str,
+                        "timezone": "UTC",
+                    },
+                    timeout=8,
+                )
+                if resp.status_code == 200:
+                    weather = resp.json()
+                    temps = (weather.get("hourly") or {}).get("temperature_2m")
+                    if temps:
+                        if cache:
+                            cache.set(lat, lon, date_str, weather)
+                        return weather, offset.total_seconds() / 3600
+            except Exception as e:
+                print(f"[Weather] Error on attempt {attempt + 1}: {e}", file=sys.stderr)
+
+        backoff = min(max_backoff, 0.2 * (2 ** attempt))
+        print(f"[Weather][Backoff] Attempt {attempt + 1} failed, retrying in {backoff:.2f}s...", file=sys.stderr)
+        time.sleep(backoff)
         attempt += 1
-    
-    print(f"[Weather] Failed to fetch weather after {max_retries} retries for lat={lat}, lon={lon}, time={dt}")
+
+    print(f"[Weather] Failed after {max_retries} retries for lat={lat_r}, lon={lon_r}, time={dt}", file=sys.stderr)
     return None, None

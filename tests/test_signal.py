@@ -22,10 +22,10 @@ class TestFilterGPSJitter:
     """Test GPS jitter filtering."""
     
     def test_removes_slow_low_cadence(self):
-        """Test that slow pace + low cadence points are removed."""
+        """Test that fast pace + low cadence points (GPS jitter) are removed."""
         df = pd.DataFrame({
-            'pace_min_per_km': [8.0, 9.0, 10.0],  # Some slow
-            'cadence': [170, 120, 110]  # Some low
+            'pace_min_per_km': [8.0, 5.0, 10.0],  # 5.0 is fast, 8.0/10.0 are slow
+            'cadence': [170, 50, 110]  # 50 is very low
         })
         
         filtered = filter_gps_jitter(
@@ -35,8 +35,9 @@ class TestFilterGPSJitter:
             cad_thr=128
         )
         
-        # Should keep row 0 (fast pace) and maybe row 1
-        assert len(filtered) < len(df)
+        # Should drop row 1 (fast pace, low cadence)
+        assert len(filtered) == 2
+        assert 5.0 not in filtered['pace_min_per_km'].values
     
     def test_keeps_fast_pace(self):
         """Test that fast pace is always kept."""
@@ -184,12 +185,15 @@ class TestWalkBlockSegments:
         n_points = 1000
         
         # Create datetime index
-        idx = pd.date_range('2024-01-01 10:00:00', periods=n_points, freq='S')
+        idx = pd.date_range('2024-01-01 10:00:00', periods=n_points, freq='s')
+
+        # First walk starts at 30s (within 60s warm-up window)
+        is_walk = [False] * 30 + [True] * 100 + [False] * 770 + [True] * 100
         
         df = pd.DataFrame({
-            'is_walk': [False] * 200 + [True] * 100 + [False] * 600 + [True] * 100,
-            'pace_min_per_km': [6.0] * 200 + [10.0] * 100 + [6.0] * 600 + [10.0] * 100,
-            'cadence': [170] * 200 + [120] * 100 + [170] * 600 + [120] * 100,
+            'is_walk': is_walk,
+            'pace_min_per_km': [6.0 if not w else 10.0 for w in is_walk],
+            'cadence': [170 if not w else 120 for w in is_walk],
             'distance_cumulative_km': np.cumsum([0.01] * n_points),
             'heart_rate': [160] * n_points,
         }, index=idx)
@@ -261,7 +265,7 @@ class TestWalkBlockSegments:
     
     def test_no_walk_periods(self):
         """Test handling when no walk periods exist."""
-        idx = pd.date_range('2024-01-01 10:00:00', periods=100, freq='S')
+        idx = pd.date_range('2024-01-01 10:00:00', periods=100, freq='s')
         
         df = pd.DataFrame({
             'is_walk': [False] * 100,
