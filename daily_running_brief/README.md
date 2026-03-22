@@ -96,8 +96,8 @@ YYYY-MM-DD_running_brief.md
 
 ## Architecture notes
 
-- `WORKSPACE = Path(__file__).parent.parent` — identical to `nightly_synthesis_engine.py`
-- OpenAI primary / Anthropic fallback — identical `_chat()` to SIF engine
-- `_TOKEN_LOG` + usage table — identical format to SIF engine
+- `WORKSPACE = Path(__file__).parent.parent` — root of bio-systems-engineering repo
+- OpenAI primary / Anthropic fallback — `_chat()` abstraction used throughout
+- `_TOKEN_LOG` + usage table — consistent across all brief scripts
 - Exit code 2 from `biosystems strava` = analysis OK, history persistence failed — output is valid JSON, treated as success
 - FullRunReport JSON truncated to 12k chars if extremely large (marathon with full splits)
