@@ -223,15 +223,19 @@ bio-systems-engineering/
 │   ├── physics/             # EF, Decoupling, TSS, GAP algorithms
 │   ├── environment/         # Weather API integration
 │   ├── signal/              # Walk detection, filtering
+│   ├── wellness/            # HabitDash sync, Whoop/Garmin cache, G/A/R readiness
+│   ├── analytics/           # Strava integration, longitudinal analytics
+│   ├── cli.py               # CLI entry points (biosystems *)
 │   └── models.py            # Pydantic data contracts
 ├── data/
 │   ├── sample/              # Anonymized example run + weekly metrics
 │   └── raw/                 # User's .gpx/.fit files (gitignored)
 ├── docs/
+│   ├── WELLNESS.md          # Wellness integration architecture + signal timing
 │   └── images/              # Publication-quality charts
 ├── reports/
 │   └── 01_longitudinal_study.md  # Full technical narrative
-├── tests/                   # Automated test suite
+├── tests/                   # Automated test suite (161 tests)
 │   ├── test_readme_examples.py  # Validates README code works
 │   └── test_*.py            # Unit and integration tests
 └── tools/                   # Chart generation and utilities
@@ -304,7 +308,7 @@ Traditional sports science relies on manual logging, proprietary platforms, or e
 The physiological improvements documented in this study (W17-W36, 2025) were tracked using prototype analysis scripts in the parent `Holistic-Performance-Enhancement` monorepo. This repository represents a **production-grade refactoring** of that analysis methodology, with significant architectural improvements:
 
 - **Structured Package Architecture** - Modular `biosystems` package vs loose scripts
-- **Comprehensive Test Suite** - 149 tests across Python 3.10/3.11/3.12 with automated CI validation
+- **Comprehensive Test Suite** - 161 tests across Python 3.10/3.11/3.12 with automated CI validation
 - **Strict Data Contracts** - Pydantic models for type safety
 - **Enhanced Features** - Grade Adjusted Pace (GAP) calculation added
 - **Privacy Protection** - GPS sanitization tools and comprehensive `.gitignore`
@@ -328,7 +332,7 @@ MIT License - See [LICENSE](LICENSE) for details.
 ## Acknowledgments
 
 - **Open-Meteo API** - Free weather data
-- **Python Scientific Stack** - NumPy, Pandas, SciPy communities
+- **Python Scientific Stack** - NumPy, Pandas communities
 - **fitdecode** - Robust FIT file parsing
 
 ---
