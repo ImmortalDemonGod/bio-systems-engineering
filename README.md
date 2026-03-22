@@ -1,4 +1,4 @@
-# Bio-Systems Engineering (WORK IN PROGRESS!)
+# Bio-Systems Engineering
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -304,7 +304,7 @@ Traditional sports science relies on manual logging, proprietary platforms, or e
 The physiological improvements documented in this study (W17-W36, 2025) were tracked using prototype analysis scripts in the parent `Holistic-Performance-Enhancement` monorepo. This repository represents a **production-grade refactoring** of that analysis methodology, with significant architectural improvements:
 
 - **Structured Package Architecture** - Modular `biosystems` package vs loose scripts
-- **Comprehensive Test Suite** - 77% coverage with automated validation
+- **Comprehensive Test Suite** - 149 tests across Python 3.10/3.11/3.12 with automated CI validation
 - **Strict Data Contracts** - Pydantic models for type safety
 - **Enhanced Features** - Grade Adjusted Pace (GAP) calculation added
 - **Privacy Protection** - GPS sanitization tools and comprehensive `.gitignore`
