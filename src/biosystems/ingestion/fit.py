@@ -146,6 +146,13 @@ def parse_fit(path: str | Path) -> pd.DataFrame:
     if "heart_rate" in df.columns:
         df = df.rename(columns={"heart_rate": "hr"})
 
+    # Add lat/lon aliases so FIT DataFrames are interchangeable with GPX
+    # output in downstream functions that reference the short column names.
+    if "latitude" in df.columns and "lat" not in df.columns:
+        df["lat"] = df["latitude"]
+    if "longitude" in df.columns and "lon" not in df.columns:
+        df["lon"] = df["longitude"]
+
     # Handle potential NaN values
     # Convert cadence to int where valid, NaN otherwise
     if "cadence" in df.columns:

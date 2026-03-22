@@ -1,8 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/ingestion/fit.py`
-**Commit:** `7427955`
-**Generated:** 2026-03-18T03:10:39Z
+**Commit:** `8fdd2b3`
+**Previous:** `056b46d`
+**Generated:** 2026-03-22T03:12:23Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -15,15 +16,16 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "src/biosystems/ingestion/fit.py"
-  classification_rationale: "Consistency fix"
+  classification_rationale: "Low-risk additive change — aliases added only when canonical columns exist and alias is absent; no renames"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T03:10:39Z"
+  classified_at: "2026-03-22T03:12:23Z"
 ```
 
 ## Claim(s)
 
-1. FIT timestamps use utc=True to match GPX parser
-2. No existing tests were modified or deleted during this change.
+1. parse_fit output DataFrame contains lat and lon columns in addition to latitude and longitude
+2. FIT DataFrames can be passed to downstream functions expecting GPX-style lat/lon column names without KeyError
+3. No existing tests were modified or deleted during this change.
 
 ---
 
@@ -31,22 +33,26 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/openclaw-integration](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/openclaw-integration)
-- **Requirements Verified:** Maintain consistent timezone handling across all ingestion sources
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
+- **Requirements Verified:** FIT and GPX parsers must produce interchangeable DataFrames for the same signal/physics pipeline
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`7427955`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/742795587086c607b5c082d6fcb3366a368ec970))
+**Scope Inventory** (SHA: [`8fdd2b3`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/8fdd2b36fea7bd9ef6fbcb47e1e249414b3411bd))
 
-- [`src/biosystems/ingestion/fit.py#L137`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/742795587086c607b5c082d6fcb3366a368ec970/src/biosystems/ingestion/fit.py#L137)
+- [`src/biosystems/ingestion/fit.py#L149-L155`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/8fdd2b36fea7bd9ef6fbcb47e1e249414b3411bd/src/biosystems/ingestion/fit.py#L149-L155)
 
 ### Class A (Execution Evidence)
 
 **Per-symbol test coverage (AST analysis):**
 
-- **`parse_fit`** (L137): FAIL -- WARNING: No tests import or call `parse_fit`
+- **`parse_fit`** (L149-L155): PASS -- 4 test(s) call `parse_fit` directly
+  - `tests/test_ingestion_fit.py::test_row_count`
+  - `tests/test_ingestion_fit.py::test_zero_hr_becomes_nan`
+  - `tests/test_ingestion_fit.py::test_zero_cadence_becomes_nan`
+  - `tests/test_ingestion_fit.py::test_empty_file_raises_value_error`
 
-**Coverage summary:** 0/1 symbols verified by tests.
+**Coverage summary:** 1/1 symbols verified by tests.
 
 ### Code Quality (Linting & Types)
 
@@ -57,20 +63,21 @@ classification:
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | FIT timestamps use utc=True to match GPX parser | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
-| 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
+| 1 | parse_fit output DataFrame contains lat and lon columns in a... | symbol | 4 test(s) call `parse_fit` | PASS VERIFIED |
+| 2 | FIT DataFrames can be passed to downstream functions expecti... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 3 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
-**Verdict summary:** 0 verified, 0 unverified, 2 manual review.
+**Verdict summary:** 1 verified, 0 unverified, 2 manual review.
 ---
 
 ## Verification Methodology
 
 **Zero-Touch Mandate:** Verifier inspects artifacts only.
-Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (0/1 symbols verified).
+Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (1/1 symbols verified).
 Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/types, not behavior.
 
 ---
 
 ## Summary
 
-Force UTC timestamps in FIT ingestion
+Add lat/lon alias columns in parse_fit() after latitude/longitude are populated
