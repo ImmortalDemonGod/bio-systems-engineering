@@ -1056,9 +1056,39 @@ _TOKEN_LOG: list[dict] = []
 
 
 def _chat(messages: list[dict], system: str, label: str = "call") -> str:
-    """Call OpenAI (primary) or Anthropic (fallback). Mirrors SIF engine."""
-    openai_key    = os.environ.get("OPENAI_API_KEY")
-    anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
+    """Call OpenRouter (primary), OpenAI, or Anthropic (fallback). Mirrors SIF engine."""
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+    openai_key     = os.environ.get("OPENAI_API_KEY")
+    anthropic_key  = os.environ.get("ANTHROPIC_API_KEY")
+
+    if openrouter_key:
+        try:
+            from openai import OpenAI
+            client = OpenAI(
+                api_key=openrouter_key,
+                base_url="https://openrouter.ai/api/v1",
+            )
+            _REASONING_PREFIXES = ("o1", "o3", "o4", "gpt-5")
+            is_reasoning = any(_OPENAI_MODEL.startswith(p) for p in _REASONING_PREFIXES)
+            kwargs: dict = dict(
+                model=_OPENAI_MODEL,
+                messages=[{"role": "system", "content": system}] + messages,
+            )
+            if not is_reasoning:
+                kwargs["temperature"] = 0
+            resp = client.chat.completions.create(**kwargs)
+            u = resp.usage
+            _TOKEN_LOG.append({
+                "label":  label,
+                "model":  _OPENAI_MODEL,
+                "input":  u.prompt_tokens,
+                "output": u.completion_tokens,
+                "total":  u.total_tokens,
+                "cost":   round(u.prompt_tokens * 0.00000015 + u.completion_tokens * 0.00000060, 6),
+            })
+            return resp.choices[0].message.content or ""
+        except Exception:
+            pass  # fall through to next provider
 
     if openai_key:
         try:
@@ -1769,10 +1799,10 @@ def _print_token_report() -> None:
 def main() -> None:
     import argparse
 
-    if not os.environ.get("OPENAI_API_KEY") and not os.environ.get("ANTHROPIC_API_KEY"):
+    if not os.environ.get("OPENROUTER_API_KEY") and not os.environ.get("OPENAI_API_KEY") and not os.environ.get("ANTHROPIC_API_KEY"):
         sys.exit(
             "Error: no API key found.\n"
-            "  Set OPENAI_API_KEY (preferred, cheaper) or ANTHROPIC_API_KEY."
+            "  Set OPENROUTER_API_KEY (preferred), OPENAI_API_KEY, or ANTHROPIC_API_KEY."
         )
 
     parser = argparse.ArgumentParser(
