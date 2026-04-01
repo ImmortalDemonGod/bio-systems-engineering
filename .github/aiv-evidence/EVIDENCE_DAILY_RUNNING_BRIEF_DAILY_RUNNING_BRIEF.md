@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `daily_running_brief/daily_running_brief.py`
-**Commit:** `b1d13a7`
-**Previous:** `56cc2e5`
-**Generated:** 2026-03-18T20:40:46Z
+**Commit:** `074a0a7`
+**Previous:** `4edd74a`
+**Generated:** 2026-04-01T10:26:56Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -12,21 +12,19 @@
 
 ```yaml
 classification:
-  risk_tier: R0
+  risk_tier: R1
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "daily_running_brief/daily_running_brief.py"
-  classification_rationale: "Feature enhancement"
+  classification_rationale: "functional fix to production pipeline — brief was non-functional without valid OPENAI_API_KEY"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T20:40:46Z"
+  classified_at: "2026-04-01T10:26:56Z"
 ```
 
 ## Claim(s)
 
-1. Add dual G/A/R classification (overnight vs full-day) to briefing synthesis
-2. Explicitly note unavailable signals (HRV/Recovery) and timing limitations (Body Battery daily average)
-3. Surface GAP suppression notes in the efficiency section of run cards
-4. No existing tests were modified or deleted during this change.
+1. brief generates successfully using OPENROUTER_API_KEY when OPENAI_API_KEY is absent or invalid, using same gpt-5-mini model
+2. No existing tests were modified or deleted during this change.
 
 ---
 
@@ -34,37 +32,49 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/ops](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/ops)
-- **Requirements Verified:** Synthesize nuanced physiological context for decision support
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
+- **Requirements Verified:** brief must be generatable when OpenAI key is expired, using OpenRouter as drop-in replacement
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`b1d13a7`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/b1d13a7615ea6a3d2eae13be2b17c9153eb635af))
+**Scope Inventory** (SHA: [`074a0a7`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/074a0a7f9432515d4deb28a7c6ec8bbd7a323b6f))
 
-- [`daily_running_brief/daily_running_brief.py#L456-L461`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L456-L461)
-- [`daily_running_brief/daily_running_brief.py#L522-L533`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L522-L533)
-- [`daily_running_brief/daily_running_brief.py#L733-L736`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L733-L736)
-- [`daily_running_brief/daily_running_brief.py#L879`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L879)
-- [`daily_running_brief/daily_running_brief.py#L1598-L1600`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L1598-L1600)
-- [`daily_running_brief/daily_running_brief.py#L1602-L1608`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L1602-L1608)
-- [`daily_running_brief/daily_running_brief.py#L1623-L1624`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b1d13a7615ea6a3d2eae13be2b17c9153eb635af/daily_running_brief/daily_running_brief.py#L1623-L1624)
+- [`daily_running_brief/daily_running_brief.py#L1059-L1091`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/074a0a7f9432515d4deb28a7c6ec8bbd7a323b6f/daily_running_brief/daily_running_brief.py#L1059-L1091)
+- [`daily_running_brief/daily_running_brief.py#L1802`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/074a0a7f9432515d4deb28a7c6ec8bbd7a323b6f/daily_running_brief/daily_running_brief.py#L1802)
+- [`daily_running_brief/daily_running_brief.py#L1805`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/074a0a7f9432515d4deb28a7c6ec8bbd7a323b6f/daily_running_brief/daily_running_brief.py#L1805)
 
 ### Class A (Execution Evidence)
 
-- Local checks skipped (--skip-checks).
-- **Skip reason:** LLM synthesis logic; requires external API keys and live wellness data for verification.
+**Per-symbol test coverage (AST analysis):**
 
+- **`_chat`** (L1059-L1091): FAIL -- WARNING: No tests import or call `_chat`
+- **`main`** (L1802): FAIL -- WARNING: No tests import or call `main`
 
+**Coverage summary:** 0/2 symbols verified by tests.
+
+### Code Quality (Linting & Types)
+
+- **ruff:** 343 error(s)
+- **mypy:** Found 10 errors in 1 file (checked 1 source file)
+
+## Claim Verification Matrix
+
+| # | Claim | Type | Evidence | Verdict |
+|---|-------|------|----------|---------|
+| 1 | brief generates successfully using OPENROUTER_API_KEY when O... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
+
+**Verdict summary:** 0 verified, 0 unverified, 2 manual review.
 ---
 
 ## Verification Methodology
 
-**R0 (trivial) -- local checks skipped.**
-**Reason:** LLM synthesis logic; requires external API keys and live wellness data for verification.
-Only git diff scope inventory was collected. No execution evidence.
+**Zero-Touch Mandate:** Verifier inspects artifacts only.
+Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (0/2 symbols verified).
+Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/types, not behavior.
 
 ---
 
 ## Summary
 
-Update briefing tool synthesis
+check OPENROUTER_API_KEY first, use openai SDK with openrouter base_url, fall through to OpenAI then Anthropic
