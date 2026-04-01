@@ -54,14 +54,25 @@ def compute_pmc(
     if not entries:
         return []
 
-    # Build a TSS-by-date lookup
+    # Build a TSS-by-date lookup, aggregating multiple same-day runs
     tss_by_date: dict[str, float] = {}
     meta_by_date: dict[str, dict[str, Any]] = {}
     for e in entries:
         d = e.get("date", "")
         if d:
-            tss_by_date[d] = float(e.get("hrTSS", 0))
-            meta_by_date[d] = e
+            tss_by_date[d] = tss_by_date.get(d, 0.0) + float(e.get("hrTSS", 0))
+            if d not in meta_by_date:
+                meta_by_date[d] = dict(e)
+            else:
+                # Aggregate distance and mark as multi-run day
+                prev = meta_by_date[d]
+                prev_dist = prev.get("distance_km") or 0.0
+                curr_dist = e.get("distance_km") or 0.0
+                prev["distance_km"] = prev_dist + curr_dist
+                prev_name = prev.get("activity_name", "")
+                curr_name = e.get("activity_name", "")
+                if curr_name and curr_name != prev_name:
+                    prev["activity_name"] = f"{prev_name} + {curr_name}"
 
     dates_sorted = sorted(tss_by_date.keys())
     if not dates_sorted:
