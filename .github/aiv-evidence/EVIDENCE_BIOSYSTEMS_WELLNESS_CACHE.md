@@ -1,8 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/wellness/cache.py`
-**Commit:** `1c54260`
-**Generated:** 2026-03-18T20:37:27Z
+**Commit:** `b17b50d`
+**Previous:** `c3306ed`
+**Generated:** 2026-04-01T10:26:32Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -15,17 +16,15 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "src/biosystems/wellness/cache.py"
-  classification_rationale: "Algorithmic refinement"
+  classification_rationale: "runtime crash fix in production path (brief generation)"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-18T20:37:27Z"
+  classified_at: "2026-04-01T10:26:32Z"
 ```
 
 ## Claim(s)
 
-1. Add gar_overnight classification using only sleep-measured signals (RHR, HRV, sleep metrics)
-2. Explicitly flag daily-average signals (Body Battery, Stress) as not pre-run valid
-3. Update documentation with signal timing and readiness interpretation guide
-4. No existing tests were modified or deleted during this change.
+1. daily running brief no longer crashes with TypeError on resting_hr_garmin when string values are present in cache
+2. No existing tests were modified or deleted during this change.
 
 ---
 
@@ -33,25 +32,23 @@ classification:
 
 ### Class E (Intent Alignment)
 
-- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/wellness](https://github.com/ImmortalDemonGod/bio-systems-engineering/issues/wellness)
-- **Requirements Verified:** Distinguish morning readiness from end-of-day recovery accounting
+- **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
+- **Requirements Verified:** brief assembly must not crash on partially-synced or string-typed wellness cache entries
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`1c54260`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/1c54260c89d3ea8b64a57b228bdeb0c2af43401d))
+**Scope Inventory** (SHA: [`b17b50d`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/b17b50d2eb1f458a0f517a31ec2f50afe5cca70c))
 
-- [`src/biosystems/wellness/cache.py#L13-L25`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/1c54260c89d3ea8b64a57b228bdeb0c2af43401d/src/biosystems/wellness/cache.py#L13-L25)
-- [`src/biosystems/wellness/cache.py#L388-L435`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/1c54260c89d3ea8b64a57b228bdeb0c2af43401d/src/biosystems/wellness/cache.py#L388-L435)
-- [`src/biosystems/wellness/cache.py#L460`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/1c54260c89d3ea8b64a57b228bdeb0c2af43401d/src/biosystems/wellness/cache.py#L460)
-- [`src/biosystems/wellness/cache.py#L463-L468`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/1c54260c89d3ea8b64a57b228bdeb0c2af43401d/src/biosystems/wellness/cache.py#L463-L468)
+- [`src/biosystems/wellness/cache.py#L247`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b17b50d2eb1f458a0f517a31ec2f50afe5cca70c/src/biosystems/wellness/cache.py#L247)
 
 ### Class A (Execution Evidence)
 
 **Per-symbol test coverage (AST analysis):**
 
-- **`compute_wellness_context`** (L13-L25): FAIL -- WARNING: No tests import or call `compute_wellness_context`
+- **`compute_wellness_context`** (L247): FAIL -- WARNING: No tests import or call `compute_wellness_context`
+- **`_7d_mean`** (unknown): FAIL -- WARNING: No tests import or call `_7d_mean`
 
-**Coverage summary:** 0/1 symbols verified by tests.
+**Coverage summary:** 0/2 symbols verified by tests.
 
 ### Code Quality (Linting & Types)
 
@@ -62,22 +59,20 @@ classification:
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | Add gar_overnight classification using only sleep-measured s... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
-| 2 | Explicitly flag daily-average signals (Body Battery, Stress)... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
-| 3 | Update documentation with signal timing and readiness interp... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
-| 4 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
+| 1 | daily running brief no longer crashes with TypeError on rest... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
+| 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
-**Verdict summary:** 0 verified, 0 unverified, 4 manual review.
+**Verdict summary:** 0 verified, 0 unverified, 2 manual review.
 ---
 
 ## Verification Methodology
 
 **Zero-Touch Mandate:** Verifier inspects artifacts only.
-Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (0/1 symbols verified).
+Evidence collected by `aiv commit` running: git diff (scope inventory), AST symbol-to-test binding (0/2 symbols verified).
 Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/types, not behavior.
 
 ---
 
 ## Summary
 
-Add dual-signal wellness scoring
+use pd.to_numeric(errors=coerce) before .mean() in _7d_mean to handle mixed-type columns

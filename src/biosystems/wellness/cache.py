@@ -244,7 +244,7 @@ def compute_wellness_context(date_str: str) -> dict[str, Any]:
         prior = window[window.index < today_ts].tail(7)
         if prior.empty or col not in prior.columns:
             return None
-        vals = prior[col].dropna()
+        vals = pd.to_numeric(prior[col], errors="coerce").dropna()
         return float(vals.mean()) if not vals.empty else None
 
     # ── Raw values ────────────────────────────────────────────────────────────
