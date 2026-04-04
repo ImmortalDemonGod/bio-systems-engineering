@@ -10,9 +10,15 @@
 
 ## Abstract
 
-This longitudinal case study documents a **103-day systematic intervention** targeting biomechanical efficiency in endurance running. Using an automated data pipeline with rigorous signal filtering, we demonstrate a **+17% improvement in Efficiency Factor** (from RPE 10 baseline test 0.0180 to RPE 10 retest 0.0211) and a **+6 spm increase in cadence** following targeted neuromuscular training. The final test was conducted in summer heat (~28°C ambient, daily maximum 32°C vs. ~20°C baseline), providing evidence of physiological adaptation under continued thermal stress.
+**Background:** An endurance athlete exhibited diminishing efficiency returns over 15 months of volume-based training, with habitual cadence (~164 spm) below the optimal range for distance running.
 
-**Key Innovation:** Implementation of a "Run-Only Filter" that mathematically excludes recovery periods from performance calculations, ensuring metrics reflect pure running physiology rather than aggregate activity.
+**Purpose:** To determine whether targeted cadence modification via neuromuscular economy (NME) drills could improve running efficiency as measured by Efficiency Factor (EF = speed / heart rate).
+
+**Methods:** A 103-day N=1 intervention (Weeks 17–36) using an automated data pipeline with a custom Run-Only Filter (cadence ≥140 spm, pace <9.5 min/km) to isolate pure running physiology from aggregate activity data. RPE 10 test-retest design with pre-study trajectory as baseline context.
+
+**Results:** EF improved +17% (0.0180 → 0.0211) from the W17 RPE 10 baseline to the W32 retest, conducted in summer heat (~28°C). Cadence increased from 164.4 to 170.1 spm (+5.7 spm) at maximal effort. Aerobic decoupling dropped from 19.78% (W23, 32°C) to 4.71% (W35, 27°C) over a 66-minute endurance session. Within-subject EF coefficient of variation across 12 high-intensity sessions was 8.0%; the observed improvement was 2.1× CV.
+
+**Conclusions:** Systematic cadence modification produced measurable improvements in running efficiency beyond what volume-based training alone had achieved. The open-source `biosystems` pipeline and aggregate data are publicly available for independent verification and replication.
 
 ---
 
@@ -110,17 +116,17 @@ ef = (work_df['dist'].sum() / work_df['dt'].sum()) / work_df['hr'].mean()
 
 ### 2.5 Post-Study Pipeline Improvements
 
-Following completion of the 103-day study, the analysis pipeline underwent algorithmic corrections that do not retroactively alter the reported results but improve future measurement validity:
+Following completion of the 103-day study, the analysis pipeline (`biosystems`) underwent algorithmic improvements. The reported results use the original Cultivation pipeline's Run-Only Filter thresholds (cadence ≥140 spm OR pace ≤9.5 min/km); the current `biosystems` pipeline has been aligned to match these thresholds.
 
-1. **Aerobic Decoupling (temporal split):** The original pipeline split workouts at the midpoint *by sample index*. The corrected implementation splits at the true temporal midpoint using cumulative elapsed time (`DatetimeIndex` midpoint), ensuring accurate halving for auto-paused and non-uniformly sampled sessions.
+Changes and their impact on reported values:
 
-2. **Walk Detection (hybrid classifier):** The original FIT/GPX pipeline used a single pace threshold. The pipeline now uses a hybrid criterion: Strava `moving` flag (primary, from device motion detection) combined with pace > 8.7 min/km (fallback), dramatically reducing false positives at traffic stops and GPS dropout events.
+1. **Aerobic Decoupling (temporal split):** The original pipeline split workouts at the midpoint *by sample index*. The corrected implementation splits at the true temporal midpoint using cumulative elapsed time. Recomputation of the W17 baseline and W32 retest sessions showed <0.3 percentage point difference in decoupling values.
 
-3. **Strava API integration:** The pipeline now ingests data directly from Strava's V3 API, incorporating device-grade barometric elevation, per-km GAP from the device's own sensor, and session metadata (perceived exertion, workout type, lap splits). This enables prospective studies with richer instrumentation.
+2. **Walk Detection alignment:** The original Cultivation pipeline classified walk segments using `cadence < 140 spm OR pace > 9.5 min/km`. The `biosystems` pipeline has been updated to match these exact thresholds. The W32 RPE 10 session yields 170.1 spm (N=1,900 samples) under both the original and current pipeline — verified by reprocessing the Strava stream data with the Cultivation filter.
 
-4. **Dual-mode reporting:** The pipeline now computes both full-session metrics (all data) and run-only metrics (walk-filtered), surfacing both. The study's EF values are equivalent to run-only metrics under the updated model.
+3. **Strava API integration:** The pipeline now ingests data directly from Strava's V3 API. Reprocessing of study-period sessions via Strava streams produces EF and cadence values consistent with the original FIT-file-based analysis.
 
-These changes have been validated against the study period data and do not alter the core findings.
+4. **Dual-mode reporting:** The pipeline now computes both full-session and run-only metrics. The study's EF values correspond to run-only metrics under both the original and updated models.
 
 ---
 
@@ -319,7 +325,7 @@ This 103-day longitudinal study demonstrates:
 
 **Funding:** No external funding was received for this study.
 
-**Data availability:** Weekly aggregate metrics used in this study are publicly available in the project repository at `https://github.com/ImmortalDemonGod/bio-systems-engineering` under `data/real_weekly_data.json`. Raw `.fit` activity files are not shared to protect location privacy. Readers wishing to reproduce the analysis may apply the open-source `biosystems` pipeline (included in the same repository) to their own `.fit` data.
+**Data availability:** Weekly aggregate metrics are publicly available at `https://github.com/ImmortalDemonGod/bio-systems-engineering` under `data/real_weekly_data.json`. The dataset includes heart rate time-series (relative time only), cadence distribution data, and environmental context (temperature, weather codes). All absolute GPS coordinates have been removed and first/last 500m truncated per privacy protocol. Raw `.fit` activity files are not shared to protect location privacy. Requests for additional aggregated data may be submitted via GitHub Issues. Readers wishing to reproduce the analysis may apply the open-source `biosystems` pipeline (included in the same repository) to their own `.fit` data.
 
 ---
 
@@ -328,7 +334,14 @@ This 103-day longitudinal study demonstrates:
 1. Friel, J. (2009). *The Triathlete's Training Bible*. VeloPress. (Efficiency Factor methodology)
 2. Minetti, A. E., et al. (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *Journal of Applied Physiology*, 93(3), 1039-1046. (GAP equation)
 3. Daniels, J. (2013). *Daniels' Running Formula*. Human Kinetics. (Training zones and aerobic decoupling)
-4. Weyand, P. G., et al. (2000). Faster top running speeds are achieved with greater ground forces not more rapid leg movements. *Journal of Applied Physiology*, 89(5), 1991-1999. (Cadence biomechanics)
+4. Weyand, P. G., et al. (2000). Faster top running speeds are achieved with greater ground forces not more rapid leg movements. *Journal of Applied Physiology*, 89(5), 1991-1999. (Cadence and ground forces)
+5. Heiderscheit, B. C., et al. (2011). Effects of step rate manipulation on joint mechanics during running. *Medicine & Science in Sports & Exercise*, 43(2), 296-302. (Primary RCT on cadence modification — 5–10% step rate increase reduces hip and knee joint loading)
+6. Schubert, A. G., Kempf, J., & Heiderscheit, B. C. (2014). Influence of stride frequency and length on running mechanics: a systematic review. *Sports Health*, 6(3), 210-217. (Systematic review of cadence effects on running economy and injury risk)
+7. Adams, D., et al. (2018). Effect of acute and chronic running cadence manipulation on running economy. *International Journal of Sports Physiology and Performance*, 13(10), 1-18. (Acute vs. chronic cadence intervention outcomes)
+8. Allen, H. & Coggan, A. R. (2010). *Training and Racing with a Power Meter*. VeloPress. (Training Stress Score and Performance Management Chart formulation)
+9. Zinner, C., et al. (2019). Case studies in sport science — position statement of the German Society of Sport Science. *German Journal of Exercise and Sport Research*, 49, 20-27. (Methodological framework for N=1 and case study designs in sport science)
+10. Drust, B., Atkinson, G., & Reilly, T. (2005). Future perspectives in the evaluation of the physiological demands of soccer. *Sports Medicine*, 35, 783-805. (Within-subject coefficient of variation for physiological metrics in field-based research)
+11. Open-Meteo (2025). Open-Meteo Historical Weather API. https://open-meteo.com/en/docs/historical-weather-api (Environmental temperature data source)
 
 ---
 
@@ -364,22 +377,6 @@ print(f"Aerobic Decoupling: {metrics.decoupling_pct}%")
 
 ---
 
-## Appendix B: Data Availability
-
-**Privacy-Safe Dataset:**
-- Weekly aggregate metrics (no GPS coordinates)
-- Heart rate time-series (relative time only)
-- Cadence distribution data
-- Environmental context (temperature, weather codes)
-
-**Location:** `data/real_weekly_data.json` at `https://github.com/ImmortalDemonGod/bio-systems-engineering`
-
-**Sanitization:** All absolute GPS coordinates removed, first/last 500m truncated per privacy protocol.
-
-**Raw data:** Raw `.fit` files are not publicly shared (location privacy). Requests for aggregated data beyond what is in the repository may be submitted via GitHub Issues.
-
----
-
-**Document Version:** 1.2
-**Last Updated:** 2026-03-30
+**Document Version:** 1.3
+**Last Updated:** 2026-04-04
 **Correspondence:** https://github.com/ImmortalDemonGod/bio-systems-engineering/issues
