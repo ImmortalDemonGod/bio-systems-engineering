@@ -10,12 +10,11 @@ Core algorithms for calculating running performance metrics including:
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import numpy as np
 import pandas as pd
-
-import logging
 
 from biosystems.models import PhysiologicalMetrics, RunContext, ZoneConfig
 from biosystems.physics.gap import calculate_average_gap, check_elevation_quality

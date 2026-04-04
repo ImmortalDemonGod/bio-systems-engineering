@@ -8,10 +8,10 @@ recovery intervals.
 """
 
 import sys
+from typing import cast
 
 import numpy as np
 import pandas as pd
-from typing import Any, cast
 
 
 def filter_gps_jitter(df: pd.DataFrame, pace_col: str, cad_col: str, cad_thr: int = 100) -> pd.DataFrame:
