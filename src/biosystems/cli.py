@@ -261,14 +261,11 @@ def strava(
         typer.secho(f"Error loading zones: {e}", fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1)
 
-    # --- Walk detection using Strava moving flag (primary) + pace fallback ---
+    # --- Walk detection: pace OR cadence below running threshold ---
     df["pace_min_per_km"] = df["pace_sec_km"] / 60
+    df["is_walk"] = (df["pace_min_per_km"] > 9.5) | (df["cadence"].fillna(0) < 140)
     if "moving" in df.columns:
-        df["is_walk"] = (~df["moving"].fillna(True).astype(bool)) | (
-            df["pace_min_per_km"] > 8.7
-        )
-    else:
-        df["is_walk"] = (df["pace_min_per_km"] > 8.7) | (df["cadence"].fillna(0) < 128)
+        df["is_walk"] = df["is_walk"] | (~df["moving"].fillna(True).astype(bool))
 
     # --- Auto weather context from GPS ---
     if temp_c is not None:
@@ -336,6 +333,7 @@ def strava(
             "ef": round(report.run_only.efficiency_factor, 5),
             "ef_gap": report.ef_grade_adjusted,
             "decoupling_pct": round(report.run_only.decoupling_pct, 2),
+            "avg_cadence": round(report.run_only.avg_cadence, 1) if report.run_only.avg_cadence else None,
             "activity_name": activity_name_str,
             "source": "biosystems_strava",
         }
@@ -639,14 +637,11 @@ def backfill_streams(
             time.sleep(delay)
             continue
 
-        # Walk detection: Strava moving flag (primary) + pace fallback
+        # Walk detection: pace OR cadence below running threshold
         df["pace_min_per_km"] = df["pace_sec_km"] / 60
+        df["is_walk"] = (df["pace_min_per_km"] > 9.5) | (df["cadence"].fillna(0) < 140)
         if "moving" in df.columns:
-            df["is_walk"] = (~df["moving"].fillna(True).astype(bool)) | (
-                df["pace_min_per_km"] > 8.7
-            )
-        else:
-            df["is_walk"] = (df["pace_min_per_km"] > 8.7) | (df["cadence"].fillna(0) < 128)
+            df["is_walk"] = df["is_walk"] | (~df["moving"].fillna(True).astype(bool))
 
         # Enrich context with wellness data for this run's date
         backfill_context = None
@@ -681,6 +676,7 @@ def backfill_streams(
             "ef": round(m.efficiency_factor, 5),
             "ef_gap": report.ef_grade_adjusted,
             "decoupling_pct": round(m.decoupling_pct, 2),
+            "avg_cadence": round(m.avg_cadence, 1) if m.avg_cadence else None,
             "activity_name": activity_name,
             "source": "biosystems_strava",
         }
