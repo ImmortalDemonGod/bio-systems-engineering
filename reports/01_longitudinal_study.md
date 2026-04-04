@@ -20,9 +20,9 @@ This longitudinal case study documents a **103-day systematic intervention** tar
 
 ### 1.1 The Problem Statement
 
-Despite substantial training volume, many endurance athletes encounter performance plateaus that volume alone cannot resolve. This phenomenon suggests the presence of **biomechanical limiters**—inefficiencies in movement patterns that constrain cardiovascular system utilization.
+Endurance running performance depends on the interaction between cardiovascular capacity and biomechanical efficiency. An athlete may possess adequate aerobic fitness yet exhibit suboptimal performance due to **biomechanical limiters** — inefficiencies in movement patterns (such as low cadence) that constrain the utilization of available cardiovascular output.
 
-**Research Question:** Can systematic modification of cadence (step frequency) unlock performance gains in a trained athlete who has plateaued under volume-based training?
+**Research Question:** Can systematic modification of cadence (step frequency) improve running efficiency in a trained athlete whose baseline cadence falls below the commonly cited optimal range of 170–180 spm?
 
 ### 1.2 The Hypothesis
 
@@ -80,7 +80,9 @@ ef = (work_df['dist'].sum() / work_df['dt'].sum()) / work_df['hr'].mean()
 **Control Variables:**
 - Training volume maintained at ~40-50 km/week
 - Route topography held constant (±10m elevation variance)
-- Time of day controlled (morning sessions)
+
+**Uncontrolled Variables:**
+- Time of day varied across sessions (morning, afternoon, and evening runs recorded throughout the study period)
 
 ### 2.4 Limitations & Conservative Framing
 
@@ -136,12 +138,15 @@ These changes have been validated against the study period data and do not alter
 
 **State:** Environmental overload
 
-**Critical Data Point - Week 23:**
+**Critical Data Point — Week 23, 2025-06-05 (Interval session):**
 | Metric | Value |
 |--------|-------|
-| Temperature | 32.3°C |
+| Temperature | **32.3°C** |
+| Average Pace | **4:59 min/km** |
+| Average HR | **180.4 bpm** |
+| Efficiency Factor | **0.01851** |
+| Average Cadence | **165.4 spm** |
 | Aerobic Decoupling | **19.78%** |
-| Perceived Effort | Maximal |
 
 **Analysis:** The instrumentation successfully captured **physiological breakdown** under thermal stress. The extreme decoupling (>10% indicates poor durability) confirms:
 1. Heat overwhelmed aerobic stability
@@ -249,7 +254,7 @@ The "Crucible" phase (Week 23) provided an unintended but valuable control:
 - **Pre-intervention:** 19.78% decoupling at 32.3°C (system breakdown)
 - **Post-intervention:** 4.71% decoupling at ~28°C (heat resilience)
 
-The retest temperature (~28°C ambient, daily max 32°C) was comparable to the W23 crucible (32.3°C daily max), making this a meaningful like-for-like comparison. The dramatic reduction in decoupling (−15 percentage points) under similar thermal conditions demonstrates the intervention created **systemic adaptation** beyond just mechanical efficiency.
+The retest temperature (~28°C ambient, daily max 32°C) was comparable to the W23 crucible (32.3°C daily max), making this a meaningful like-for-like comparison. The dramatic reduction in decoupling (−15 percentage points) under similar thermal conditions is consistent with **systemic adaptation** beyond mechanical efficiency alone, though the specific mechanism (heat acclimatization, cardiovascular drift reduction, or biomechanical optimization) cannot be isolated in this design.
 
 ### 4.3 The Software Pipeline as Research Contribution
 
@@ -264,8 +269,10 @@ Beyond the physiological findings, this study demonstrates that:
 
 **Study Limitations:**
 1. **Single subject** - Requires replication across diverse populations
-2. **Confounding variables** - Cannot fully isolate cadence from other training adaptations
+2. **Confounding variables** - Cannot fully isolate cadence from other training adaptations (fitness, heat acclimatization, and training volume all changed concurrently)
 3. **Missing counterfactual** - No control period to test volume-only continuation
+4. **Protocol compliance unverified** - NME drill frequency (2–3 sessions/week) and volume (20–30% of mileage) are stated as prescribed protocol but were not systematically logged; compliance is inferred from filename artifacts and gradual cadence shift at the retest, not from verified session logs
+5. **Time of day uncontrolled** - Sessions occurred at varying times (morning, afternoon, evening) throughout the study; circadian effects on performance were not accounted for
 
 **Future Research Directions:**
 1. **Implement heat adjustment algorithm** - Quantify true performance gains
@@ -288,7 +295,7 @@ This 103-day longitudinal study demonstrates:
 
 **Methodological Innovation:** The "Run-Only Filter" provides a replicable framework for isolating true running performance from aggregate activity data, addressing a critical limitation in consumer fitness analytics.
 
-**Strategic Implication:** This work positions software-instrumented self-experimentation as a credible research methodology, bridging the gap between casual "Quantified Self" tracking and formal exercise physiology.
+**Replication:** The complete analysis pipeline, zone configuration, and aggregate weekly data are publicly available, enabling independent verification of all reported metrics and application to new subjects' data.
 
 ---
 
@@ -334,6 +341,8 @@ zones = ZoneConfig(
 )
 
 # Calculate metrics with Run-Only Filter applied
+# run_metrics() filters df to run-only samples (cadence >= 140, pace < 9.5 min/km),
+# then computes EF, decoupling, hrTSS, and cadence statistics.
 metrics = run_metrics(df, zones)
 print(f"Efficiency Factor: {metrics.efficiency_factor}")
 print(f"Aerobic Decoupling: {metrics.decoupling_pct}%")
