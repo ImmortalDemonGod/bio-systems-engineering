@@ -95,7 +95,7 @@ Each item below was identified during a full read-through of `reports/01_longitu
 
 - [x] **[§4.1] +10 spm claim uses inconsistent reference point**: **RESOLVED.** Updated to "+5.7 spm cadence increase (164.4 → 170.1 spm at RPE 10)" using consistent RPE10-to-RPE10 comparison. Phase III table now shows actual weekly means instead of fabricated progression. W35 restored as Phase V durability consolidation (164.5 spm sustained for 66 min).
 
-- [ ] **[References] Only 4 references — insufficient for any journal**: Missing at minimum: Heiderscheit et al. (2011) on cadence modification and running economy (the primary RCT in this space); Adams et al. (2018) or equivalent cadence intervention outcome study; a source validating EF as a performance metric; Open-Meteo citation (now used as a data source); at least one N=1 / single-subject methodology paper to justify the design.
+- [x] **[References] Only 4 references — insufficient for any journal**: **RESOLVED.** Expanded to 11 references: added Heiderscheit (2011) cadence RCT, Schubert (2014) cadence systematic review, Adams (2018) cadence intervention outcomes, Allen & Coggan (2010) TSS/PMC, Zinner (2019) N=1 methodology framework, Drust (2005) within-subject CV, Open-Meteo API citation.
 
 - [x] **[§2.3] "Morning sessions" control variable contradicts retest data**: **RESOLVED.** Removed false "time of day controlled" claim. Replaced with "Uncontrolled Variables" noting time of day varied. Added as limitation #5.
 
@@ -103,9 +103,9 @@ Each item below was identified during a full read-through of `reports/01_longitu
 
 - [x] **[§3 Phase II] W23 Crucible table is incomplete**: **RESOLVED.** Added pace (4:59/km), HR (180.4), EF (0.01851), and cadence (165.4 spm) from W17-W23 audit. Removed vague "Perceived Effort: Maximal."
 
-- [x] **[§1.1] "Plateau" claim never demonstrated**: **RESOLVED.** Reframed from "plateaued under volume-based training" to "athlete whose baseline cadence falls below optimal range." Research question no longer assumes a plateau.
+- [x] **[§1.1] "Plateau" claim never demonstrated**: **RESOLVED.** Replaced with data-backed pre-study trajectory table (25 high-effort sessions from Strava) showing escalating HR for marginal pace gains — establishing efficiency limiter hypothesis with verifiable data.
 
-- [ ] **[§2.5] Post-study pipeline changes need validation table or removal**: Section 2.5 discloses pipeline algorithm changes post-study but only asserts "do not alter the core findings" without proof. Either add a validation table or move to a footnote. **Still open — requires generating old vs. new comparison values.**
+- [x] **[§2.5] Post-study pipeline changes need validation table or removal**: **RESOLVED.** Rewrote §2.5 with specific validation notes: decoupling <0.3pp difference on recomputation, walk detection thresholds now aligned between Cultivation and biosystems pipelines, W32 cadence verified at 170.1 spm under both pipelines.
 
 - [x] **[§4.2] "Thermal regulation via biomechanics" mechanism is unsupported**: **RESOLVED.** Reframed to "consistent with systemic adaptation... though the specific mechanism cannot be isolated in this design."
 
@@ -113,13 +113,13 @@ Each item below was identified during a full read-through of `reports/01_longitu
 
 ### Low Priority
 
-- [ ] **[Abstract] Needs structured format for journal submission**: Background/Purpose/Methods/Results/Conclusions structure required by IJSPP, JSS. The "Key Innovation" callout is non-standard. **Blocked on P3 venue decision.**
+- [x] **[Abstract] Needs structured format for journal submission**: **RESOLVED.** Structured as Background/Purpose/Methods/Results/Conclusions. "Key Innovation" callout removed. Cadence corrected to +5.7 spm. All quantitative claims match paper body.
 
 - [x] **[§5 Conclusions] "Strategic Implication" paragraph is marketing language**: **RESOLVED.** Replaced with factual replication statement pointing to public pipeline and data.
 
 - [x] **[Appendix A] `run_metrics()` is undefined**: **RESOLVED.** Added inline comment describing function behavior and filter thresholds.
 
-- [ ] **[Appendix B vs Declarations] Duplication**: Data availability in both places. Collapse for journal submission.
+- [x] **[Appendix B vs Declarations] Duplication**: **RESOLVED.** Appendix B removed. All data availability information consolidated into Declarations section including privacy sanitization details.
 
 - [ ] **[§2.1] Garmin sampling rate claim**: States "1 Hz" — may need to confirm recording mode.
 
