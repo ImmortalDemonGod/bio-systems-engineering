@@ -13,11 +13,10 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import date
 from pathlib import Path
 from typing import Any
 
-from filelock import FileLock, Timeout as FileLockTimeout
+from filelock import FileLock
 
 
 def history_path() -> Path:
@@ -208,7 +207,7 @@ def detect_block_bests(
 
 def backfill_from_strava(
     n: int,
-    zone_config: "ZoneConfig",  # type: ignore[name-defined]  # noqa: F821
+    zone_config: ZoneConfig,  # type: ignore[name-defined]  # noqa: F821
     access_token: str | None = None,
 ) -> list[dict[str, Any]]:
     """

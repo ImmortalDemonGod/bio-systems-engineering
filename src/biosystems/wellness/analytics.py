@@ -20,7 +20,6 @@ Era boundary: Whoop data ends 2025-12-25; Garmin-only era begins 2026-01-01.
 
 from __future__ import annotations
 
-import math
 from typing import Any
 
 import pandas as pd
@@ -63,7 +62,7 @@ def compute_coverage(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame(columns=["metric", "n_rows", "date_start", "date_end",
                                      "span_days", "pct_coverage"])
-    total_days = (df.index.max() - df.index.min()).days + 1
+    (df.index.max() - df.index.min()).days + 1
     rows = []
     for col in df.columns:
         s = df[col].dropna()

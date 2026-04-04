@@ -6,10 +6,10 @@ Tests for compute_wellness_context and its helpers, focusing on
 the _7d_mean numeric coercion fix and edge cases.
 """
 
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
-import pytest
-from unittest.mock import patch
 
 
 def _build_wellness_df(data: dict, dates: list[str]) -> pd.DataFrame:
