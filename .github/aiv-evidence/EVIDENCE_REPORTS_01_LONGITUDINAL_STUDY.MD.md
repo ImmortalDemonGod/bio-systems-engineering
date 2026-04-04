@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `reports/01_longitudinal_study.md`
-**Commit:** `0f8ad33`
-**Previous:** `96a4f3a`
-**Generated:** 2026-04-04T22:46:15Z
+**Commit:** `46db04b`
+**Previous:** `143536c`
+**Generated:** 2026-04-04T23:00:01Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -16,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "reports/01_longitudinal_study.md"
-  classification_rationale: "editorial corrections, no data changes"
+  classification_rationale: "narrative improvement backed by data verification"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-04-04T22:46:15Z"
+  classified_at: "2026-04-04T23:00:01Z"
 ```
 
 ## Claim(s)
 
-1. W23 table now includes EF/pace/HR/cadence; morning sessions claim removed; plateau claim reframed; thermal mechanism hedged; protocol compliance and time-of-day added as limitations; marketing language replaced
+1. Section 1.1 now shows pre-study pace-HR-EF table from 25 high-effort Strava sessions, replacing generic plateau claim with verifiable efficiency ceiling argument
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -33,22 +33,15 @@ classification:
 ### Class E (Intent Alignment)
 
 - **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
-- **Requirements Verified:** Paper must not contain unsupported claims or factual contradictions
+- **Requirements Verified:** Introduction must establish a data-backed motivation, not an unsupported claim
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`0f8ad33`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/0f8ad3353a4fc7f118644ba61138ceed191ef97d))
+**Scope Inventory** (SHA: [`46db04b`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/46db04b2721d0f056c84cfddf4251acfb33ea1f6))
 
-- [`reports/01_longitudinal_study.md#L23`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L23)
-- [`reports/01_longitudinal_study.md#L25`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L25)
-- [`reports/01_longitudinal_study.md#L83-L85`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L83-L85)
-- [`reports/01_longitudinal_study.md#L141`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L141)
-- [`reports/01_longitudinal_study.md#L144-L148`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L144-L148)
-- [`reports/01_longitudinal_study.md#L257`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L257)
-- [`reports/01_longitudinal_study.md#L272`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L272)
-- [`reports/01_longitudinal_study.md#L274-L275`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L274-L275)
-- [`reports/01_longitudinal_study.md#L298`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L298)
-- [`reports/01_longitudinal_study.md#L344-L345`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/0f8ad3353a4fc7f118644ba61138ceed191ef97d/reports/01_longitudinal_study.md#L344-L345)
+- [`reports/01_longitudinal_study.md#L23`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/46db04b2721d0f056c84cfddf4251acfb33ea1f6/reports/01_longitudinal_study.md#L23)
+- [`reports/01_longitudinal_study.md#L25-L37`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/46db04b2721d0f056c84cfddf4251acfb33ea1f6/reports/01_longitudinal_study.md#L25-L37)
+- [`reports/01_longitudinal_study.md#L42-L44`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/46db04b2721d0f056c84cfddf4251acfb33ea1f6/reports/01_longitudinal_study.md#L42-L44)
 
 ### Class A (Execution Evidence)
 
@@ -68,4 +61,4 @@ Only git diff scope inventory was collected. No execution evidence.
 
 ## Summary
 
-Fix 7 items from section-by-section review: W23 data, control variables, limitations, mechanism claims, conclusions
+Replace plateau claim with pre-study trajectory table showing escalating HR for marginal pace gains

@@ -20,16 +20,28 @@ This longitudinal case study documents a **103-day systematic intervention** tar
 
 ### 1.1 The Problem Statement
 
-Endurance running performance depends on the interaction between cardiovascular capacity and biomechanical efficiency. An athlete may possess adequate aerobic fitness yet exhibit suboptimal performance due to **biomechanical limiters** — inefficiencies in movement patterns (such as low cadence) that constrain the utilization of available cardiovascular output.
+Over 15 months of training (January 2024 – April 2025), the subject improved from 9.8 min/km to sub-5:00 min/km — but analysis of high-effort sessions (avg HR ≥170 bpm, distance ≥3 km) revealed that later pace gains came at escalating cardiovascular cost:
 
-**Research Question:** Can systematic modification of cadence (step frequency) improve running efficiency in a trained athlete whose baseline cadence falls below the commonly cited optimal range of 170–180 spm?
+| Period | Representative Pace | HR | EF (speed/HR) | n sessions |
+|--------|--------------------|----|---------------|------------|
+| Jun–Sep 2024 | 5.0–5.3 min/km | 173–179 bpm | 0.0176–0.0195 | 9 |
+| Jan 2025 | 5.2–5.4 min/km | 182–190 bpm | 0.0164–0.0177 | 3 |
+| Apr 2025 (W17 baseline) | 5.02 min/km | 183.6 bpm | 0.0180 | 1 (RPE 10) |
+
+_Values are Strava whole-activity averages for high-effort sessions. Run-only filtered EF for the W17 baseline is 0.01804 (see §3)._
+
+From Jun–Sep 2024 to Jan 2025, pace was similar (~5.2 min/km) but average HR increased from 173–179 to 182–190 bpm, and efficiency (EF) declined. By the W17 baseline, the subject was running 5:02/km at near-maximal HR (183.6 bpm) — leaving little cardiac headroom for further pace improvement through effort alone.
+
+Throughout this period, habitual cadence remained at **~164 spm**, well below the commonly cited optimal range of 170–180 spm for distance running. This suggested that **low cadence was a specific biomechanical constraint** limiting the conversion of cardiovascular capacity into running speed.
+
+**Research Question:** Can systematic modification of cadence (step frequency) improve running efficiency — specifically, can the subject achieve faster pace at the same or lower cardiac effort?
 
 ### 1.2 The Hypothesis
 
 We hypothesize that:
-1. **Mechanical efficiency** (steps per minute) acts as a constraint on cardiovascular output utilization
-2. **Targeted intervention** on cadence will improve Efficiency Factor independent of cardiovascular fitness changes
-3. **Heat resilience** will improve as a secondary adaptation to neuromuscular re-patterning
+1. **Mechanical efficiency** (cadence) acts as a constraint on the conversion of cardiovascular output into running speed
+2. **Targeted cadence intervention** will improve Efficiency Factor (speed per heartbeat), demonstrating pace gains without proportional HR increase
+3. **Durability under heat stress** will improve as a secondary benefit of reduced biomechanical cost per stride
 
 ### 1.3 The Instrumentation
 
