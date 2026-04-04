@@ -11,7 +11,6 @@ EF, cadence, and decoupling values across the entire pipeline.
 
 import numpy as np
 import pandas as pd
-import pytest
 
 
 def classify_walk(df: pd.DataFrame) -> pd.Series:

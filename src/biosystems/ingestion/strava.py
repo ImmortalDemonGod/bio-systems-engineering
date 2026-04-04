@@ -122,7 +122,7 @@ def _get_credentials() -> tuple[str, str, str]:
         if not os.environ.get(v)
     ]
     if missing:
-        raise EnvironmentError(
+        raise OSError(
             f"Missing Strava credentials in environment: {', '.join(missing)}\n"
             "Set STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, and STRAVA_REFRESH_TOKEN."
         )
@@ -344,7 +344,7 @@ def parse_strava_streams(
     time_offsets = pd.to_timedelta(streams["time"], unit="s")
     timestamps = start_dt + time_offsets
 
-    n = len(streams["time"])
+    len(streams["time"])
     df = pd.DataFrame(index=timestamps)
     df.index.name = "timestamp"
 

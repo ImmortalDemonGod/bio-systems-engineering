@@ -7,14 +7,11 @@ concurrency safety, strava_activity_id keying, and detect_block_bests.
 
 from __future__ import annotations
 
-import json
 import threading
-from pathlib import Path
 
 import pytest
 
 import biosystems.analytics.history as hist_mod
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

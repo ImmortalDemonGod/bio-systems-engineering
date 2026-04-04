@@ -36,7 +36,6 @@ from biosystems.models import (
 )
 from biosystems.physics.metrics import compute_training_zones, lower_z2_bpm, run_metrics
 
-
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------

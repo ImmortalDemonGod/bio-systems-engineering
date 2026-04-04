@@ -5,7 +5,6 @@ Tests for Trending & PMC Computation
 Tests for compute_pmc, compute_rolling_stats, and summarize_trend.
 """
 
-import pytest
 from biosystems.analytics.trending import compute_pmc, compute_rolling_stats, summarize_trend
 
 

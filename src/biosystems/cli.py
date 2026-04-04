@@ -12,6 +12,12 @@ from pathlib import Path
 import dotenv
 import typer
 import yaml
+from pydantic import ValidationError
+
+from biosystems.ingestion.fit import add_derived_metrics, parse_fit
+from biosystems.ingestion.gpx import parse_gpx
+from biosystems.models import HeartRateZone, RunContext, ZoneConfig
+from biosystems.physics.metrics import run_metrics
 
 # Load .env using python-dotenv's upward search (CWD → parents).
 # This works for both editable installs (repo root .env) and bare
@@ -43,12 +49,6 @@ def _default_zones_path() -> Path:
         return xdg_path
 
     return _PKG_ROOT / "data" / "zones_personal.yml"
-from pydantic import ValidationError
-
-from biosystems.ingestion.fit import add_derived_metrics, parse_fit
-from biosystems.ingestion.gpx import parse_gpx
-from biosystems.models import HeartRateZone, RunContext, ZoneConfig
-from biosystems.physics.metrics import run_metrics
 
 app = typer.Typer(
     help=(
@@ -391,7 +391,7 @@ def strava(
             typer.echo(f"Pace split: {d.first_half_pace_min_km:.2f} → {d.second_half_pace_min_km:.2f} ({d.pace_strategy})")
         if report.block_bests:
             new_bests = [bb for bb in report.block_bests if bb.is_new_best and bb.prev_best_s is not None]
-            first_ever = [bb for bb in report.block_bests if bb.is_new_best and bb.prev_best_s is None]
+            [bb for bb in report.block_bests if bb.is_new_best and bb.prev_best_s is None]
             if new_bests:
                 typer.secho("\n--- Personal Records (recorded history) ---", fg=typer.colors.GREEN, bold=True)
             else:
@@ -507,7 +507,7 @@ def backfill_efforts(
         entry = dict(existing.get(run_date, {}))
         if not entry:
             dist_km = round(summary.get("distance", 0) / 1000, 2)
-            moving_s = summary.get("moving_time", 0)
+            summary.get("moving_time", 0)
             avg_hr = float(summary.get("average_heartrate") or 0)
             entry = {
                 "date": run_date,
@@ -567,7 +567,6 @@ def backfill_streams(
         fetch_activity_streams,
         fetch_runs_since,
     )
-    from biosystems.models import RunContext
     from biosystems.physics.report import build_run_report
 
     try:
@@ -725,8 +724,9 @@ def summary(
       biosystems summary --since 2025-09-08       # post-study only
       biosystems summary --group week --since 2026-01-01
     """
-    from biosystems.analytics.history import load_history
     from collections import defaultdict
+
+    from biosystems.analytics.history import load_history
 
     entries = load_history()
 
@@ -1067,14 +1067,14 @@ def trend(
             output["pmc"] = pmc_data
         typer.echo(json.dumps(output, indent=2))
     else:
-        typer.secho(f"\n--- Performance Management ---", fg=typer.colors.CYAN, bold=True)
+        typer.secho("\n--- Performance Management ---", fg=typer.colors.CYAN, bold=True)
         typer.echo(f"CTL (fitness):  {summary.get('ctl', 0):.1f}  [{summary.get('ctl_trend', 'unknown')}]")
         typer.echo(f"ATL (fatigue):  {summary.get('atl', 0):.1f}")
         typer.echo(f"TSB (form):     {summary.get('tsb', 0):+.1f}")
         typer.echo(f"EF trend:       {summary.get('ef_trend', 'unknown')}")
         typer.echo(f"History runs:   {summary.get('history_runs', 0)}")
         if rolling_data:
-            typer.secho(f"\n--- Recent Runs ---", fg=typer.colors.CYAN, bold=True)
+            typer.secho("\n--- Recent Runs ---", fg=typer.colors.CYAN, bold=True)
             for r in rolling_data[-10:]:
                 ef_str = f"{r['ef']:.5f}" if r.get("ef") else "  —  "
                 dec_str = f"{r['decoupling_pct']:.1f}%" if r.get("decoupling_pct") is not None else " — "
@@ -1134,6 +1134,7 @@ def wellness_show(
     """
     import json as _json
     from datetime import date as _date
+
     from biosystems.wellness.cache import compute_wellness_context
 
     target = date_str or _date.today().isoformat()
@@ -1163,7 +1164,8 @@ def wellness_show(
 
     typer.echo()
     typer.secho("  Raw values:", fg=typer.colors.CYAN)
-    _row = lambda label, val, unit="": typer.echo(f"    {label:<28} {val if val is not None else 'n/a'} {unit}".rstrip())
+    def _row(label, val, unit=""):
+        return typer.echo(f"    {label:<28} {val if val is not None else 'n/a'} {unit}".rstrip())
     _row("HRV RMSSD",           ctx.get("hrv_rmssd"),      "ms")
     _row("Resting HR",          ctx.get("resting_hr"),     "bpm")
     _row("Recovery Score",      ctx.get("recovery_score"), "%")
@@ -1176,9 +1178,10 @@ def wellness_show(
 
     typer.echo()
     typer.secho("  Deltas:", fg=typer.colors.CYAN)
-    _delta = lambda label, val, unit="": typer.echo(
-        f"    {label:<28} {(f'{val:+.1f}' if val is not None else 'n/a')} {unit}".rstrip()
-    )
+    def _delta(label, val, unit=""):
+        return typer.echo(
+            f"    {label:<28} {(f'{val:+.1f}' if val is not None else 'n/a')} {unit}".rstrip()
+        )
     _delta("HRV 1d Δ",             ctx.get("hrv_1d_delta"),  "ms")
     _delta("HRV 7d Δ (% of mean)", ctx.get("hrv_7d_pct"),   "%")
     _delta("RHR 1d Δ",             ctx.get("rhr_1d_delta"),  "bpm")
@@ -1230,11 +1233,14 @@ def wellness_analyze(
     Surfaces the analytics methodology used to understand and calibrate the G/A/R system.
     """
     import json as _json
-    from biosystems.wellness.cache import load_wellness_df, wellness_path
+
     from biosystems.wellness.analytics import (
-        compute_baselines, compute_coverage, compute_correlations,
-        compute_era_stats, calibrate_thresholds,
+        calibrate_thresholds,
+        compute_correlations,
+        compute_coverage,
+        compute_era_stats,
     )
+    from biosystems.wellness.cache import load_wellness_df, wellness_path
 
     df = load_wellness_df()
     if df.empty:
@@ -1345,8 +1351,9 @@ def wellness_trends(
     Highlights: RHR improvement over time, VO2max trajectory, training adaptation.
     """
     import json as _json
-    from biosystems.wellness.cache import load_wellness_df
+
     from biosystems.wellness.analytics import compute_longitudinal_fitness
+    from biosystems.wellness.cache import load_wellness_df
 
     df = load_wellness_df()
     if df.empty:
