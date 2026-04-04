@@ -2,7 +2,7 @@ name: Full Test Suite
 
 on:
   push:
-    branches: [main, develop]
+    branches: ['**']
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
@@ -29,6 +29,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check src/ tests/
+
+      - name: Type check (mypy)
+        run: mypy src/biosystems/ --ignore-missing-imports --no-error-summary || true
+        # TODO: remove `|| true` once existing mypy errors are fixed
 
       - name: Run full test suite
         run: pytest --tb=short -q
