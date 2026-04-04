@@ -97,31 +97,31 @@ Each item below was identified during a full read-through of `reports/01_longitu
 
 - [ ] **[References] Only 4 references — insufficient for any journal**: Missing at minimum: Heiderscheit et al. (2011) on cadence modification and running economy (the primary RCT in this space); Adams et al. (2018) or equivalent cadence intervention outcome study; a source validating EF as a performance metric; Open-Meteo citation (now used as a data source); at least one N=1 / single-subject methodology paper to justify the design.
 
-- [ ] **[§2.3] "Morning sessions" control variable contradicts retest data**: Section 2.3 lists "Time of day controlled (morning sessions)" as a control variable. The W32 retest run file is `20250806_030140` UTC = ~22:00 CDT — a night run. This is a direct factual contradiction. Either the control was not maintained for the retest, or "morning sessions" was not an actual control variable. **Requires clarification — may need to remove or reframe this control claim.**
+- [x] **[§2.3] "Morning sessions" control variable contradicts retest data**: **RESOLVED.** Removed false "time of day controlled" claim. Replaced with "Uncontrolled Variables" noting time of day varied. Added as limitation #5.
 
 ### Medium Priority
 
-- [ ] **[§3 Phase II] W23 Crucible table is incomplete**: The crucible table only shows temperature, decoupling, and perceived effort. Phase I and Phase IV tables show cadence, EF, and pace. A reviewer will expect the same metrics across all phases for direct comparison. EF, pace, and HR for the W23 session should be added if the data exists. **Requires data investigation.**
+- [x] **[§3 Phase II] W23 Crucible table is incomplete**: **RESOLVED.** Added pace (4:59/km), HR (180.4), EF (0.01851), and cadence (165.4 spm) from W17-W23 audit. Removed vague "Perceived Effort: Maximal."
 
-- [ ] **[§1.1] "Plateau" claim never demonstrated**: The introduction states the athlete plateaued under volume-based training, but no data is presented to show stagnation prior to W17. The paper jumps straight to the baseline without establishing that a plateau existed. Needs either pre-study trend data or reframing to "the athlete sought to address biomechanical inefficiency" without the plateau claim.
+- [x] **[§1.1] "Plateau" claim never demonstrated**: **RESOLVED.** Reframed from "plateaued under volume-based training" to "athlete whose baseline cadence falls below optimal range." Research question no longer assumes a plateau.
 
-- [ ] **[§2.5] Post-study pipeline changes need validation table or removal**: Section 2.5 discloses pipeline algorithm changes post-study but only asserts "do not alter the core findings" without proof. A reviewer will ask for a comparison of old vs. new values on the key sessions (W17 baseline, W23 crucible, W32 retest). Either add a validation table or remove this section and move the disclosure to a footnote.
+- [ ] **[§2.5] Post-study pipeline changes need validation table or removal**: Section 2.5 discloses pipeline algorithm changes post-study but only asserts "do not alter the core findings" without proof. Either add a validation table or move to a footnote. **Still open — requires generating old vs. new comparison values.**
 
-- [ ] **[§4.2] "Thermal regulation via biomechanics" mechanism is unsupported**: The Discussion concludes the intervention created "systemic adaptation beyond just mechanical efficiency — improved thermal regulation through biomechanical optimization." This is a strong mechanistic claim with no supporting evidence in the paper. Should be reframed as "data are consistent with systemic adaptation" without asserting the mechanism.
+- [x] **[§4.2] "Thermal regulation via biomechanics" mechanism is unsupported**: **RESOLVED.** Reframed to "consistent with systemic adaptation... though the specific mechanism cannot be isolated in this design."
 
-- [ ] **[§4.4] Protocol compliance not acknowledged as a limitation**: The paper describes the NME protocol (2-3 sessions/week, 20-30% mileage) but never verifies it was executed as planned. The "Evidence of Systematic Training" (filename artifacts, manual notes) is thin. Lack of compliance verification should be explicitly listed as a study limitation.
+- [x] **[§4.4] Protocol compliance not acknowledged as a limitation**: **RESOLVED.** Added as limitation #4: "Protocol compliance unverified — NME drill frequency and volume inferred from filename artifacts, not verified session logs."
 
 ### Low Priority
 
 - [ ] **[Abstract] Needs structured format for journal submission**: Background/Purpose/Methods/Results/Conclusions structure required by IJSPP, JSS. The "Key Innovation" callout is non-standard. **Blocked on P3 venue decision.**
 
-- [ ] **[§5 Conclusions] "Strategic Implication" paragraph is marketing language**: "Bridging the gap between casual Quantified Self tracking and formal exercise physiology" is not conclusion language appropriate for a peer-reviewed paper. Remove or replace with a factual implication statement.
+- [x] **[§5 Conclusions] "Strategic Implication" paragraph is marketing language**: **RESOLVED.** Replaced with factual replication statement pointing to public pipeline and data.
 
-- [ ] **[Appendix A] `run_metrics()` is undefined**: The code block calls `run_metrics(df, zones)` but the function is never described. A reader cannot reproduce the result without reading the source. Add a one-line comment explaining what the function returns.
+- [x] **[Appendix A] `run_metrics()` is undefined**: **RESOLVED.** Added inline comment describing function behavior and filter thresholds.
 
-- [ ] **[Appendix B vs Declarations] Duplication**: Data availability information now appears in both the Declarations section and Appendix B. For journal submission, one location is sufficient. Collapse Appendix B into Declarations or remove the redundancy.
+- [ ] **[Appendix B vs Declarations] Duplication**: Data availability in both places. Collapse for journal submission.
 
-- [ ] **[§2.1] Garmin sampling rate claim**: States "1 Hz (GPS/HR/cadence)" — Garmin devices use smart recording by default (variable rate). Should specify "1 Hz or Garmin smart recording mode" unless the device was confirmed to be in 1-second recording mode throughout the study.
+- [ ] **[§2.1] Garmin sampling rate claim**: States "1 Hz" — may need to confirm recording mode.
 
 ---
 
