@@ -55,9 +55,18 @@ _GARMIN_METRICS = [
 
 def compute_coverage(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Return a DataFrame with one row per metric showing coverage stats.
-
-    Columns: metric, n_rows, date_start, date_end, span_days, pct_coverage
+    Compute per-metric coverage statistics from a date-indexed DataFrame.
+    
+    Parameters:
+        df (pd.DataFrame): Input DataFrame whose index is date-like and whose columns are metric series.
+    
+    Returns:
+        pd.DataFrame: A DataFrame indexed by metric with columns:
+            - n_rows (int): count of non-missing observations for the metric.
+            - date_start (date): first date with a non-missing value.
+            - date_end (date): last date with a non-missing value.
+            - span_days (int): inclusive number of days between date_start and date_end.
+            - pct_coverage (float): percent coverage = n_rows / span_days * 100, rounded to 1 decimal.
     """
     if df.empty:
         return pd.DataFrame(columns=["metric", "n_rows", "date_start", "date_end",

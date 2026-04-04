@@ -50,40 +50,30 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 def parse_gpx(path: str | Path) -> pd.DataFrame:
     """
-    Parse a GPX file into a tidy, chronologically sorted DataFrame.
-
-    This parser robustly handles:
-    - Garmin GPX namespace variations
-    - Missing heart rate, cadence, or power data
-    - Non-namespaced GPX files (fallback)
-    - Multiple power data locations in extensions
-
-    Parameters
-    ----------
-    path : str or Path
-        Path to the GPX file
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with columns:
-        - time : pandas.Timestamp (UTC)
-        - lat : float (degrees)
-        - lon : float (degrees)
-        - ele : float (metres, NaN if absent)
-        - hr : int (bpm, NaN if absent)
-        - cadence : int (spm, NaN if absent)
-        - power : int (watts, NaN if absent)
-        - dt : float (seconds since previous point)
-        - dist : float (segment distance in metres)
-        - speed_mps : raw speed (m/s)
-        - speed_mps_smooth : 5-point rolling average (m/s)
-        - pace_sec_km : smoothed pace (seconds per km)
-
-    Raises
-    ------
-    ValueError
-        If no trackpoints are found in the GPX file
+    Parse a GPX file into a chronologically sorted pandas DataFrame containing positional, temporal, and common sensor fields.
+    
+    Supports Garmin GPX namespace variants, falls back to non-namespaced GPX, and attempts to extract elevation, heart rate, cadence, and power from multiple possible XML locations.
+    
+    Parameters:
+        path (str | Path): Filesystem path to the GPX file.
+    
+    Returns:
+        pd.DataFrame: DataFrame with the following columns:
+            - time: pandas.Timestamp (UTC)
+            - lat: float (degrees)
+            - lon: float (degrees)
+            - ele: float (meters, NaN if absent)
+            - hr: int (bpm, NaN if absent or non-positive)
+            - cadence: int (spm, NaN if absent)
+            - power: int (watts, NaN if absent or unparseable)
+            - dt: float (seconds elapsed since previous point)
+            - dist: float (segment distance in meters)
+            - speed_mps: float (instantaneous speed in m/s)
+            - speed_mps_smooth: float (5-point centered rolling mean of speed_mps)
+            - pace_sec_km: float (smoothed pace in seconds per km)
+    
+    Raises:
+        ValueError: If no <trkpt> elements are found in the GPX file.
     """
     # GPX namespaces (Garmin extensions)
     ns = {

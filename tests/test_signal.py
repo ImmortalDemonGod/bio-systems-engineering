@@ -176,7 +176,19 @@ class TestWalkBlockSegments:
 
     @pytest.fixture
     def sample_activity(self):
-        """Create sample activity with walk periods."""
+        """
+        Create a sample activity DataFrame containing two walk periods within a 1000-second, 1 Hz time series.
+        
+        The DataFrame is indexed by a 1-second DatetimeIndex starting at 2024-01-01 10:00:00 and contains 1000 rows. It includes two contiguous walk blocks: one starting at 30s lasting 100s, and one at the end lasting 100s. Non-walk rows surround and separate these blocks.
+        
+        Returns:
+            pd.DataFrame: Time-indexed activity with columns:
+                - is_walk (bool): True for walk rows, False otherwise.
+                - pace_min_per_km (float): 10.0 during walk rows, 6.0 otherwise.
+                - cadence (int): 120 during walk rows, 170 otherwise.
+                - distance_cumulative_km (float): Cumulative distance with 0.01 km increment per row.
+                - heart_rate (int): Constant heart rate (160).
+        """
         # 1000 points, 1 Hz
         n_points = 1000
 
