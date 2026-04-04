@@ -1,8 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `docs/PUBLICATION_CHECKLIST.md`
-**Commit:** `c8cf6bf`
-**Generated:** 2026-04-01T10:27:29Z
+**Commit:** `96a4f3a`
+**Previous:** `29ad008`
+**Generated:** 2026-04-04T18:40:30Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -15,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "docs/PUBLICATION_CHECKLIST.md"
-  classification_rationale: "documentation only, no code or behavior changes"
+  classification_rationale: "documentation only"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-04-01T10:27:29Z"
+  classified_at: "2026-04-04T18:40:30Z"
 ```
 
 ## Claim(s)
 
-1. PUBLICATION_CHECKLIST.md exists at docs/ and enumerates all pre-publication blockers
+1. Cadence inconsistency items marked resolved with forensic investigation details; section-by-section review findings added
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -32,13 +33,23 @@ classification:
 ### Class E (Intent Alignment)
 
 - **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
-- **Requirements Verified:** paper readiness blockers must be tracked in a visible, committed document
+- **Requirements Verified:** Checklist must track all identified publication blockers
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`c8cf6bf`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/c8cf6bf531c892d66f727d150cab77774dcb9c9c))
+**Scope Inventory** (SHA: [`96a4f3a`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/96a4f3aa8a3e33550f1d5ff61290df100d58cf24))
 
-- [`docs/PUBLICATION_CHECKLIST.md#L1-L92`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/c8cf6bf531c892d66f727d150cab77774dcb9c9c/docs/PUBLICATION_CHECKLIST.md#L1-L92)
+- [`docs/PUBLICATION_CHECKLIST.md#L51`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L51)
+- [`docs/PUBLICATION_CHECKLIST.md#L53`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L53)
+- [`docs/PUBLICATION_CHECKLIST.md#L55`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L55)
+- [`docs/PUBLICATION_CHECKLIST.md#L57`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L57)
+- [`docs/PUBLICATION_CHECKLIST.md#L59`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L59)
+- [`docs/PUBLICATION_CHECKLIST.md#L61`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L61)
+- [`docs/PUBLICATION_CHECKLIST.md#L67`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L67)
+- [`docs/PUBLICATION_CHECKLIST.md#L69`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L69)
+- [`docs/PUBLICATION_CHECKLIST.md#L71`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L71)
+- [`docs/PUBLICATION_CHECKLIST.md#L73`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L73)
+- [`docs/PUBLICATION_CHECKLIST.md#L86-L127`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/96a4f3aa8a3e33550f1d5ff61290df100d58cf24/docs/PUBLICATION_CHECKLIST.md#L86-L127)
 
 ### Class A (Execution Evidence)
 
@@ -58,4 +69,4 @@ Only git diff scope inventory was collected. No execution evidence.
 
 ## Summary
 
-new doc tracking publication gates, owners, and deadlines for the longitudinal study
+Mark cadence items resolved, add 14 section-by-section review findings
