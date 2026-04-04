@@ -41,7 +41,8 @@ def load_history() -> list[dict[str, Any]]:
     list[dict]
         Each dict has at minimum: 'date' (ISO string), 'hrTSS' (float).
         Optional keys: 'ef', 'ef_gap', 'decoupling_pct', 'distance_km',
-        'avg_hr', 'avg_pace_min_per_km', 'activity_name', 'strava_activity_id'.
+        'avg_hr', 'avg_pace_min_per_km', 'avg_cadence', 'activity_name',
+        'strava_activity_id'.
 
     Notes
     -----
