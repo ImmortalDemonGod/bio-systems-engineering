@@ -1,0 +1,74 @@
+name: Installation Methods Test
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'pyproject.toml'
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - '.github/workflows/installation-test.yml'
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  pip-install:
+    name: Test pip install
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip setuptools wheel
+      
+      - name: Install package in editable mode
+        run: pip install -e .
+      
+      - name: Verify package imports
+        run: |
+          python -c "import biosystems; print('✅ biosystems imports')"
+          python -c "from biosystems.models import ZoneConfig, HeartRateZone; print('✅ models import')"
+          python -c "from biosystems.physics.metrics import run_metrics; print('✅ metrics import')"
+      
+      - name: Install dev dependencies
+        run: pip install -e ".[dev]"
+      
+      - name: Run quick test
+        run: pytest tests/test_readme_examples.py -v
+  
+  docker-build:
+    name: Test Docker build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image
+        run: docker build -t biosystems:test .
+      
+      - name: Run tests in Docker
+        run: docker run biosystems:test pytest tests/test_readme_examples.py -v
+      
+      - name: Test package import in Docker
+        run: |
+          docker run biosystems:test python -c "
+          import biosystems
+          from biosystems.models import ZoneConfig
+          print('✅ Docker image works correctly')
+          "

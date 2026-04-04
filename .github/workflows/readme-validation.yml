@@ -1,0 +1,46 @@
+name: README Examples Validation
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  validate-readme:
+    name: Validate README Examples
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      
+      - name: Run README validation tests
+        run: |
+          pytest tests/test_readme_examples.py -v --tb=short
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
+      
+      - name: Report failure details
+        if: failure()
+        run: |
+          echo "::error::README examples are broken! Users copying code from README will encounter errors."
+          echo "::error::This MUST be fixed before merging."
+          echo ""
+          echo "To fix locally:"
+          echo "  1. cd cultivation/scripts/running/bio-systems-engineering"
+          echo "  2. PYTHONPATH=src pytest tests/test_readme_examples.py -v"
+          echo "  3. Fix any failures"
+          echo "  4. Update README.md with corrected code"

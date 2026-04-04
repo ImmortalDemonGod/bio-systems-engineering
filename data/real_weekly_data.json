@@ -1,0 +1,126 @@
+[
+  {
+    "week": 17,
+    "ef_mean": 0.018995,
+    "num_runs": 2,
+    "decoupling_mean": 8.1,
+    "rpe10_ef": 0.01801,
+    "note": "Weekly mean (2 runs: RPE_7 + RPE_10); RPE_10 Baseline run EF = 0.01801"
+  },
+  {
+    "week": 18,
+    "ef_mean": 0.015874795120460455,
+    "num_runs": 3,
+    "decoupling_mean": 6.197004890177567
+  },
+  {
+    "week": 19,
+    "ef_mean": 0.01615124696882678,
+    "num_runs": 4,
+    "decoupling_mean": 6.781483384526899
+  },
+  {
+    "week": 20,
+    "ef_mean": 0.01557021466978938,
+    "num_runs": 4,
+    "decoupling_mean": 5.593620613622427
+  },
+  {
+    "week": 21,
+    "ef_mean": 0.016938056851193786,
+    "num_runs": 3,
+    "decoupling_mean": 7.215227418649508
+  },
+  {
+    "week": 22,
+    "ef_mean": 0.017408596014635545,
+    "num_runs": 3,
+    "decoupling_mean": 1.5868629645284293
+  },
+  {
+    "week": 23,
+    "ef_mean": 0.018158860983650882,
+    "num_runs": 2,
+    "decoupling_mean": 9.951334087127334
+  },
+  {
+    "week": 24,
+    "ef_mean": 0.016321881826827,
+    "num_runs": 4,
+    "decoupling_mean": 2.6738651984716477
+  },
+  {
+    "week": 25,
+    "ef_mean": 0.018553176364794165,
+    "num_runs": 1,
+    "decoupling_mean": 9.860781569546143
+  },
+  {
+    "week": 26,
+    "ef_mean": 0.017647512939846545,
+    "num_runs": 4,
+    "decoupling_mean": 6.8222033948153
+  },
+  {
+    "week": 27,
+    "ef_mean": 0.018626375918706122,
+    "num_runs": 2,
+    "decoupling_mean": 12.036989270159474
+  },
+  {
+    "week": 28,
+    "ef_mean": 0.016815796329016072,
+    "num_runs": 4,
+    "decoupling_mean": 7.837298192796071
+  },
+  {
+    "week": 29,
+    "ef_mean": 0.018675834854306295,
+    "num_runs": 4,
+    "decoupling_mean": 8.168854431845993
+  },
+  {
+    "week": 30,
+    "ef_mean": 0.017356285446614484,
+    "num_runs": 4,
+    "decoupling_mean": 4.90395687963409
+  },
+  {
+    "week": 31,
+    "ef_mean": 0.01798842049693564,
+    "num_runs": 4,
+    "decoupling_mean": 8.446336815947166
+  },
+  {
+    "week": 32,
+    "ef_mean": 0.0179125,
+    "num_runs": 4,
+    "decoupling_mean": 12.05,
+    "rpe10_ef": 0.02122,
+    "note": "Weekly mean (4 runs); RPE_10 Final Retest run EF = 0.02122 (36\u00b0C heat)"
+  },
+  {
+    "week": 33,
+    "ef_mean": 0.017317555173925477,
+    "num_runs": 5,
+    "decoupling_mean": 6.373620410696832
+  },
+  {
+    "week": 34,
+    "ef_mean": 0.018031774631770307,
+    "num_runs": 3,
+    "decoupling_mean": 8.32468592821899
+  },
+  {
+    "week": 35,
+    "ef_mean": 0.0173944107718258,
+    "num_runs": 3,
+    "decoupling_mean": 4.688820557708
+  },
+  {
+    "week": 36,
+    "ef_mean": 0.01823933476374609,
+    "num_runs": 7,
+    "decoupling_mean": 5.397200289402407
+  }
+]
