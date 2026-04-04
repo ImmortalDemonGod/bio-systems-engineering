@@ -14,12 +14,18 @@ import pandas as pd
 from typing import Any, cast
 
 
-def filter_gps_jitter(df: pd.DataFrame, pace_col: str, cad_col: str, cad_thr: int) -> pd.DataFrame:
+def filter_gps_jitter(df: pd.DataFrame, pace_col: str, cad_col: str, cad_thr: int = 100) -> pd.DataFrame:
     """
     Remove GPS jitter points from walk segments.
 
-    Drops rows where BOTH pace < 8.7 min/km AND cadence < threshold.
-    Keeps points where EITHER pace >= 8.7 OR cadence >= threshold.
+    Within already-classified walk segments, drops rows that are likely
+    GPS noise (e.g., pace spikes from signal bounce).  Keeps rows where
+    EITHER pace is below the walk ceiling OR cadence is above a minimal
+    movement floor.
+
+    Note: This is a secondary cleanup filter applied to walk segments only.
+    The primary run/walk classification (``is_walk``) uses stricter
+    Cultivation-aligned thresholds (pace > 9.5 min/km OR cadence < 140 spm).
 
     Parameters
     ----------
@@ -30,14 +36,14 @@ def filter_gps_jitter(df: pd.DataFrame, pace_col: str, cad_col: str, cad_thr: in
     cad_col : str
         Name of cadence column (spm)
     cad_thr : int
-        Cadence threshold (spm)
+        Cadence threshold (spm), default 100
 
     Returns
     -------
     pd.DataFrame
         Filtered DataFrame with jitter removed
     """
-    pace_flag = df[pace_col] >= 8.7
+    pace_flag = df[pace_col] <= 12.0
     cad_flag = df[cad_col] >= cad_thr
     return df[pace_flag | cad_flag]
 
@@ -163,7 +169,7 @@ def walk_block_segments(
     is_walk_col: str,
     pace_col: str,
     cad_col: str,
-    cad_thr: int = 128,
+    cad_thr: int = 140,
     max_gap_s: float = 2,
     min_dur_s: int = 2,
 ) -> list[dict]:
