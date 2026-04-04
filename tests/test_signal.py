@@ -21,56 +21,52 @@ from biosystems.signal.walk_detection import (
 class TestFilterGPSJitter:
     """Test GPS jitter filtering."""
     
-    def test_removes_slow_low_cadence(self):
-        """Test that fast pace + low cadence points (GPS jitter) are removed."""
+    def test_removes_gps_jitter(self):
+        """Test that extreme GPS jitter (very slow pace + zero cadence) is removed."""
         df = pd.DataFrame({
-            'pace_min_per_km': [8.0, 5.0, 10.0],  # 5.0 is fast, 8.0/10.0 are slow
-            'cadence': [170, 50, 110]  # 50 is very low
+            'pace_min_per_km': [10.0, 15.0, 8.0],
+            'cadence': [120, 50, 110]  # row 1: 50 spm + 15 min/km = noise
         })
-        
+
         filtered = filter_gps_jitter(
             df,
             pace_col='pace_min_per_km',
             cad_col='cadence',
-            cad_thr=128
         )
-        
-        # Should drop row 1 (fast pace, low cadence)
+
+        # Row 1 dropped (pace 15 > 12 AND cad 50 < 100), others kept
         assert len(filtered) == 2
-        assert 5.0 not in filtered['pace_min_per_km'].values
-    
-    def test_keeps_fast_pace(self):
-        """Test that fast pace is always kept."""
+        assert 50 not in filtered['cadence'].values
+
+    def test_keeps_real_walk_points(self):
+        """Test that genuine walk points (moderate pace + cadence) are kept."""
         df = pd.DataFrame({
-            'pace_min_per_km': [8.0, 8.5],  # All fast
-            'cadence': [170, 150]
+            'pace_min_per_km': [10.0, 11.0],  # Walking pace
+            'cadence': [120, 110]  # Walk cadence above jitter floor
         })
-        
+
         filtered = filter_gps_jitter(
             df,
             pace_col='pace_min_per_km',
             cad_col='cadence',
-            cad_thr=128
         )
-        
-        # Should keep all rows
+
+        # All kept — real walk data, not jitter
         assert len(filtered) == len(df)
-    
-    def test_keeps_high_cadence(self):
-        """Test that high cadence is always kept."""
+
+    def test_keeps_fast_pace(self):
+        """Test that fast pace is always kept even with low cadence."""
         df = pd.DataFrame({
-            'pace_min_per_km': [9.5, 10.0],  # Slow pace
-            'cadence': [170, 165]  # High cadence
+            'pace_min_per_km': [5.0, 7.0, 9.0],
+            'cadence': [170, 80, 145]
         })
-        
+
         filtered = filter_gps_jitter(
             df,
             pace_col='pace_min_per_km',
             cad_col='cadence',
-            cad_thr=128
         )
-        
-        # Should keep all (high cadence overrides slow pace)
+
         assert len(filtered) == len(df)
 
 
