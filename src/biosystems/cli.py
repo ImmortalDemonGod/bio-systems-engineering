@@ -35,12 +35,12 @@ _PKG_ROOT = Path(__file__).resolve().parents[2]
 def _default_zones_path() -> Path:
     """
     Determine which zones YAML file to use based on configured priorities.
-    
+
     Searches in this order and returns the first path found:
     1. Path specified by the `BIOSYSTEMS_ZONES_PATH` environment variable.
     2. User config at `~/.config/biosystems/zones.yml` if that file exists.
     3. Fallback to the repository-installed file at `<repo-root>/data/zones_personal.yml`.
-    
+
     Returns:
         Path: Filesystem path to the selected zones YAML file.
     """
@@ -180,16 +180,16 @@ def strava(
 ):
     """
     Analyze a Strava activity (or list recent activities) and print a run report.
-    
+
     When called without an activity_id the most recent run is used. Supports a JSON
     mode for machine-readable output and a human-readable text mode. The command
     will attempt to infer weather and wellness context, detect walking segments,
     compute a full run report, and append a summarized entry to the local run
     history when a run date is available.
-    
+
     Requires STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, and STRAVA_REFRESH_TOKEN to
     be set in the environment.
-    
+
     Parameters:
         activity_id (int | None): Strava activity ID to fetch; omit to use the most
             recent run.
@@ -478,7 +478,7 @@ def backfill_efforts(
 ):
     """
     Backfill Strava-detected best-effort times for recent runs into the local history.
-    
+
     Fetches the last N run summaries from Strava, retrieves each activity's best-effort records (e.g., 400m, 1K, 5K), and appends or merges those effort times into the local history store. Creates a minimal history entry when no existing entry is present. Skips activities that cannot be fetched or that have no effort data.
     """
     from biosystems.analytics.history import append_run, load_history
@@ -730,9 +730,9 @@ def summary(
 ):
     """
     Produce period-aggregated running statistics (EF, decoupling, HR, pace, and TSS).
-    
+
     Groups recorded runs by month (default), ISO week, or all-time, applies optional filters, and prints per-period aggregates including run count, mean/best EF, mean decoupling, average HR, average pace (min/km), and total hrTSS.
-    
+
     Parameters:
         since (str | None): Start date inclusive in YYYY-MM-DD format to filter runs.
         group (str): Grouping period: "month" (default), "week" (ISO week), or "all".
@@ -1028,9 +1028,9 @@ def trend(
 ):
     """
     Display longitudinal fitness trends (Performance Management Chart: ATL, CTL, TSB) and rolling EF/decoupling across recorded runs.
-    
+
     If requested via --backfill, seed local history from the last N Strava activity summaries (no stream fetch) using the provided zones configuration. When --json is set, output is a JSON object containing `summary` and `rolling`, and optionally `pmc` when `--pmc` is enabled; otherwise a human-readable summary and recent runs list are printed.
-    
+
     Parameters:
         zones_path (Path): Path to zones configuration YAML used when backfilling.
         backfill (int): Number of recent Strava activity summaries to import into local history before computing trends.
@@ -1185,7 +1185,7 @@ def wellness_show(
     def _row(label, val, unit=""):
         """
         Write a single formatted row to the CLI containing a left-aligned label, a value (or 'n/a' when None), and an optional unit.
-        
+
         Parameters:
             label (str): Text label shown at the start of the row.
             val (Any): Value to display; `None` is rendered as 'n/a'.
@@ -1207,7 +1207,7 @@ def wellness_show(
     def _delta(label, val, unit=""):
         """
         Prints a single formatted labeled delta line to the console.
-        
+
         Parameters:
             label (str): Label text shown at the start of the line.
             val (float | None): Numeric delta to display; when provided it's shown with a sign and one decimal place (e.g., `+1.2` or `-0.3`); when `None` prints `n/a`.
@@ -1263,9 +1263,9 @@ def wellness_analyze(
 ) -> None:
     """
     Produce analytics for personal wellness including coverage, era baselines, calibrated G/A/R thresholds, and key metric correlations.
-    
+
     When `json_output` is True, emits a JSON object containing `coverage` (records), `era_stats`, `thresholds`, and rounded `correlations`. Otherwise prints a human-readable report including coverage table, per-era baseline summaries, correlations (Whoop era), calibrated thresholds with source, and any personal norms.
-    
+
     Parameters:
         json_output (bool): If True, output results as JSON instead of human-readable text.
     """
@@ -1384,7 +1384,7 @@ def wellness_trends(
 ) -> None:
     """
     Display longitudinal monthly trends for resting heart rate and VO2max.
-    
+
     Loads the cached wellness dataframe, computes longitudinal fitness trends, and prints either
     a JSON payload (when `json_output` is True) or a human-readable report showing an era
     summary and per-month means for RHR and VO2max. Exits with code 1 if no wellness data is
