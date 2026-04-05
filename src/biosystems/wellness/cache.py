@@ -202,15 +202,25 @@ def _pct_change(today: float | None, reference: float | None) -> float | None:
 
 def compute_wellness_context(date_str: str) -> dict[str, Any]:
     """
-    Build a full wellness context dict for a given date:
-      - raw values for the day
-      - 1-day absolute deltas
-      - 7-day rolling mean deltas
-      - G/A/R readiness signal (calibrated thresholds when sufficient data)
-      - body_battery, sleep_hours, avg_stress, vo2max
-      - personal norms for display context
-
-    Returns empty dict if no wellness data exists at all.
+    Compute a wellness context dictionary for the specified date.
+    
+    The returned context aggregates that day's raw metrics, 1-day absolute deltas, 7-day rolling means and percent changes, G/A/R readiness signals (full-day and overnight-only), calibrated norms/threshold metadata when available, sleep-debt and respiratory-rate sigma where computable, and staleness metadata.
+    
+    Parameters:
+        date_str (str): A date string parseable by pandas.Timestamp representing the target date.
+    
+    Returns:
+        dict[str, Any]: A mapping containing:
+            - Raw metrics: `hrv_rmssd`, `resting_hr`, `recovery_score`, `sleep_score`,
+              `sleep_duration_s`, `sleep_hours`, `body_battery`, `strain_score`,
+              `avg_stress`, `vo2max`, `respiratory_rate`.
+            - Deltas and summaries: `hrv_1d_delta`, `hrv_7d_pct`, `hrv_7d_mean`,
+              `rhr_1d_delta`, `rhr_7d_delta`, `rhr_7d_mean`, `bb_7d_mean`, `bb_7d_delta`,
+              `rr_sigma`, `sleep_debt_7d`.
+            - Readiness signals: `gar`, `gar_detail`, `gar_overnight`, `gar_overnight_detail`.
+            - Calibration/metadata: `norms`, `thresholds_calibrated`, `body_battery_timing`,
+              `avg_stress_timing`, `stale`, `staleness_days`.
+          Returns an empty dict if no wellness data exists for the requested window.
     """
     # Single parquet load — used for both window slice and threshold calibration
     full_df = _load_df()
@@ -241,6 +251,15 @@ def compute_wellness_context(date_str: str) -> dict[str, Any]:
         return None if pd.isna(v) else float(v)
 
     def _7d_mean(col: str) -> float | None:
+        """
+        Compute the mean of the specified column over the seven days immediately before today_ts in the surrounding window.
+        
+        Parameters:
+            col (str): Column name in the window DataFrame to average.
+        
+        Returns:
+            float | None: The mean of numeric values from up to seven prior days as a float, or `None` if the column is missing, there are no prior rows, or no numeric values are present.
+        """
         prior = window[window.index < today_ts].tail(7)
         if prior.empty or col not in prior.columns:
             return None

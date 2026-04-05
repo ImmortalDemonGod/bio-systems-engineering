@@ -16,32 +16,18 @@ import pandas as pd
 
 def filter_gps_jitter(df: pd.DataFrame, pace_col: str, cad_col: str, cad_thr: int = 100) -> pd.DataFrame:
     """
-    Remove GPS jitter points from walk segments.
-
-    Within already-classified walk segments, drops rows that are likely
-    GPS noise (e.g., pace spikes from signal bounce).  Keeps rows where
-    EITHER pace is below the walk ceiling OR cadence is above a minimal
-    movement floor.
-
-    Note: This is a secondary cleanup filter applied to walk segments only.
-    The primary run/walk classification (``is_walk``) uses stricter
-    Cultivation-aligned thresholds (pace > 9.5 min/km OR cadence < 140 spm).
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame with pace and cadence columns
-    pace_col : str
-        Name of pace column (min/km)
-    cad_col : str
-        Name of cadence column (spm)
-    cad_thr : int
-        Cadence threshold (spm), default 100
-
-    Returns
-    -------
-    pd.DataFrame
-        Filtered DataFrame with jitter removed
+    Remove likely GPS-noise points from rows labeled as walking.
+    
+    Keeps points with pace <= 12.0 min/km or cadence >= cad_thr; intended as a secondary cleanup applied to already-classified walk rows.
+    
+    Parameters:
+        df (pd.DataFrame): DataFrame containing the pace and cadence columns.
+        pace_col (str): Column name for pace in minutes per kilometer.
+        cad_col (str): Column name for cadence in steps per minute.
+        cad_thr (int): Cadence threshold (spm) used to retain points; default 100.
+    
+    Returns:
+        pd.DataFrame: Subset of `df` containing rows that pass the pace or cadence criteria.
     """
     pace_flag = df[pace_col] <= 12.0
     cad_flag = df[cad_col] >= cad_thr
@@ -174,46 +160,33 @@ def walk_block_segments(
     min_dur_s: int = 2,
 ) -> list[dict]:
     """
-    Group contiguous walk blocks, allowing small gaps between intervals.
-
-    This function:
-    1. Filters walk points to remove GPS jitter
-    2. Identifies blocks of walking allowing up to max_gap_s of non-walk
-    3. Classifies segments as warm-up, mid-session, or cool-down
-
-    Parameters
-    ----------
-    gpx_df : pd.DataFrame
-        Full activity DataFrame with datetime index
-    is_walk_col : str
-        Column indicating walk classification (boolean)
-    pace_col : str
-        Pace column name (min/km)
-    cad_col : str
-        Cadence column name (spm)
-    cad_thr : int
-        Cadence threshold for walk detection (default: 128 spm)
-    max_gap_s : float
-        Maximum gap in seconds to bridge between walk intervals (default: 2)
-    min_dur_s : int
-        Minimum segment duration in seconds (default: 2)
-
-    Returns
-    -------
-    List[dict]
-        List of segment dictionaries with keys:
-        - segment_id : int (1-indexed)
-        - start_ts : str (ISO timestamp)
-        - end_ts : str (ISO timestamp)
-        - dur_s : int (duration in seconds)
-        - dist_km : float (distance covered)
-        - avg_pace_min_km : float (average pace)
-        - avg_hr : float (average heart rate)
-        - avg_cad : float (average cadence)
-        - tag : str ('warm-up', 'mid-session', 'cool-down', 'pause')
-        - start_offset_s : int (seconds from activity start)
-        - end_offset_s : int (seconds from activity end)
-        - note : str (additional information)
+    Identify contiguous walking segments in an activity and compute per-segment metrics and session-position tags.
+    
+    Filters walk-labeled points to remove GPS jitter, groups them into contiguous blocks allowing gaps up to `max_gap_s` seconds, drops blocks shorter than `min_dur_s`, and for each remaining block computes duration, distance (when cumulative distance is available), time-weighted average pace, mean heart rate, mean cadence, and a tag indicating its position in the session.
+    
+    Parameters:
+        gpx_df (pd.DataFrame): Activity dataframe indexed by datetime containing at least `is_walk_col`, `pace_col`, and `cad_col`. Optional columns: `distance_cumulative_km`, `heart_rate`, `cadence`.
+        is_walk_col (str): Column name used to identify walk-labeled rows.
+        pace_col (str): Column name for pace values (minutes per kilometer).
+        cad_col (str): Column name for cadence values (steps per minute).
+        cad_thr (int): Cadence threshold used when filtering walk points (default: 140).
+        max_gap_s (float): Maximum allowed gap in seconds between walk points to consider them part of the same block (default: 2).
+        min_dur_s (int): Minimum segment duration in seconds to include in output (default: 2).
+    
+    Returns:
+        list[dict]: A list of segment dictionaries (1-indexed). Each dictionary contains:
+            - segment_id (int): Sequential segment identifier starting at 1.
+            - start_ts (str): Segment start timestamp (ISO-formatted).
+            - end_ts (str): Segment end timestamp (ISO-formatted).
+            - dur_s (int): Segment duration in seconds.
+            - dist_km (float | None): Distance covered in kilometers (rounded to 3 decimals) or None when unavailable.
+            - avg_pace_min_km (float | None): Time-weighted average pace in min/km (rounded to 1 decimal) or None when unavailable.
+            - avg_hr (float | None): Mean heart rate (rounded to 1 decimal) or None when unavailable.
+            - avg_cad (float | None): Mean cadence (rounded to 1 decimal) or None when unavailable.
+            - tag (str): One of 'warm-up', 'mid-session', or 'cool-down' based on the segment's position in the session.
+            - start_offset_s (int): Seconds from activity start to segment start.
+            - end_offset_s (int): Seconds from activity start to segment end.
+            - note (str): Additional information (e.g., "pause?" for short mid-session segments with very small distance) or empty string.
     """
     # Filter walk points to remove GPS jitter
     walk_df = filter_gps_jitter(gpx_df[gpx_df[is_walk_col]].copy(), pace_col, cad_col, cad_thr)

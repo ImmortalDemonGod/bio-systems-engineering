@@ -1056,7 +1056,22 @@ _TOKEN_LOG: list[dict] = []
 
 
 def _chat(messages: list[dict], system: str, label: str = "call") -> str:
-    """Call OpenRouter (primary), OpenAI, or Anthropic (fallback). Mirrors SIF engine."""
+    """
+    Send the provided chat messages to an LLM provider, preferring OpenRouter, then OpenAI, then Anthropic, and return the model's textual response.
+    
+    The function attempts providers in that order and falls through to the next on failure. When using OpenRouter or OpenAI it injects the given `system` prompt as a system message, may force `temperature=0` for non-reasoning models, and records input/output token counts and an estimated cost to the module-level `_TOKEN_LOG`. For Anthropic it calls the provider with the provided system and messages and likewise logs token usage and estimated cost.
+    
+    Parameters:
+        messages (list[dict]): Chat message list (each item is a mapping with at least `role` and `content`) to send to the model.
+        system (str): System prompt content to be prepended as a system message.
+        label (str): Short label used when recording token usage in `_TOKEN_LOG`.
+    
+    Returns:
+        str: The chosen model's response text (empty string if provider returned no content).
+    
+    Raises:
+        RuntimeError: If no supported provider API key is available in the environment.
+    """
     openrouter_key = os.environ.get("OPENROUTER_API_KEY")
     openai_key     = os.environ.get("OPENAI_API_KEY")
     anthropic_key  = os.environ.get("ANTHROPIC_API_KEY")
@@ -1797,6 +1812,24 @@ def _print_token_report() -> None:
 
 
 def main() -> None:
+    """
+    Orchestrates the end-to-end creation of the daily running brief: collects recent Strava runs, computes baselines, generates per-run cards, obtains LLM-produced analyses, assembles a Markdown brief, and writes it to the workspace.
+    
+    Performs the following high-level actions:
+    - Validates that an API key for OpenRouter (preferred), OpenAI, or Anthropic is present and exits the process with an error message if none are found.
+    - Parses command-line arguments: --days (lookback window), --force (re-analyze already-briefed runs), and --dry-run (collect without calling LLMs).
+    - Loads historical stats and PMC/trend data to build operator context.
+    - Collects recent runs and filters out runs already recorded in the seen-runs ledger (unless --force).
+    - For each new run: fetches a detailed report, builds a numeric run card, and requests an LLM analysis.
+    - Generates a fitness preamble and a weekly synthesis (when enough runs exist).
+    - Assembles the final Markdown brief and writes it to OUTPUT_DIR with a YYYY-MM-DD filename.
+    - Updates the seen-runs ledger and prints a token-usage report.
+    
+    Side effects:
+    - Exits the process via sys.exit when no supported API key is found.
+    - Creates/updates files under OUTPUT_DIR (brief markdown and seen-runs ledger).
+    - Calls external CLIs (biosystems), imports optional wellness modules, and invokes LLM providers which may consume network resources and API keys.
+    """
     import argparse
 
     if not os.environ.get("OPENROUTER_API_KEY") and not os.environ.get("OPENAI_API_KEY") and not os.environ.get("ANTHROPIC_API_KEY"):

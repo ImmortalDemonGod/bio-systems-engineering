@@ -34,11 +34,15 @@ _PKG_ROOT = Path(__file__).resolve().parents[2]
 
 def _default_zones_path() -> Path:
     """
-    Resolve the default zones configuration file in priority order:
-
-    1. ``BIOSYSTEMS_ZONES_PATH`` environment variable (explicit override)
-    2. ``~/.config/biosystems/zones.yml`` (XDG standard user config)
-    3. ``<repo-root>/data/zones_personal.yml`` (editable-install fallback)
+    Determine which zones YAML file to use based on configured priorities.
+    
+    Searches in this order and returns the first path found:
+    1. Path specified by the `BIOSYSTEMS_ZONES_PATH` environment variable.
+    2. User config at `~/.config/biosystems/zones.yml` if that file exists.
+    3. Fallback to the repository-installed file at `<repo-root>/data/zones_personal.yml`.
+    
+    Returns:
+        Path: Filesystem path to the selected zones YAML file.
     """
     env_override = os.environ.get("BIOSYSTEMS_ZONES_PATH")
     if env_override:
@@ -175,10 +179,27 @@ def strava(
     n: int = typer.Option(5, "--count", "-n", help="Number of runs to list (with --list)"),
 ):
     """
-    Fetch a Strava activity and output physiological metrics.
-
-    Requires STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, and STRAVA_REFRESH_TOKEN
-    to be set in the environment.
+    Analyze a Strava activity (or list recent activities) and print a run report.
+    
+    When called without an activity_id the most recent run is used. Supports a JSON
+    mode for machine-readable output and a human-readable text mode. The command
+    will attempt to infer weather and wellness context, detect walking segments,
+    compute a full run report, and append a summarized entry to the local run
+    history when a run date is available.
+    
+    Requires STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, and STRAVA_REFRESH_TOKEN to
+    be set in the environment.
+    
+    Parameters:
+        activity_id (int | None): Strava activity ID to fetch; omit to use the most
+            recent run.
+        zones_path (Path): Path to zones configuration YAML.
+        temp_c (float | None): Override ambient temperature in Celsius for the run
+            context; when omitted the command attempts to fetch weather from GPS.
+        json_output (bool): When true emit the full report as JSON; otherwise print
+            a formatted human-readable report.
+        list_runs (bool): If true list recent runs and exit instead of analyzing an activity.
+        n (int): Number of recent runs to list when --list is used.
     """
     from biosystems.ingestion.strava import (
         _refresh_access_token,
@@ -456,14 +477,9 @@ def backfill_efforts(
     n: int = typer.Argument(50, help="Number of recent runs to backfill efforts for"),
 ):
     """
-    Backfill best effort times from past Strava activities into local history.
-
-    Fetches activity details (no full stream data) for the last N runs and stores
-    the Strava-detected best effort times (400m, 1K, 1mi, 5K, etc.) so the
-    own-history PR comparison has data to work with.
-
-    Much faster than re-running 'biosystems strava' for each activity — only
-    one API call per activity, no GPS stream processing.
+    Backfill Strava-detected best-effort times for recent runs into the local history.
+    
+    Fetches the last N run summaries from Strava, retrieves each activity's best-effort records (e.g., 400m, 1K, 5K), and appends or merges those effort times into the local history store. Creates a minimal history entry when no existing entry is present. Skips activities that cannot be fetched or that have no effort data.
     """
     from biosystems.analytics.history import append_run, load_history
     from biosystems.ingestion.strava import (
@@ -713,16 +729,16 @@ def summary(
     json_output: bool = typer.Option(False, "--json/--no-json", help="Output as JSON array"),
 ):
     """
-    How have I been improving? EF / decoupling / HR / pace by period.
-
-    Groups all recorded runs and prints aggregate stats per month (default),
-    week, or overall. Use --since to scope to post-study data only.
-
-    Examples:
-
-      biosystems summary                          # all time, by month
-      biosystems summary --since 2025-09-08       # post-study only
-      biosystems summary --group week --since 2026-01-01
+    Produce period-aggregated running statistics (EF, decoupling, HR, pace, and TSS).
+    
+    Groups recorded runs by month (default), ISO week, or all-time, applies optional filters, and prints per-period aggregates including run count, mean/best EF, mean decoupling, average HR, average pace (min/km), and total hrTSS.
+    
+    Parameters:
+        since (str | None): Start date inclusive in YYYY-MM-DD format to filter runs.
+        group (str): Grouping period: "month" (default), "week" (ISO week), or "all".
+        min_dist (float): Minimum run distance in kilometers to include (default 3.0 km).
+        source (str | None): If provided, include only runs whose `source` field equals this value.
+        json_output (bool): When true, emit the period rows as a JSON array instead of human-readable text.
     """
     from collections import defaultdict
 
@@ -1011,14 +1027,16 @@ def trend(
     json_output: bool = typer.Option(True, "--json/--no-json", help="Output as JSON"),
 ):
     """
-    Show longitudinal fitness trends: ATL, CTL, TSB (Performance Management Chart)
-    and rolling EF / decoupling across all recorded runs.
-
-    Run history is stored in ~/.biosystems/history.jsonl and updated
-    automatically each time 'biosystems strava' is executed.
-
-    Use --backfill N to seed history from the last N Strava activity summaries
-    without fetching full streams (uses hrTSS approximation).
+    Display longitudinal fitness trends (Performance Management Chart: ATL, CTL, TSB) and rolling EF/decoupling across recorded runs.
+    
+    If requested via --backfill, seed local history from the last N Strava activity summaries (no stream fetch) using the provided zones configuration. When --json is set, output is a JSON object containing `summary` and `rolling`, and optionally `pmc` when `--pmc` is enabled; otherwise a human-readable summary and recent runs list are printed.
+    
+    Parameters:
+        zones_path (Path): Path to zones configuration YAML used when backfilling.
+        backfill (int): Number of recent Strava activity summaries to import into local history before computing trends.
+        pmc (bool): Include the full day-by-day PMC table in the output when True.
+        rolling_window (int): Window size (in runs) for computing rolling statistics.
+        json_output (bool): Emit machine-readable JSON output when True; otherwise print formatted text.
     """
     from biosystems.analytics.history import backfill_from_strava, load_history
     from biosystems.analytics.trending import compute_pmc, compute_rolling_stats, summarize_trend
@@ -1165,6 +1183,14 @@ def wellness_show(
     typer.echo()
     typer.secho("  Raw values:", fg=typer.colors.CYAN)
     def _row(label, val, unit=""):
+        """
+        Write a single formatted row to the CLI containing a left-aligned label, a value (or 'n/a' when None), and an optional unit.
+        
+        Parameters:
+            label (str): Text label shown at the start of the row.
+            val (Any): Value to display; `None` is rendered as 'n/a'.
+            unit (str): Optional unit suffix appended after the value.
+        """
         return typer.echo(f"    {label:<28} {val if val is not None else 'n/a'} {unit}".rstrip())
     _row("HRV RMSSD",           ctx.get("hrv_rmssd"),      "ms")
     _row("Resting HR",          ctx.get("resting_hr"),     "bpm")
@@ -1179,6 +1205,14 @@ def wellness_show(
     typer.echo()
     typer.secho("  Deltas:", fg=typer.colors.CYAN)
     def _delta(label, val, unit=""):
+        """
+        Prints a single formatted labeled delta line to the console.
+        
+        Parameters:
+            label (str): Label text shown at the start of the line.
+            val (float | None): Numeric delta to display; when provided it's shown with a sign and one decimal place (e.g., `+1.2` or `-0.3`); when `None` prints `n/a`.
+            unit (str): Optional unit string appended after the value (e.g., "km", "%").
+        """
         return typer.echo(
             f"    {label:<28} {(f'{val:+.1f}' if val is not None else 'n/a')} {unit}".rstrip()
         )
@@ -1228,9 +1262,12 @@ def wellness_analyze(
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
 ) -> None:
     """
-    Analyze personal wellness baselines, coverage, correlations, and calibrated thresholds.
-
-    Surfaces the analytics methodology used to understand and calibrate the G/A/R system.
+    Produce analytics for personal wellness including coverage, era baselines, calibrated G/A/R thresholds, and key metric correlations.
+    
+    When `json_output` is True, emits a JSON object containing `coverage` (records), `era_stats`, `thresholds`, and rounded `correlations`. Otherwise prints a human-readable report including coverage table, per-era baseline summaries, correlations (Whoop era), calibrated thresholds with source, and any personal norms.
+    
+    Parameters:
+        json_output (bool): If True, output results as JSON instead of human-readable text.
     """
     import json as _json
 
@@ -1346,9 +1383,12 @@ def wellness_trends(
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
 ) -> None:
     """
-    Show longitudinal fitness arc: RHR and VO2max monthly trends since tracking began.
-
-    Highlights: RHR improvement over time, VO2max trajectory, training adaptation.
+    Display longitudinal monthly trends for resting heart rate and VO2max.
+    
+    Loads the cached wellness dataframe, computes longitudinal fitness trends, and prints either
+    a JSON payload (when `json_output` is True) or a human-readable report showing an era
+    summary and per-month means for RHR and VO2max. Exits with code 1 if no wellness data is
+    available; exits with code 0 if there is insufficient data for trend analysis.
     """
     import json as _json
 

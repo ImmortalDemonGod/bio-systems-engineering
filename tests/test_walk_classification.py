@@ -14,9 +14,14 @@ import pandas as pd
 
 
 def classify_walk(df: pd.DataFrame) -> pd.Series:
-    """Apply the Cultivation-aligned walk classification.
-
-    This mirrors the logic in cli.py for is_walk assignment.
+    """
+    Classify rows as walking using the Cultivation-aligned thresholds.
+    
+    Parameters:
+        df (pd.DataFrame): DataFrame containing at least the columns `pace_min_per_km` and `cadence`. Missing `cadence` values are treated as 0.
+    
+    Returns:
+        pd.Series: `True` for rows classified as walk, `False` otherwise. A row is `True` when `pace_min_per_km` is greater than 9.5 or `cadence` (with `NaN` treated as 0) is less than 140.
     """
     return (df["pace_min_per_km"] > 9.5) | (df["cadence"].fillna(0) < 140)
 

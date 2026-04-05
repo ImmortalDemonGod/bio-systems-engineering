@@ -13,7 +13,16 @@ import pandas as pd
 
 
 def _build_wellness_df(data: dict, dates: list[str]) -> pd.DataFrame:
-    """Helper to build a wellness DataFrame with a DatetimeIndex."""
+    """
+    Builds a pandas DataFrame from columnar `data` and assigns a DatetimeIndex from `dates`.
+    
+    Parameters:
+        data (dict): Mapping of column names to iterable column values. Lengths should match the number of `dates`.
+        dates (list[str]): List of date-like strings that will be converted to a DatetimeIndex.
+    
+    Returns:
+        pd.DataFrame: DataFrame with columns from `data` and index set to the parsed DatetimeIndex of `dates`.
+    """
     idx = pd.to_datetime(dates)
     df = pd.DataFrame(data, index=idx)
     return df
@@ -23,7 +32,16 @@ class TestSevenDayMean:
     """Test the _7d_mean helper behavior via compute_wellness_context."""
 
     def _make_context(self, date_str: str, df: pd.DataFrame):
-        """Invoke compute_wellness_context with a patched load_wellness."""
+        """
+        Call compute_wellness_context while patching the wellness DataFrame loader to return the provided DataFrame.
+        
+        Parameters:
+            date_str (str): Date string passed to compute_wellness_context (e.g., "YYYY-MM-DD").
+            df (pd.DataFrame): DataFrame to be returned by the patched `_load_df`.
+        
+        Returns:
+            dict | None: The context mapping produced by compute_wellness_context, or `None` if no context is produced.
+        """
         with patch("biosystems.wellness.cache._load_df", return_value=df):
             from biosystems.wellness.cache import compute_wellness_context
             return compute_wellness_context(date_str)

@@ -52,7 +52,12 @@ class TestParseGPX:
 
     @pytest.fixture
     def sample_gpx_file(self):
-        """Create a minimal valid GPX file for testing."""
+        """
+        Provide a temporary GPX file containing a minimal valid track for tests.
+        
+        Yields:
+            Path: Path to a temporary `.gpx` file populated with three track points (including elevation, time, heart rate, and cadence). The temporary file is removed after the fixture consumer finishes.
+        """
         gpx_content = '''<?xml version="1.0"?>
 <gpx version="1.1" creator="Test" xmlns="http://www.topografix.com/GPX/1/1"
      xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1">
