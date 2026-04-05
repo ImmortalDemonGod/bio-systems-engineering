@@ -22,9 +22,9 @@ from filelock import FileLock
 def history_path() -> Path:
     """
     Return the filesystem path to the local run history file.
-    
+
     Ensures the base directory exists (uses $BIOSYSTEMS_HOME if set, otherwise ~/.biosystems).
-    
+
     Returns:
         Path: Path to the `history.jsonl` file inside the base directory.
     """
@@ -41,9 +41,9 @@ def _lock_path() -> Path:
 def load_history() -> list[dict[str, Any]]:
     """
     Load the persistent run history from the history JSON Lines file and return deduplicated entries sorted by ascending date.
-    
+
     Reads each non-empty line as a JSON object (invalid JSON lines are ignored). If the history file does not exist, returns an empty list. Deduplication keys entries by `strava_activity_id` when present (keyed as `id:{strava_activity_id}`) and otherwise by the entry's `date` (last-write-wins for date-only entries).
-    
+
     Returns:
         list[dict[str, Any]]: A list of run-entry objects sorted by `date` (ISO yyyy-mm-dd strings). Each entry contains at minimum:
             - `date` (str): ISO date string.
@@ -213,14 +213,14 @@ def backfill_from_strava(
 ) -> list[dict[str, Any]]:
     """
     Estimate hrTSS for recent Strava run summaries and append entries for dates not already present in history.
-    
+
     Uses the Banister approximation: hrTSS ≈ (duration_h × (avg_hr / threshold_hr)²) × 100. Fetches up to `n` recent run summaries, skips activities missing required fields, and appends a compact estimated entry (including date, hrTSS, distance_km, avg_hr, optional avg_pace_min_per_km, activity_name, and source) for each new date.
-    
+
     Parameters:
         n (int): Number of recent run summaries to fetch from Strava.
         zone_config (ZoneConfig): Provides `threshold_hr` for the TSS estimation.
         access_token (str | None): Optional Strava access token to use for the fetch.
-    
+
     Returns:
         list[dict[str, Any]]: Entries that were added to history (each entry as written to the history file).
     """
