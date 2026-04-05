@@ -105,7 +105,7 @@ def parse_gpx(path: str | Path) -> pd.DataFrame:
 
         # Timestamp (required)
         time_node = pt.find("g:time", ns)
-        if time_node is None or time_node.text is None:
+        if time_node is None or not (time_node.text or "").strip():
             continue  # skip malformed trackpoints with no timestamp
         ts = pd.to_datetime(time_node.text, utc=True)
 
