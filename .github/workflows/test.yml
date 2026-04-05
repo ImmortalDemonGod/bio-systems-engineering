@@ -34,8 +34,8 @@ jobs:
         run: ruff check src/ tests/
 
       - name: Type check (mypy)
-        run: mypy src/biosystems/ --ignore-missing-imports --no-error-summary || true
-        # TODO: remove `|| true` once existing mypy errors are fixed
+        run: mypy src/biosystems/ --ignore-missing-imports --no-error-summary
+        continue-on-error: true  # TODO: make blocking once existing mypy errors are fixed
 
       - name: Run full test suite
         run: pytest --tb=short -q

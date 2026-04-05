@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `.github/workflows/test.yml`
-**Commit:** `c685c09`
-**Previous:** `51c82ca`
-**Generated:** 2026-04-04T23:22:30Z
+**Commit:** `fe89a1c`
+**Previous:** `c14e289`
+**Generated:** 2026-04-05T02:15:40Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -16,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: ".github/workflows/test.yml"
-  classification_rationale: "CI config fix"
+  classification_rationale: "CI visibility improvement"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-04-04T23:22:30Z"
+  classified_at: "2026-04-05T02:15:40Z"
 ```
 
 ## Claim(s)
 
-1. Ruff step now uses || true to prevent 1894 pre-existing lint errors from blocking CI
+1. mypy failures now visible in CI as warnings rather than silently masked
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -33,13 +33,13 @@ classification:
 ### Class E (Intent Alignment)
 
 - **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
-- **Requirements Verified:** CI must not fail on pre-existing issues unrelated to current changes
+- **Requirements Verified:** CI must show failures even when non-blocking
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`c685c09`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/c685c0942019403e2b1f9980a980671ae2df0d56))
+**Scope Inventory** (SHA: [`fe89a1c`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/fe89a1ce3257879edc0f9cef5c800abeeb13e3db))
 
-- [`.github/workflows/test.yml#L34-L35`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/c685c0942019403e2b1f9980a980671ae2df0d56/.github/workflows/test.yml#L34-L35)
+- [`.github/workflows/test.yml#L37-L38`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/fe89a1ce3257879edc0f9cef5c800abeeb13e3db/.github/workflows/test.yml#L37-L38)
 
 ### Class A (Execution Evidence)
 
@@ -59,4 +59,4 @@ Only git diff scope inventory was collected. No execution evidence.
 
 ## Summary
 
-Add || true to ruff check step with TODO to remove once errors are cleaned up
+Replace || true with continue-on-error: true on mypy step
