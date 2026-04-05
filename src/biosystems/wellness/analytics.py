@@ -56,10 +56,10 @@ _GARMIN_METRICS = [
 def compute_coverage(df: pd.DataFrame) -> pd.DataFrame:
     """
     Compute per-metric coverage statistics from a date-indexed DataFrame.
-    
+
     Parameters:
         df (pd.DataFrame): Input DataFrame whose index is date-like and whose columns are metric series.
-    
+
     Returns:
         pd.DataFrame: A DataFrame indexed by metric with columns:
             - n_rows (int): count of non-missing observations for the metric.
