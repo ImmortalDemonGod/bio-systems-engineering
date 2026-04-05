@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | github.com/ImmortalDemonGod/aiv-protocol |
+| **Repository** | github.com/ImmortalDemonGod/bio-systems-engineering |
 | **Change ID** | walk-detection-and-cadence-fixes |
 | **Commits** | `b4571b5`, `9b0a008`, `41716a6`, `58f817e`, `96a4f3a`, `0069a6d` |
 | **Head SHA** | `0069a6d` |
@@ -19,7 +19,7 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Documentation and code quality changes with component-level blast radius"
   classified_by: "Miguel Ingram"
   classified_at: "2026-04-04T18:40:36Z"
 ```

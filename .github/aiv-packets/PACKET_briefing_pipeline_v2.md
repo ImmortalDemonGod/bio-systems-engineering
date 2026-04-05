@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | github.com/ImmortalDemonGod/aiv-protocol |
+| **Repository** | github.com/ImmortalDemonGod/bio-systems-engineering |
 | **Change ID** | briefing-pipeline-v2 |
 | **Commits** | `56cc2e5` |
 | **Head SHA** | `56cc2e5` |

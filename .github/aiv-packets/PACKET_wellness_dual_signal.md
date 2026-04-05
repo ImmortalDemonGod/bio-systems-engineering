@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | github.com/ImmortalDemonGod/aiv-protocol |
+| **Repository** | github.com/ImmortalDemonGod/bio-systems-engineering |
 | **Change ID** | wellness-dual-signal |
 | **Commits** | `cc1b74f`, `9009800` |
 | **Head SHA** | `cc1b74f` |

@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | github.com/ImmortalDemonGod/aiv-protocol |
+| **Repository** | github.com/ImmortalDemonGod/bio-systems-engineering |
 | **Change ID** | cli-enterprise-polish |
 | **Commits** | `e7feb24`, `cfa8d6d`, `9763666` |
 | **Head SHA** | `9763666` |
