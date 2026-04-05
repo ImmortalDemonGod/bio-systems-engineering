@@ -1,8 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `tests/test_ingestion_fit.py`
-**Commit:** `2e2443f`
-**Generated:** 2026-03-22T03:18:02Z
+**Commit:** `67774e0`
+**Previous:** `cf4d29d`
+**Generated:** 2026-04-05T02:15:24Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -15,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "tests/test_ingestion_fit.py"
-  classification_rationale: "New test file only — no production code modified; uses mock FitReader, no .fit fixture required"
+  classification_rationale: "test precision improvement"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-22T03:18:02Z"
+  classified_at: "2026-04-05T02:15:24Z"
 ```
 
 ## Claim(s)
 
-1. 12 tests cover parse_fit column renames, lat/lon aliases, semicircle conversion, NaN handling, and empty-file error
+1. Timezone check now asserts str(tz) == 'UTC' instead of just 'is not None'
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -32,18 +33,18 @@ classification:
 ### Class E (Intent Alignment)
 
 - **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
-- **Requirements Verified:** parse_fit lat/lon cross-compatibility fix requires test evidence that aliases are present and correct
+- **Requirements Verified:** Tests must validate specific contracts, not just presence
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`2e2443f`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/2e2443f64942b36c54a9a3b997e179057ebb81c8))
+**Scope Inventory** (SHA: [`67774e0`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/67774e00ff02e6e24e3c4d53d6b7d63d17253e42))
 
-- [`tests/test_ingestion_fit.py#L1-L144`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/2e2443f64942b36c54a9a3b997e179057ebb81c8/tests/test_ingestion_fit.py#L1-L144)
+- [`tests/test_ingestion_fit.py#L92`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/67774e00ff02e6e24e3c4d53d6b7d63d17253e42/tests/test_ingestion_fit.py#L92)
 
 ### Class A (Execution Evidence)
 
 - Local checks skipped (--skip-checks).
-- **Skip reason:** Test-only file; production code already verified by previous atomic commit
+- **Skip reason:** single assert change in test
 
 
 ---
@@ -51,11 +52,11 @@ classification:
 ## Verification Methodology
 
 **R0 (trivial) -- local checks skipped.**
-**Reason:** Test-only file; production code already verified by previous atomic commit
+**Reason:** single assert change in test
 Only git diff scope inventory was collected. No execution evidence.
 
 ---
 
 ## Summary
 
-Add tests/test_ingestion_fit.py: 12 mock-based tests for parse_fit schema and lat/lon aliasing
+Change assert df.index.tz is not None to assert str(df.index.tz) == 'UTC'
