@@ -89,7 +89,7 @@ class TestParseFitBasic:
     def test_index_is_utc_datetime(self):
         df = _three_point_df()
         assert df.index.name == "timestamp"
-        assert df.index.tz is not None
+        assert str(df.index.tz) == "UTC"
 
     def test_altitude_renamed_to_ele(self):
         df = _three_point_df()
