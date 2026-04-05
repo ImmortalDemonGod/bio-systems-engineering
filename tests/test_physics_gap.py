@@ -150,11 +150,10 @@ class TestCalculateGAPFromDataFrame:
     """Test DataFrame GAP calculation."""
 
     def test_simple_dataframe(self):
-        """Test GAP calculation on simple DataFrame.
-
-        Uses 10 points so the 5-point rolling elevation smoother has enough
-        context to preserve the grade signal (3-point series collapses to a
-        flat average under the centered window).
+        """
+        Validate GAP computation on a simple uniformly uphill DataFrame.
+        
+        Creates a 10-row DataFrame with constant pace, 5 m elevation gain per segment, and 100 m segment distance (≈5% grade), then verifies the first GAP equals the input pace (no prior grade) and that interior and final GAP values are faster than the input pace.
         """
         n = 10
         df = pd.DataFrame({
