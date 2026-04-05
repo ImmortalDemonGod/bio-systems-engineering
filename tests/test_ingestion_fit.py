@@ -32,17 +32,17 @@ def _make_record(
 ) -> MagicMock:
     """
     Create a MagicMock that simulates a FIT 'record' data message for use in tests.
-    
+
     The mock is specified as a fitdecode.FitDataMessage, has its `name` set to "record",
     and provides FI T-like raw fields:
     - `timestamp` set from `ts`.
     - `position_lat` and `position_long` set as integer semicircle values derived from `lat_deg`/`lon_deg`.
     - `altitude`, `heart_rate`, `cadence`, and `speed` set from the corresponding arguments.
-    
+
     Behavior:
     - `has_field(name)` returns True only for the keys listed above.
     - `get_value(name, fallback)` returns the stored value for `name` or `fallback` if absent.
-    
+
     Parameters:
         ts (datetime): UTC timestamp to assign to the mock record.
         lat_deg (float): Latitude in degrees (converted to FIT semicircles).
@@ -51,7 +51,7 @@ def _make_record(
         heart_rate (int): Heart rate value to store.
         cadence (int): Cadence value to store.
         speed (float): Speed value to store.
-    
+
     Returns:
         MagicMock: A mock object masquerading as a fitdecode.FitDataMessage with the behavior described above.
     """
@@ -77,10 +77,10 @@ def _make_record(
 def _parse_with_records(records: list) -> pd.DataFrame:
     """
     Run parse_fit using a patched FitReader that iterates over the provided mocked FIT records.
-    
+
     Parameters:
         records (list): Iterable of mocked `fitdecode.FitDataMessage`-like objects to be yielded by the patched reader.
-    
+
     Returns:
         pd.DataFrame: The DataFrame produced by `parse_fit` when consuming `records`.
     """
@@ -97,7 +97,7 @@ def _parse_with_records(records: list) -> pd.DataFrame:
 def _three_point_df() -> pd.DataFrame:
     """
     Create a DataFrame parsed from three mocked FIT record messages with consecutive UTC timestamps.
-    
+
     Returns:
         pd.DataFrame: DataFrame with three rows (one per mocked record). The index is named "timestamp" and contains timezone-aware UTC datetimes; columns correspond to the values produced by parse_fit (for example, latitude/longitude, aliased lat/lon, ele, hr, cadence, speed).
     """
@@ -117,7 +117,7 @@ class TestParseFitBasic:
     def test_returns_dataframe(self):
         """
         Verify that parsing a small set of mocked FIT records produces a pandas DataFrame.
-        
+
         Asserts that calling the helper which parses three mocked FIT record messages returns an instance of `pandas.DataFrame`.
         """
         assert isinstance(_three_point_df(), pd.DataFrame)
