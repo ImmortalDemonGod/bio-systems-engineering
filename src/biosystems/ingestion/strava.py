@@ -106,11 +106,11 @@ def _get_with_backoff(
 def _get_credentials() -> tuple[str, str, str]:
     """
     Load Strava OAuth credentials from environment variables.
-    
+
     Returns:
         tuple[str, str, str]: (client_id, client_secret, refresh_token) read from
             STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, and STRAVA_REFRESH_TOKEN.
-    
+
     Raises:
         OSError: If any of the required environment variables are missing.
     """
