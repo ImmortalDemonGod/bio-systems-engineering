@@ -43,7 +43,19 @@ def sample_zone_config():
 
 @pytest.fixture
 def sample_activity_df():
-    """Create sample activity DataFrame for testing."""
+    """
+    Create a sample pandas DataFrame representing 10 minutes of activity sampled at 1 Hz for use in tests.
+    
+    The DataFrame contains constant, synthetic values to exercise metrics calculations:
+    - dist: meters covered during the sample interval (10.0 m per sample)
+    - dt: sample interval in seconds (1.0 s)
+    - hr: heart rate in beats per minute (165.0 bpm)
+    - pace_sec_km: pace in seconds per kilometer (300.0 s/km, i.e., 5:00/km)
+    - cadence: steps or pedal cadence (170)
+    
+    Returns:
+        pd.DataFrame: DataFrame with 600 rows (10 minutes at 1 Hz) and columns described above.
+    """
     # 10 minutes of data, 1 Hz sampling
     n_points = 600
 

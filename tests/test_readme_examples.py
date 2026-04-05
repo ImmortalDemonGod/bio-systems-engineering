@@ -19,12 +19,22 @@ class TestReadmeExamples:
 
     @pytest.fixture
     def sample_data_path(self) -> Path:
-        """Path to sample data file."""
+        """
+        Path to the sample CSV used by the README example tests.
+        
+        Returns:
+            Path: Filesystem path to data/sample/sample_run.csv relative to this test module.
+        """
         return Path(__file__).parent.parent / "data" / "sample" / "sample_run.csv"
 
     @pytest.fixture
     def sample_zones(self) -> ZoneConfig:
-        """Zone configuration from README example."""
+        """
+        Provide a ZoneConfig matching the README example.
+        
+        Returns:
+            ZoneConfig: Configuration with resting_hr=50, threshold_hr=186 and a single "Z2" HeartRateZone named "Z2 (Aerobic)" with bpm (145, 165) and pace_min_per_km (4.5, 6.0).
+        """
         return ZoneConfig(
             resting_hr=50,
             threshold_hr=186,
@@ -39,9 +49,9 @@ class TestReadmeExamples:
 
     def test_quick_start_example(self, sample_data_path, sample_zones):
         """
-        Test the Quick Start example from README.
-
-        This is the EXACT code users will copy-paste, so it MUST work.
+        Validate the README Quick Start example produces the expected metrics when run against the sample dataset.
+        
+        Runs the example code from the README using the provided sample CSV and zone configuration, asserts basic sanity conditions on the resulting metrics (positive efficiency factor, decoupling between 0 and 100, positive HR TSS), and verifies that efficiency factor, decoupling percentage, and HR TSS match the README's documented values within predefined tolerances.
         """
         # This is copied directly from README
         df = pd.read_csv(sample_data_path, parse_dates=['time'])
@@ -64,9 +74,9 @@ class TestReadmeExamples:
 
     def test_sample_data_has_required_columns(self, sample_data_path):
         """
-        Sample data must have all columns expected by run_metrics.
-
-        This prevents KeyError failures when users run the example.
+        Ensure the sample CSV contains columns required by run_metrics.
+        
+        Checks for the presence of 'time', 'hr', 'dist', 'dt', and 'pace_sec_km'; fails the test if any are missing.
         """
         df = pd.read_csv(sample_data_path)
 
@@ -104,9 +114,9 @@ class TestReadmeExamples:
 
     def test_sample_data_is_realistic(self, sample_data_path):
         """
-        Sample data should represent a realistic run.
-
-        Prevents using synthetic data that doesn't match real-world patterns.
+        Assert that the sample CSV represents a realistic running session.
+        
+        Performs sanity checks on the loaded DataFrame: requires at least 1000 rows, heart-rate values with min > 100, max < 200, and mean > 120, and running speeds with min > 0 and max < 10 m/s.
         """
         df = pd.read_csv(sample_data_path)
 

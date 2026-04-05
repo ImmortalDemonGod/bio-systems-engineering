@@ -30,26 +30,23 @@ def compute_pmc(
     decay_ctl: int = 42,
 ) -> list[dict[str, Any]]:
     """
-    Compute ATL, CTL, and TSB for each calendar day spanned by ``entries``.
-
-    Days with no run have TSS=0 (rest days still contribute to decay).
-
-    Parameters
-    ----------
-    entries : list[dict]
-        Run history entries, each with 'date' (ISO YYYY-MM-DD) and 'hrTSS'.
-        Must be sorted by date ascending.
-    decay_atl : int
-        Time constant for ATL in days (default 7).
-    decay_ctl : int
-        Time constant for CTL in days (default 42).
-
-    Returns
-    -------
-    list[dict]
-        One dict per calendar day between first and last entry, with keys:
-        'date', 'hrTSS', 'atl', 'ctl', 'tsb', 'activity_name'.
-        Only days with an actual run have non-zero hrTSS.
+    Compute daily ATL, CTL, and TSB across the calendar range covered by the provided run entries.
+    
+    Aggregates multiple runs on the same ISO date by summing `hrTSS` and summing `distance_km`; when multiple distinct non-empty `activity_name` values occur on the same date they are concatenated with " + ". Days with no runs use `hrTSS = 0` for decay purposes. TSB is computed for each day before that day's load is applied. ATL, CTL, and TSB are rounded to one decimal place; `hrTSS` is rounded to one decimal when present and otherwise returned as `None`.
+    
+    Parameters:
+        entries (list[dict]): Run history entries containing at minimum `'date'` (ISO YYYY-MM-DD) and `'hrTSS'`. Entries should be sorted ascending by date.
+        decay_atl (int): Time constant for ATL in days (default 7).
+        decay_ctl (int): Time constant for CTL in days (default 42).
+    
+    Returns:
+        list[dict]: One dictionary per calendar day from the earliest to latest entry date. Each dictionary contains:
+            - `date` (str): ISO date (YYYY-MM-DD)
+            - `hrTSS` (float|None): Daily hrTSS if > 0 (rounded to 0.1), otherwise `None`
+            - `atl` (float): ATL rounded to 0.1
+            - `ctl` (float): CTL rounded to 0.1
+            - `tsb` (float): CTB = CTL - ATL (rounded to 0.1) computed before that day's load
+            - optional metadata copied/aggregated from input: `activity_name`, `distance_km`, `ef`, `ef_gap`, `decoupling_pct`, `avg_hr`, `avg_pace_min_per_km`
     """
     if not entries:
         return []
