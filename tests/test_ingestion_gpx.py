@@ -54,7 +54,7 @@ class TestParseGPX:
     def sample_gpx_file(self):
         """
         Provide a temporary GPX file containing a minimal valid track for tests.
-        
+
         Yields:
             Path: Path to a temporary `.gpx` file populated with three track points (including elevation, time, heart rate, and cadence). The temporary file is removed after the fixture consumer finishes.
         """
