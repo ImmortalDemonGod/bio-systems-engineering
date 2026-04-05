@@ -116,7 +116,7 @@ ef = (work_df['dist'].sum() / work_df['dt'].sum()) / work_df['hr'].mean()
 
 ### 2.5 Post-Study Pipeline Improvements
 
-Following completion of the 103-day study, the analysis pipeline (`biosystems`) underwent algorithmic improvements. The reported results use the original Cultivation pipeline's Run-Only Filter thresholds (cadence ≥140 spm OR pace ≤9.5 min/km); the current `biosystems` pipeline has been aligned to match these thresholds.
+Following completion of the 103-day study, the analysis pipeline (`biosystems`) underwent algorithmic improvements. The reported results use the original Cultivation pipeline's Run-Only Filter thresholds (cadence ≥140 spm AND pace <9.5 min/km); the current `biosystems` pipeline has been aligned to match these thresholds.
 
 Changes and their impact on reported values:
 
