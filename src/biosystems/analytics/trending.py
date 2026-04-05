@@ -31,14 +31,14 @@ def compute_pmc(
 ) -> list[dict[str, Any]]:
     """
     Compute daily ATL, CTL, and TSB across the calendar range covered by the provided run entries.
-    
+
     Aggregates multiple runs on the same ISO date by summing `hrTSS` and summing `distance_km`; when multiple distinct non-empty `activity_name` values occur on the same date they are concatenated with " + ". Days with no runs use `hrTSS = 0` for decay purposes. TSB is computed for each day before that day's load is applied. ATL, CTL, and TSB are rounded to one decimal place; `hrTSS` is rounded to one decimal when present and otherwise returned as `None`.
-    
+
     Parameters:
         entries (list[dict]): Run history entries containing at minimum `'date'` (ISO YYYY-MM-DD) and `'hrTSS'`. Entries should be sorted ascending by date.
         decay_atl (int): Time constant for ATL in days (default 7).
         decay_ctl (int): Time constant for CTL in days (default 42).
-    
+
     Returns:
         list[dict]: One dictionary per calendar day from the earliest to latest entry date. Each dictionary contains:
             - `date` (str): ISO date (YYYY-MM-DD)
