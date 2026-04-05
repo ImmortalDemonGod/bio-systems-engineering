@@ -178,9 +178,9 @@ class TestWalkBlockSegments:
     def sample_activity(self):
         """
         Create a sample activity DataFrame containing two walk periods within a 1000-second, 1 Hz time series.
-        
+
         The DataFrame is indexed by a 1-second DatetimeIndex starting at 2024-01-01 10:00:00 and contains 1000 rows. It includes two contiguous walk blocks: one starting at 30s lasting 100s, and one at the end lasting 100s. Non-walk rows surround and separate these blocks.
-        
+
         Returns:
             pd.DataFrame: Time-indexed activity with columns:
                 - is_walk (bool): True for walk rows, False otherwise.
