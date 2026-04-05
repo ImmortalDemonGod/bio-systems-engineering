@@ -152,7 +152,7 @@ class TestCalculateGAPFromDataFrame:
     def test_simple_dataframe(self):
         """
         Validate GAP computation on a simple uniformly uphill DataFrame.
-        
+
         Creates a 10-row DataFrame with constant pace, 5 m elevation gain per segment, and 100 m segment distance (≈5% grade), then verifies the first GAP equals the input pace (no prior grade) and that interior and final GAP values are faster than the input pace.
         """
         n = 10
