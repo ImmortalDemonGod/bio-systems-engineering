@@ -69,10 +69,10 @@ def compute_pmc(
                 prev_dist = prev.get("distance_km") or 0.0
                 curr_dist = e.get("distance_km") or 0.0
                 prev["distance_km"] = prev_dist + curr_dist
-                prev_name = prev.get("activity_name", "")
-                curr_name = e.get("activity_name", "")
+                prev_name = prev.get("activity_name") or ""
+                curr_name = e.get("activity_name") or ""
                 if curr_name and curr_name != prev_name:
-                    prev["activity_name"] = f"{prev_name} + {curr_name}"
+                    prev["activity_name"] = f"{prev_name} + {curr_name}" if prev_name else curr_name
 
     dates_sorted = sorted(tss_by_date.keys())
     if not dates_sorted:
