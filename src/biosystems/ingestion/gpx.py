@@ -51,12 +51,12 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 def parse_gpx(path: str | Path) -> pd.DataFrame:
     """
     Parse a GPX file into a chronologically sorted pandas DataFrame containing positional, temporal, and common sensor fields.
-    
+
     Supports Garmin GPX namespace variants, falls back to non-namespaced GPX, and attempts to extract elevation, heart rate, cadence, and power from multiple possible XML locations.
-    
+
     Parameters:
         path (str | Path): Filesystem path to the GPX file.
-    
+
     Returns:
         pd.DataFrame: DataFrame with the following columns:
             - time: pandas.Timestamp (UTC)
@@ -71,7 +71,7 @@ def parse_gpx(path: str | Path) -> pd.DataFrame:
             - speed_mps: float (instantaneous speed in m/s)
             - speed_mps_smooth: float (5-point centered rolling mean of speed_mps)
             - pace_sec_km: float (smoothed pace in seconds per km)
-    
+
     Raises:
         ValueError: If no <trkpt> elements are found in the GPX file.
     """
