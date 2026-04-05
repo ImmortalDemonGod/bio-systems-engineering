@@ -263,7 +263,7 @@ def strava(
 
     # --- Walk detection: pace OR cadence below running threshold ---
     df["pace_min_per_km"] = df["pace_sec_km"] / 60
-    df["is_walk"] = (df["pace_min_per_km"] > 9.5) | (df["cadence"].fillna(0) < 140)
+    df["is_walk"] = (df["pace_min_per_km"] > 9.5) | (df["cadence"].fillna(999) < 140)
     if "moving" in df.columns:
         df["is_walk"] = df["is_walk"] | (~df["moving"].fillna(True).astype(bool))
 
@@ -638,7 +638,7 @@ def backfill_streams(
 
         # Walk detection: pace OR cadence below running threshold
         df["pace_min_per_km"] = df["pace_sec_km"] / 60
-        df["is_walk"] = (df["pace_min_per_km"] > 9.5) | (df["cadence"].fillna(0) < 140)
+        df["is_walk"] = (df["pace_min_per_km"] > 9.5) | (df["cadence"].fillna(999) < 140)
         if "moving" in df.columns:
             df["is_walk"] = df["is_walk"] | (~df["moving"].fillna(True).astype(bool))
 
