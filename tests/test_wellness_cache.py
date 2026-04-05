@@ -15,11 +15,11 @@ import pandas as pd
 def _build_wellness_df(data: dict, dates: list[str]) -> pd.DataFrame:
     """
     Builds a pandas DataFrame from columnar `data` and assigns a DatetimeIndex from `dates`.
-    
+
     Parameters:
         data (dict): Mapping of column names to iterable column values. Lengths should match the number of `dates`.
         dates (list[str]): List of date-like strings that will be converted to a DatetimeIndex.
-    
+
     Returns:
         pd.DataFrame: DataFrame with columns from `data` and index set to the parsed DatetimeIndex of `dates`.
     """
@@ -34,11 +34,11 @@ class TestSevenDayMean:
     def _make_context(self, date_str: str, df: pd.DataFrame):
         """
         Call compute_wellness_context while patching the wellness DataFrame loader to return the provided DataFrame.
-        
+
         Parameters:
             date_str (str): Date string passed to compute_wellness_context (e.g., "YYYY-MM-DD").
             df (pd.DataFrame): DataFrame to be returned by the patched `_load_df`.
-        
+
         Returns:
             dict | None: The context mapping produced by compute_wellness_context, or `None` if no context is produced.
         """
