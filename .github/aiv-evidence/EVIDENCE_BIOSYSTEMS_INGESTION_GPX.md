@@ -1,8 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `src/biosystems/ingestion/gpx.py`
-**Commit:** `21b577a`
-**Generated:** 2026-03-22T03:07:54Z
+**Commit:** `892b0a3`
+**Previous:** `8fdd2b3`
+**Generated:** 2026-04-05T02:13:57Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -15,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "src/biosystems/ingestion/gpx.py"
-  classification_rationale: "Low-risk defensive check — skipping malformed points is safe and consistent with how missing HR/elevation is handled"
+  classification_rationale: "defensive fix for edge case in data ingestion"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-03-22T03:07:54Z"
+  classified_at: "2026-04-05T02:13:57Z"
 ```
 
 ## Claim(s)
 
-1. parse_gpx skips trackpoints with missing or empty <time> element instead of raising AttributeError
+1. GPX parser now skips trackpoints with empty or whitespace-only time text, not just None
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -32,19 +33,19 @@ classification:
 ### Class E (Intent Alignment)
 
 - **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
-- **Requirements Verified:** Parser must not crash on non-standard GPX files that omit the timestamp element
+- **Requirements Verified:** Parser must not produce malformed rows from incomplete GPX data
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`21b577a`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/21b577a2c7da88b84caca7455ed6cfc345259f8f))
+**Scope Inventory** (SHA: [`892b0a3`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/892b0a3cc5e1be4656ad67b93cc8b7f3ad9758d7))
 
-- [`src/biosystems/ingestion/gpx.py#L107-L110`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/21b577a2c7da88b84caca7455ed6cfc345259f8f/src/biosystems/ingestion/gpx.py#L107-L110)
+- [`src/biosystems/ingestion/gpx.py#L108`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/892b0a3cc5e1be4656ad67b93cc8b7f3ad9758d7/src/biosystems/ingestion/gpx.py#L108)
 
 ### Class A (Execution Evidence)
 
 **Per-symbol test coverage (AST analysis):**
 
-- **`parse_gpx`** (L107-L110): PASS -- 9 test(s) call `parse_gpx` directly
+- **`parse_gpx`** (L108): PASS -- 9 test(s) call `parse_gpx` directly
   - `tests/test_ingestion_gpx.py::test_parse_valid_gpx`
   - `tests/test_ingestion_gpx.py::test_extracts_coordinates`
   - `tests/test_ingestion_gpx.py::test_extracts_heart_rate`
@@ -66,10 +67,10 @@ classification:
 
 | # | Claim | Type | Evidence | Verdict |
 |---|-------|------|----------|---------|
-| 1 | parse_gpx skips trackpoints with missing or empty <time> ele... | symbol | 9 test(s) call `parse_gpx` | PASS VERIFIED |
+| 1 | GPX parser now skips trackpoints with empty or whitespace-on... | unresolved | No automatic binding available | REVIEW MANUAL REVIEW |
 | 2 | No existing tests were modified or deleted during this chang... | structural | Class C not collected | REVIEW MANUAL REVIEW |
 
-**Verdict summary:** 1 verified, 0 unverified, 1 manual review.
+**Verdict summary:** 0 verified, 0 unverified, 2 manual review.
 ---
 
 ## Verification Methodology
@@ -82,4 +83,4 @@ Ruff/mypy results are in Code Quality (not Class A) because they prove syntax/ty
 
 ## Summary
 
-Add None-check on g:time find result before accessing .text in parse_gpx()
+Change time_node.text is None to not (time_node.text or '').strip()
