@@ -203,12 +203,12 @@ def _pct_change(today: float | None, reference: float | None) -> float | None:
 def compute_wellness_context(date_str: str) -> dict[str, Any]:
     """
     Compute a wellness context dictionary for the specified date.
-    
+
     The returned context aggregates that day's raw metrics, 1-day absolute deltas, 7-day rolling means and percent changes, G/A/R readiness signals (full-day and overnight-only), calibrated norms/threshold metadata when available, sleep-debt and respiratory-rate sigma where computable, and staleness metadata.
-    
+
     Parameters:
         date_str (str): A date string parseable by pandas.Timestamp representing the target date.
-    
+
     Returns:
         dict[str, Any]: A mapping containing:
             - Raw metrics: `hrv_rmssd`, `resting_hr`, `recovery_score`, `sleep_score`,
@@ -253,10 +253,10 @@ def compute_wellness_context(date_str: str) -> dict[str, Any]:
     def _7d_mean(col: str) -> float | None:
         """
         Compute the mean of the specified column over the seven days immediately before today_ts in the surrounding window.
-        
+
         Parameters:
             col (str): Column name in the window DataFrame to average.
-        
+
         Returns:
             float | None: The mean of numeric values from up to seven prior days as a float, or `None` if the column is missing, there are no prior rows, or no numeric values are present.
         """
