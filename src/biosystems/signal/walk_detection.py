@@ -17,15 +17,15 @@ import pandas as pd
 def filter_gps_jitter(df: pd.DataFrame, pace_col: str, cad_col: str, cad_thr: int = 100) -> pd.DataFrame:
     """
     Remove likely GPS-noise points from rows labeled as walking.
-    
+
     Keeps points with pace <= 12.0 min/km or cadence >= cad_thr; intended as a secondary cleanup applied to already-classified walk rows.
-    
+
     Parameters:
         df (pd.DataFrame): DataFrame containing the pace and cadence columns.
         pace_col (str): Column name for pace in minutes per kilometer.
         cad_col (str): Column name for cadence in steps per minute.
         cad_thr (int): Cadence threshold (spm) used to retain points; default 100.
-    
+
     Returns:
         pd.DataFrame: Subset of `df` containing rows that pass the pace or cadence criteria.
     """
@@ -161,9 +161,9 @@ def walk_block_segments(
 ) -> list[dict]:
     """
     Identify contiguous walking segments in an activity and compute per-segment metrics and session-position tags.
-    
+
     Filters walk-labeled points to remove GPS jitter, groups them into contiguous blocks allowing gaps up to `max_gap_s` seconds, drops blocks shorter than `min_dur_s`, and for each remaining block computes duration, distance (when cumulative distance is available), time-weighted average pace, mean heart rate, mean cadence, and a tag indicating its position in the session.
-    
+
     Parameters:
         gpx_df (pd.DataFrame): Activity dataframe indexed by datetime containing at least `is_walk_col`, `pace_col`, and `cad_col`. Optional columns: `distance_cumulative_km`, `heart_rate`, `cadence`.
         is_walk_col (str): Column name used to identify walk-labeled rows.
@@ -172,7 +172,7 @@ def walk_block_segments(
         cad_thr (int): Cadence threshold used when filtering walk points (default: 140).
         max_gap_s (float): Maximum allowed gap in seconds between walk points to consider them part of the same block (default: 2).
         min_dur_s (int): Minimum segment duration in seconds to include in output (default: 2).
-    
+
     Returns:
         list[dict]: A list of segment dictionaries (1-indexed). Each dictionary contains:
             - segment_id (int): Sequential segment identifier starting at 1.
