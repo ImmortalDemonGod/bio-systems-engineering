@@ -1,9 +1,9 @@
 # AIV Evidence File (v1.0)
 
 **File:** `tests/test_ingestion_fit.py`
-**Commit:** `67774e0`
-**Previous:** `cf4d29d`
-**Generated:** 2026-04-05T02:15:24Z
+**Commit:** `b78a742`
+**Previous:** `fe89a1c`
+**Generated:** 2026-04-05T02:58:02Z
 **Protocol:** AIV v2.0 + Addendum 2.7 (Zero-Touch Mandate)
 
 ---
@@ -16,14 +16,14 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: "tests/test_ingestion_fit.py"
-  classification_rationale: "test precision improvement"
+  classification_rationale: "whitespace-only change from CodeRabbit docstring generation"
   classified_by: "Miguel Ingram"
-  classified_at: "2026-04-05T02:15:24Z"
+  classified_at: "2026-04-05T02:58:02Z"
 ```
 
 ## Claim(s)
 
-1. Timezone check now asserts str(tz) == 'UTC' instead of just 'is not None'
+1. ruff W293 resolved in test_ingestion_fit.py
 2. No existing tests were modified or deleted during this change.
 
 ---
@@ -33,18 +33,25 @@ classification:
 ### Class E (Intent Alignment)
 
 - **Link:** [https://github.com/ImmortalDemonGod/bio-systems-engineering](https://github.com/ImmortalDemonGod/bio-systems-engineering)
-- **Requirements Verified:** Tests must validate specific contracts, not just presence
+- **Requirements Verified:** ruff must pass clean in CI
 
 ### Class B (Referential Evidence)
 
-**Scope Inventory** (SHA: [`67774e0`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/67774e00ff02e6e24e3c4d53d6b7d63d17253e42))
+**Scope Inventory** (SHA: [`b78a742`](https://github.com/ImmortalDemonGod/bio-systems-engineering/tree/b78a74216eb173594a0a4cd6779f0a1bfa9d13a9))
 
-- [`tests/test_ingestion_fit.py#L92`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/67774e00ff02e6e24e3c4d53d6b7d63d17253e42/tests/test_ingestion_fit.py#L92)
+- [`tests/test_ingestion_fit.py#L35`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b78a74216eb173594a0a4cd6779f0a1bfa9d13a9/tests/test_ingestion_fit.py#L35)
+- [`tests/test_ingestion_fit.py#L41`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b78a74216eb173594a0a4cd6779f0a1bfa9d13a9/tests/test_ingestion_fit.py#L41)
+- [`tests/test_ingestion_fit.py#L45`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b78a74216eb173594a0a4cd6779f0a1bfa9d13a9/tests/test_ingestion_fit.py#L45)
+- [`tests/test_ingestion_fit.py#L54`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b78a74216eb173594a0a4cd6779f0a1bfa9d13a9/tests/test_ingestion_fit.py#L54)
+- [`tests/test_ingestion_fit.py#L80`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b78a74216eb173594a0a4cd6779f0a1bfa9d13a9/tests/test_ingestion_fit.py#L80)
+- [`tests/test_ingestion_fit.py#L83`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b78a74216eb173594a0a4cd6779f0a1bfa9d13a9/tests/test_ingestion_fit.py#L83)
+- [`tests/test_ingestion_fit.py#L100`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b78a74216eb173594a0a4cd6779f0a1bfa9d13a9/tests/test_ingestion_fit.py#L100)
+- [`tests/test_ingestion_fit.py#L120`](https://github.com/ImmortalDemonGod/bio-systems-engineering/blob/b78a74216eb173594a0a4cd6779f0a1bfa9d13a9/tests/test_ingestion_fit.py#L120)
 
 ### Class A (Execution Evidence)
 
 - Local checks skipped (--skip-checks).
-- **Skip reason:** single assert change in test
+- **Skip reason:** whitespace only, ruff auto-fix
 
 
 ---
@@ -52,11 +59,11 @@ classification:
 ## Verification Methodology
 
 **R0 (trivial) -- local checks skipped.**
-**Reason:** single assert change in test
+**Reason:** whitespace only, ruff auto-fix
 Only git diff scope inventory was collected. No execution evidence.
 
 ---
 
 ## Summary
 
-Change assert df.index.tz is not None to assert str(df.index.tz) == 'UTC'
+Remove blank-line whitespace in docstrings added by CodeRabbit PR #4
