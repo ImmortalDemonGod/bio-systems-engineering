@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | github.com/ImmortalDemonGod/aiv-protocol |
+| **Repository** | github.com/ImmortalDemonGod/bio-systems-engineering |
 | **Change ID** | openclaw-integration |
 | **Commits** | `7427955`, `056b46d`, `2c89739`, `d2ad841`, `c66f7c4`, `5236596`, `3c87dbc`, `07c0000`, `1b4ddbc`, `a781661` |
 | **Head SHA** | `a781661` |

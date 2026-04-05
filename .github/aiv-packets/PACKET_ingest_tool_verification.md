@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | github.com/ImmortalDemonGod/aiv-protocol |
+| **Repository** | github.com/ImmortalDemonGod/bio-systems-engineering |
 | **Change ID** | ingest-tool-verification |
 | **Commits** | `e3bd491` |
 | **Head SHA** | `e3bd491` |
@@ -19,7 +19,7 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Documentation and code quality changes with component-level blast radius"
   classified_by: "Miguel Ingram"
   classified_at: "2026-03-18T00:26:24Z"
 ```

@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | github.com/ImmortalDemonGod/aiv-protocol |
+| **Repository** | github.com/ImmortalDemonGod/bio-systems-engineering |
 | **Change ID** | pandas-compat |
 | **Commits** | `92b7987`, `019cb10`, `03c4e18` |
 | **Head SHA** | `03c4e18` |
@@ -19,7 +19,7 @@ classification:
   sod_mode: S0
   critical_surfaces: []
   blast_radius: component
-  classification_rationale: "TODO: Describe why this tier was chosen"
+  classification_rationale: "Documentation and code quality changes with component-level blast radius"
   classified_by: "Miguel Ingram"
   classified_at: "2026-03-18T22:02:18Z"
 ```

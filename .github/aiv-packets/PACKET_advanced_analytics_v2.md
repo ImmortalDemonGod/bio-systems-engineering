@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | github.com/ImmortalDemonGod/aiv-protocol |
+| **Repository** | github.com/ImmortalDemonGod/bio-systems-engineering |
 | **Change ID** | advanced-analytics-v2 |
 | **Commits** | `e7d8eba`, `7dadca2`, `36f6c0c`, `36acda3`, `705b46a`, `79c0377` |
 | **Head SHA** | `79c0377` |
