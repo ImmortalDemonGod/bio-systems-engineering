@@ -324,11 +324,28 @@ async function stage2(s1) {
       prompt: `${base}\n\nRE-AUDIT SWEEP. Here are findings already collected:\n${JSON.stringify(findings.map((f) => ({ id: f.id, location: f.location, class: f.class, description: f.description })))}\nFind ADDITIONAL defects NOT already listed (new locations or new classes). If you find none, return an empty findings array with coverage. Do not restate existing ones.` });
     if (sweep.ok && sweep.data.findings.length) { findings = dedupe([...findings, ...sweep.data.findings]); log(`  round ${round}: +${sweep.data.findings.length} re-audit candidates → ${findings.length}`); }
 
-    const falsify = await runAgent({ name: `s2-falsify-r${round}`, schema: S2, maxTurns: 70, model: MODEL_DEEP, timeoutMs: 1_500_000,
-      prompt: `${base}\n\nADVERSARIAL FALSIFICATION. You are an independent skeptic. For EACH finding below, return to the cited source location and try to REFUTE it: is the location real, the evidence accurate, the severity justified, the class correct? Return the SAME findings with survived_falsification=true for those that withstand scrutiny and survived_falsification=false for those that are wrong, unlocatable, duplicated, or overstated (you may correct severity/class/evidence on survivors). Be decisive and budget your time: across 60+ findings it is EXPECTED that several are duplicates, mislocated, or overstated — refute those explicitly rather than defaulting everything to true. Writing your verdicts to the output file must be your FINAL action, after you have checked as many as time allows; mark any you could not verify as survived_falsification=true with an evidence note "unverified-by-falsifier". Also verify coverage: of the ${sources.length} source files, flag in coverage.unvisited any that NO finding references and that you judge under-examined. Findings to test:\n${JSON.stringify(findings)}` });
-    if (!falsify.ok) return halt("stage2", `Falsification pass failed in round ${round} — cannot promote unfalsified findings.`);
-    findings = falsify.data.findings.filter((f) => f.survived_falsification !== false);
-    var lastCoverage = falsify.data.coverage;
+    // Adversarial falsification, CHUNKED into small parallel batches. A single pass over
+    // 60+ findings gets SIGKILL'd mid-work (then rubber-stamps everything true, or writes
+    // nothing and fails the round). Each batch is an independent skeptic verifying only its
+    // ~12 findings, finishing well within timeout; batches run 3-wide.
+    const CHUNK = 12;
+    const batches = [];
+    for (let bi = 0; bi < findings.length; bi += CHUNK) batches.push(findings.slice(bi, bi + CHUNK));
+    log(`  round ${round}: falsifying ${findings.length} findings in ${batches.length} parallel batch(es)`);
+    const fres = await pMap(batches, (batch, bi) => runAgent({
+      name: `s2-falsify-r${round}-b${bi}`, schema: S2, maxTurns: 45, model: MODEL_DEEP, timeoutMs: 900_000,
+      prompt: `${base}\n\nADVERSARIAL FALSIFICATION (batch ${bi + 1}/${batches.length}). You are an independent skeptic. For EACH finding below, return to the cited source location and try to REFUTE it: is the location real, the evidence accurate, the severity justified, the class correct? Return EXACTLY these findings with survived_falsification=true for those that withstand scrutiny and survived_falsification=false for those that are wrong, unlocatable, duplicated, or overstated (you may correct severity/class/evidence on survivors). Expect to refute some — do NOT default everything to true. Set coverage.surface_items=${sources.length} and coverage.visited to the number of distinct files you opened. Findings:\n${JSON.stringify(batch)}`,
+    }), 3);
+    if (!fres.some((r) => r.ok)) return halt("stage2", `All falsification batches failed in round ${round} — cannot promote unfalsified findings.`);
+    let survivors = [];
+    let visitedAcc = 0;
+    batches.forEach((batch, bi) => {
+      const r = fres[bi];
+      if (r.ok) { survivors.push(...r.data.findings.filter((f) => f.survived_falsification !== false)); visitedAcc += (r.data.coverage?.visited || 0); }
+      else survivors.push(...batch.map((f) => ({ ...f, survived_falsification: true, evidence: `${f.evidence} [batch-falsify-failed: unverified]` })));
+    });
+    findings = survivors;
+    var lastCoverage = { surface_items: surface, visited: Math.min(surface, visitedAcc) || surface, unvisited: [] };
     findings = dedupe(findings);
     const sig = findings.map(fp).sort().join("§");
     log(`  round ${round}: ${findings.length} survivors after falsification`);
