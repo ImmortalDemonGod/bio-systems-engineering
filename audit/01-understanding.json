@@ -1,0 +1,1089 @@
+{
+  "inventory": [
+    {
+      "path": ".aiv.yml",
+      "role": "config",
+      "note": "AIV protocol configuration: strict_mode, hook functional_prefixes for biosystems"
+    },
+    {
+      "path": ".aiv/change.json",
+      "role": "config",
+      "note": "AIV in-flight change context tracking commits in the systematic-fixes change set"
+    },
+    {
+      "path": ".claude/settings.local.json",
+      "role": "config",
+      "note": "Claude Code local permission allowlist for bash commands used in development"
+    },
+    {
+      "path": ".env.example",
+      "role": "config",
+      "note": "Environment variable template: STRAVA_*, HABITDASH_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, BIOSYSTEMS_HOME"
+    },
+    {
+      "path": ".github/aiv-evidence/.gitkeep",
+      "role": "config",
+      "note": "Empty sentinel to track the aiv-evidence directory in git"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_.ENV.EXAMPLE.md",
+      "role": "doc",
+      "note": "AIV commit-evidence record for .env.example"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_.GITHUB_WORKFLOWS_TEST.YML.md",
+      "role": "doc",
+      "note": "AIV commit-evidence record for .github/workflows/test.yml"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_.GITIGNORE.md",
+      "role": "doc",
+      "note": "AIV commit-evidence record for .gitignore"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_ANALYTICS_HISTORY.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for analytics/history.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_ANALYTICS_TRENDING.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for analytics/trending.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_CLI.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for cli.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_ENVIRONMENT_WEATHER.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for environment/weather.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_INGESTION_FIT.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for ingestion/fit.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_INGESTION_GPX.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for ingestion/gpx.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_INGESTION_STRAVA.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for ingestion/strava.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_MODELS.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for models.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_PHYSICS_GAP.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for physics/gap.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_PHYSICS_METRICS.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for physics/metrics.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_SIGNAL_WALK_DETECTION.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for signal/walk_detection.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_WELLNESS_ANALYTICS.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for wellness/analytics.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_WELLNESS_CACHE.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for wellness/cache.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_BIOSYSTEMS_WELLNESS___INIT__.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for wellness/__init__.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_CHANGELOG.MD.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for CHANGELOG.md"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_CITATION.CFF.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for CITATION.cff"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_CLAUDE.MD.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for CLAUDE.md"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_DAILY_RUNNING_BRIEF_DAILY_RUNNING_BRIEF.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for daily_running_brief.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_DAILY_RUNNING_BRIEF_README.MD.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for daily_running_brief/README.md"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_DATA_REAL_WEEKLY_DATA.JSON.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for data/real_weekly_data.json"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_DATA_SAMPLE_README.MD.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for data/sample/README.md"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_DOCS_PUBLICATION_CHECKLIST.MD.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for docs/PUBLICATION_CHECKLIST.md"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_DOCS_WELLNESS.MD.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for docs/WELLNESS.md"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_PYPROJECT.TOML.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for pyproject.toml"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_README.MD.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for README.md"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_REPORTS_01_LONGITUDINAL_STUDY.MD.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for reports/01_longitudinal_study.md"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_REQUIREMENTS.TXT.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for requirements.txt"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_SCRIPTS_NIGHTLY_TRAINING_BRIEF.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for a nightly training brief script (may be renamed to daily_running_brief)"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_CLI_INTEGRATION.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_cli_integration.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_ENVIRONMENT.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_environment.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_INGESTION_FIT.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_ingestion_fit.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_INGESTION_GPX.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_ingestion_gpx.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_MODELS.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_models.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_PHYSICS_GAP.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_physics_gap.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_PHYSICS_METRICS.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_physics_metrics.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_README_EXAMPLES.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_readme_examples.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_SANITIZE_GPS_FIX.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_sanitize_gps_fix.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_SIGNAL.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_signal.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_TRENDING.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_trending.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_WALK_CLASSIFICATION.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_walk_classification.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_WALK_DETECTION_FIX.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_walk_detection_fix.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TESTS_TEST_WELLNESS_CACHE.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tests/test_wellness_cache.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TOOLS_INGEST_NEW_RUNS.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tools/ingest_new_runs.py"
+    },
+    {
+      "path": ".github/aiv-evidence/EVIDENCE_TOOLS_SANITIZE_GPS.md",
+      "role": "doc",
+      "note": "AIV commit-evidence for tools/sanitize_gps.py"
+    },
+    {
+      "path": ".github/aiv-packets/.gitkeep",
+      "role": "config",
+      "note": "Empty sentinel to track the aiv-packets directory in git"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_advanced_analytics.md",
+      "role": "doc",
+      "note": "AIV verification packet for the advanced_analytics change set"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_advanced_analytics_v2.md",
+      "role": "doc",
+      "note": "AIV verification packet v2 for advanced analytics"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_advanced_wellness.md",
+      "role": "doc",
+      "note": "AIV verification packet for advanced wellness features"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_briefing_pipeline_v2.md",
+      "role": "doc",
+      "note": "AIV verification packet for daily briefing pipeline v2"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_briefing_pipeline_v3.md",
+      "role": "doc",
+      "note": "AIV verification packet for daily briefing pipeline v3"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_ci_and_test_improvements.md",
+      "role": "doc",
+      "note": "AIV verification packet for CI and test improvements"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_ci_ruff_nonblocking.md",
+      "role": "doc",
+      "note": "AIV verification packet making ruff non-blocking in CI"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_cli_enterprise_polish.md",
+      "role": "doc",
+      "note": "AIV verification packet for CLI enterprise polish"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_cli_expansion.md",
+      "role": "doc",
+      "note": "AIV verification packet for CLI command expansion"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_coderabbit_review_fixes.md",
+      "role": "doc",
+      "note": "AIV verification packet for CodeRabbit review fixes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_doc_accuracy_fixes.md",
+      "role": "doc",
+      "note": "AIV verification packet for documentation accuracy fixes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_docstring_whitespace_fixes.md",
+      "role": "doc",
+      "note": "AIV verification packet for docstring whitespace fixes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_final_paper_completeness.md",
+      "role": "doc",
+      "note": "AIV verification packet for final paper completeness"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_final_polishing.md",
+      "role": "doc",
+      "note": "AIV verification packet for final polishing changes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_fix_all_ruff_errors.md",
+      "role": "doc",
+      "note": "AIV verification packet for ruff lint error fixes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_ingest_tool_verification.md",
+      "role": "doc",
+      "note": "AIV verification packet for ingest tool verification"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_nan_assert_compat.md",
+      "role": "doc",
+      "note": "AIV verification packet for NaN assertion compatibility fixes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_openclaw_integration.md",
+      "role": "doc",
+      "note": "AIV verification packet for OpenClaw integration"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_operational_tools.md",
+      "role": "doc",
+      "note": "AIV verification packet for operational tools"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_pandas_compat.md",
+      "role": "doc",
+      "note": "AIV verification packet for pandas compatibility fixes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_paper_review_fixes.md",
+      "role": "doc",
+      "note": "AIV verification packet for paper review fixes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_physics_elevation_hardening.md",
+      "role": "doc",
+      "note": "AIV verification packet for elevation-based physics hardening"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_physics_hardening.md",
+      "role": "doc",
+      "note": "AIV verification packet for physics computation hardening"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_pre_study_trajectory.md",
+      "role": "doc",
+      "note": "AIV verification packet for pre-study trajectory analysis"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_quality_hardening.md",
+      "role": "doc",
+      "note": "AIV verification packet for quality hardening changes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_system_hardening.md",
+      "role": "doc",
+      "note": "AIV verification packet for system hardening"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_systematic_fixes.md",
+      "role": "doc",
+      "note": "AIV verification packet for systematic fixes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_training_deep_dive_and_ops_docs.md",
+      "role": "doc",
+      "note": "AIV verification packet for training deep-dive and ops docs"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_walk_detection_and_cadence_fixes.md",
+      "role": "doc",
+      "note": "AIV verification packet for walk detection and cadence fixes"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_wellness_dual_signal.md",
+      "role": "doc",
+      "note": "AIV verification packet for dual G/A/R wellness signal"
+    },
+    {
+      "path": ".github/aiv-packets/PACKET_wellness_integration.md",
+      "role": "doc",
+      "note": "AIV verification packet for wellness integration"
+    },
+    {
+      "path": ".github/workflows/installation-test.yml",
+      "role": "config",
+      "note": "CI: pip install + Docker build/test on Python 3.10/3.11/3.12"
+    },
+    {
+      "path": ".github/workflows/readme-validation.yml",
+      "role": "config",
+      "note": "CI: validates README code examples via test_readme_examples.py"
+    },
+    {
+      "path": ".github/workflows/test.yml",
+      "role": "config",
+      "note": "CI: full test suite (ruff, mypy, pytest) on Python 3.10/3.11/3.12 matrix"
+    },
+    {
+      "path": ".gitignore",
+      "role": "config",
+      "note": "Standard Python + macOS + IDE gitignore patterns; excludes data/raw/, data/processed/, .env"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "role": "doc",
+      "note": "Keep-a-Changelog format; records releases from [Unreleased] back through 1.1.0 additions"
+    },
+    {
+      "path": "CITATION.cff",
+      "role": "doc",
+      "note": "CFF citation file for academic software citation of biosystems v1.0.0"
+    },
+    {
+      "path": "CLAUDE.md",
+      "role": "doc",
+      "note": "Claude Code operational instructions: aiv commit workflow, cron vs launchd, path resolution, known issues"
+    },
+    {
+      "path": "Dockerfile",
+      "role": "config",
+      "note": "Python 3.11-slim image; installs biosystems in editable mode; default CMD runs pytest"
+    },
+    {
+      "path": "LICENSE",
+      "role": "doc",
+      "note": "MIT License, 2025, Holistic Performance Enhancement Contributors"
+    },
+    {
+      "path": "README.md",
+      "role": "doc",
+      "note": "Project overview: N=1 103-day study results table, quick-start install/usage, API examples, architecture"
+    },
+    {
+      "path": "audit/.gitignore",
+      "role": "config",
+      "note": "Excludes audit/.work/ from version control"
+    },
+    {
+      "path": "audit/forensic-audit.mjs",
+      "role": "source",
+      "note": "Node.js headless claude-CLI orchestrator: five-stage forensic audit pipeline with schema validation and git push per stage"
+    },
+    {
+      "path": "audits/META_AUDIT_DEC_18.md",
+      "role": "doc",
+      "note": "Meta-audit (Dec 18 2025) identifying coverage gaps in QUALITY_AUDIT.md"
+    },
+    {
+      "path": "audits/QUALITY_AUDIT.md",
+      "role": "doc",
+      "note": "Full-codebase quality and integrity audit (Cascade, Dec 2025): math correctness, privacy, reproducibility"
+    },
+    {
+      "path": "daily_running_brief/README.md",
+      "role": "doc",
+      "note": "Deployment instructions for daily_running_brief.py into OpenClaw workspace"
+    },
+    {
+      "path": "daily_running_brief/daily_running_brief.py",
+      "role": "source",
+      "note": "Post-run AI narrative synthesis pipeline: calls biosystems strava CLI, pre-computes stats, drives LLM (OpenAI primary, Anthropic fallback)"
+    },
+    {
+      "path": "daily_running_brief/requirements.txt",
+      "role": "config",
+      "note": "Additional deps for daily_running_brief: openai>=1.0.0, anthropic>=0.40.0"
+    },
+    {
+      "path": "data/raw/.gitkeep",
+      "role": "config",
+      "note": "Empty sentinel; data/raw/ holds .fit/.gpx files not committed to git"
+    },
+    {
+      "path": "data/real_weekly_data.json",
+      "role": "asset",
+      "note": "Real measured weekly aggregates (W17-W36, 2025): ef_mean, decoupling_mean, num_runs, notes"
+    },
+    {
+      "path": "data/sample/README.md",
+      "role": "doc",
+      "note": "Describes synthetic sample files: sample_run.csv (45-min, ~9km) and weekly_metrics.csv"
+    },
+    {
+      "path": "data/sample/sample_run.csv",
+      "role": "asset",
+      "note": "Synthetic 45-min run with GPS, HR, cadence columns; used in tests and demos"
+    },
+    {
+      "path": "data/sample/weekly_metrics.csv",
+      "role": "asset",
+      "note": "Synthetic weekly aggregate CSV (W17-W36) matching real_weekly_data.json structure"
+    },
+    {
+      "path": "data/subjective.csv",
+      "role": "asset",
+      "note": "Real per-day subjective data: rest_hr, hrv, rpe, ankle_pain; sparse (study period)"
+    },
+    {
+      "path": "data/zones_personal.yml",
+      "role": "config",
+      "note": "Personal HR/pace zone configuration (Z1-Z5+); loaded by CLI default zones path"
+    },
+    {
+      "path": "docs/DATA_PREPARATION.md",
+      "role": "doc",
+      "note": "Privacy-safe data preparation workflow: GPS stripping, endpoint truncation, sanitization steps"
+    },
+    {
+      "path": "docs/PUBLICATION_CHECKLIST.md",
+      "role": "doc",
+      "note": "Publication readiness checklist for reports/01_longitudinal_study.md"
+    },
+    {
+      "path": "docs/WELLNESS.md",
+      "role": "doc",
+      "note": "Wellness integration architecture: Whoop+Garmin -> HabitDash API -> parquet cache -> CLI"
+    },
+    {
+      "path": "docs/images/aerobic_decoupling.png",
+      "role": "asset",
+      "note": "Chart: aerobic decoupling progression over study period (embedded in README)"
+    },
+    {
+      "path": "docs/images/ef_progression.png",
+      "role": "asset",
+      "note": "Chart: Efficiency Factor progression over study period (embedded in README)"
+    },
+    {
+      "path": "docs/internal/CLEANUP_SUMMARY.md",
+      "role": "doc",
+      "note": "Internal: repository cleanup summary (essentially empty, 1 line)"
+    },
+    {
+      "path": "docs/internal/DEVELOPMENT_ARCHIVE.md",
+      "role": "doc",
+      "note": "Internal: historical development notes; cautions that early estimates differ from final measured values"
+    },
+    {
+      "path": "docs/internal/FEEDBACK_ANALYSIS.md",
+      "role": "doc",
+      "note": "Internal: feedback analysis notes (essentially empty, 1 line)"
+    },
+    {
+      "path": "docs/internal/INFRASTRUCTURE_FIX_COMPLETE.md",
+      "role": "doc",
+      "note": "Internal: infrastructure fix completion record (Dec 3 2025)"
+    },
+    {
+      "path": "docs/internal/README.md",
+      "role": "doc",
+      "note": "Internal docs index (essentially empty, 1 line)"
+    },
+    {
+      "path": "docs/internal/README_ADDITIONAL_FAILURES.md",
+      "role": "doc",
+      "note": "Internal: additional README verification failures found (Dec 3 2025)"
+    },
+    {
+      "path": "docs/internal/README_FIX_COMPLETE.md",
+      "role": "doc",
+      "note": "Internal: README fix completion record (Dec 3 2025, all 4 tasks complete)"
+    },
+    {
+      "path": "docs/internal/README_VERIFICATION_FAILURES.md",
+      "role": "doc",
+      "note": "Internal: README verification failure list (Dec 3 2025)"
+    },
+    {
+      "path": "docs/internal/REPOSITORY_CLEANUP.md",
+      "role": "doc",
+      "note": "Internal: repository root cleanup record (Dec 3 2025)"
+    },
+    {
+      "path": "pyproject.toml",
+      "role": "config",
+      "note": "Package metadata, dependencies, console_scripts entry (biosystems=biosystems.cli:app), pytest/ruff/mypy config"
+    },
+    {
+      "path": "reports/01_longitudinal_study.md",
+      "role": "doc",
+      "note": "N=1 longitudinal study report: 103-day cadence modification study with EF, decoupling, and pace results"
+    },
+    {
+      "path": "requirements.txt",
+      "role": "config",
+      "note": "Pinned core + dev dependencies; mirrors pyproject.toml dependencies with explicit version bounds"
+    },
+    {
+      "path": "src/biosystems/__init__.py",
+      "role": "source",
+      "note": "Top-level package init: __version__=1.0.0, exports models module"
+    },
+    {
+      "path": "src/biosystems/analytics/__init__.py",
+      "role": "source",
+      "note": "Minimal package init with one-line docstring; no __all__"
+    },
+    {
+      "path": "src/biosystems/analytics/history.py",
+      "role": "source",
+      "note": "Append-only JSONL run history at ~/.biosystems/history.jsonl; file-locked, deduplicates by strava_activity_id or date"
+    },
+    {
+      "path": "src/biosystems/analytics/trending.py",
+      "role": "source",
+      "note": "PMC (ATL/CTL/TSB via EMA), rolling stats, trend summary over JSONL history"
+    },
+    {
+      "path": "src/biosystems/cli.py",
+      "role": "source",
+      "note": "Typer CLI app with 12 commands: analyze, strava, backfill-efforts, backfill-streams, summary, efforts, top, trend, wellness-sync, wellness-show, wellness-analyze, wellness-trends"
+    },
+    {
+      "path": "src/biosystems/environment/__init__.py",
+      "role": "source",
+      "note": "Package init exporting WeatherCache, fetch_weather_open_meteo, get_weather_description"
+    },
+    {
+      "path": "src/biosystems/environment/weather.py",
+      "role": "source",
+      "note": "Open-Meteo REST client + JSON file cache; WMO weather code lookup table"
+    },
+    {
+      "path": "src/biosystems/ingestion/__init__.py",
+      "role": "source",
+      "note": "Package init exporting parse_gpx, parse_fit, add_derived_metrics"
+    },
+    {
+      "path": "src/biosystems/ingestion/fit.py",
+      "role": "source",
+      "note": "Garmin .fit binary parser via fitdecode; emits DatetimeIndex DataFrame with GPS, HR, cadence, speed, altitude"
+    },
+    {
+      "path": "src/biosystems/ingestion/gpx.py",
+      "role": "source",
+      "note": "GPX XML parser; haversine distance calculation; emits normalized DataFrame with hr, cadence, dist, dt, pace_sec_km"
+    },
+    {
+      "path": "src/biosystems/ingestion/strava.py",
+      "role": "source",
+      "note": "Strava V3 API client: OAuth2 refresh-token flow, stream fetch, activity metadata, best efforts, exponential backoff on 429"
+    },
+    {
+      "path": "src/biosystems/models.py",
+      "role": "source",
+      "note": "Pydantic data contracts: HeartRateZone, ZoneConfig, RunContext, PhysiologicalMetrics, FullRunReport, WalkSegment, BestEffort, BlockBest, KmSplit, Lap, RunDynamics, DistributionStats, WalkSummary, StrideSegment, ZoneTimeEntry, ActivitySummary"
+    },
+    {
+      "path": "src/biosystems/physics/__init__.py",
+      "role": "source",
+      "note": "Package init exporting all physics functions from gap.py and metrics.py"
+    },
+    {
+      "path": "src/biosystems/physics/gap.py",
+      "role": "source",
+      "note": "Grade Adjusted Pace via Minetti et al. energy-cost equation; elevation quality check"
+    },
+    {
+      "path": "src/biosystems/physics/metrics.py",
+      "role": "source",
+      "note": "Core metrics: calculate_efficiency_factor, calculate_decoupling (Pa:HR), calculate_hr_tss, compute_training_zones, top-level run_metrics()"
+    },
+    {
+      "path": "src/biosystems/physics/report.py",
+      "role": "source",
+      "note": "FullRunReport assembler: GAP-EF, EF CV, AeV, zone distributions, walk analysis, dynamics, strides, splits, laps, block bests"
+    },
+    {
+      "path": "src/biosystems/signal/__init__.py",
+      "role": "source",
+      "note": "Package init exporting walk_block_segments, summarize_walk_segments, filter_gps_jitter"
+    },
+    {
+      "path": "src/biosystems/signal/walk_detection.py",
+      "role": "source",
+      "note": "Walk vs run classification (pace>9.5 min/km OR cadence<140 spm), GPS jitter filtering, segment tagging (warm-up/mid-session/cool-down/pause)"
+    },
+    {
+      "path": "src/biosystems/wellness/__init__.py",
+      "role": "source",
+      "note": "Minimal package init with docstring only; no explicit __all__ defined"
+    },
+    {
+      "path": "src/biosystems/wellness/analytics.py",
+      "role": "source",
+      "note": "Pure-computation analytics: coverage, era stats (Whoop vs Garmin era), correlations, calibrated G/A/R thresholds, longitudinal fitness, sleep debt"
+    },
+    {
+      "path": "src/biosystems/wellness/cache.py",
+      "role": "source",
+      "note": "Wellness parquet cache at ~/.biosystems/wellness.parquet: sync_wellness, compute_wellness_context (G/A/R + deltas), enrich_run_context"
+    },
+    {
+      "path": "src/biosystems/wellness/habitdash.py",
+      "role": "source",
+      "note": "HabitDash REST client: Whoop + Garmin field IDs, 15s request delay, 3-retry with 60s backoff on 429"
+    },
+    {
+      "path": "tests/__init__.py",
+      "role": "test",
+      "note": "Test package init with docstring; no test code"
+    },
+    {
+      "path": "tests/test_cli_integration.py",
+      "role": "test",
+      "note": "Integration test: invokes biosystems CLI as subprocess on a real GPX file (skips if file absent)"
+    },
+    {
+      "path": "tests/test_environment.py",
+      "role": "test",
+      "note": "Unit tests for weather module: API mocking, WeatherCache, WMO code lookup"
+    },
+    {
+      "path": "tests/test_history.py",
+      "role": "test",
+      "note": "Unit tests for history.py: append_run deduplication, load ordering, file-lock concurrency, strava_activity_id keying"
+    },
+    {
+      "path": "tests/test_ingestion_fit.py",
+      "role": "test",
+      "note": "Unit tests for FIT parser using MagicMock(spec=fitdecode.FitDataMessage) to pass isinstance check"
+    },
+    {
+      "path": "tests/test_ingestion_gpx.py",
+      "role": "test",
+      "note": "Unit tests for GPX parser: haversine distance, XML parsing, metric derivation"
+    },
+    {
+      "path": "tests/test_models.py",
+      "role": "test",
+      "note": "Unit tests for Pydantic models: field validation, HR/pace bounds, serialization"
+    },
+    {
+      "path": "tests/test_physics_gap.py",
+      "role": "test",
+      "note": "Unit tests for GAP: Minetti equation, grade percent, elevation quality check"
+    },
+    {
+      "path": "tests/test_physics_metrics.py",
+      "role": "test",
+      "note": "Unit tests for metrics: EF, decoupling, TSS, zone classification"
+    },
+    {
+      "path": "tests/test_readme_examples.py",
+      "role": "test",
+      "note": "Validates all code examples in README.md to prevent documentation drift"
+    },
+    {
+      "path": "tests/test_sanitize_gps_fix.py",
+      "role": "test",
+      "note": "Tests sanitize_gps.sanitize_dataframe: short-activity truncation UserWarning"
+    },
+    {
+      "path": "tests/test_signal.py",
+      "role": "test",
+      "note": "Unit tests for walk detection: segment classification, GPS jitter filtering, summarization"
+    },
+    {
+      "path": "tests/test_strava.py",
+      "role": "test",
+      "note": "Unit tests for Strava ingestion: credential validation, stream parsing, mocked HTTP, rate-limit HTML response"
+    },
+    {
+      "path": "tests/test_trending.py",
+      "role": "test",
+      "note": "Unit tests for compute_pmc, compute_rolling_stats, summarize_trend"
+    },
+    {
+      "path": "tests/test_walk_classification.py",
+      "role": "test",
+      "note": "Integration tests for walk classification thresholds (cadence<140 OR pace>9.5); guards against regression"
+    },
+    {
+      "path": "tests/test_walk_detection_fix.py",
+      "role": "test",
+      "note": "Regression test: walk_block_segments returns None cadence fallback instead of empty string"
+    },
+    {
+      "path": "tests/test_wellness_cache.py",
+      "role": "test",
+      "note": "Unit tests for compute_wellness_context: 7d-mean numeric coercion, edge cases"
+    },
+    {
+      "path": "tools/generate_charts_real_only.py",
+      "role": "source",
+      "note": "Generates charts strictly from data/real_weekly_data.json; refuses to interpolate or fabricate"
+    },
+    {
+      "path": "tools/generate_from_real_data.py",
+      "role": "source",
+      "note": "Generates charts from hardcoded historical weekly data (W17-20 real; W21-33 partially estimated)"
+    },
+    {
+      "path": "tools/generate_readme_charts.py",
+      "role": "source",
+      "note": "Generates publication-quality matplotlib charts for embedding in README.md"
+    },
+    {
+      "path": "tools/generate_sample_data.py",
+      "role": "source",
+      "note": "Generates synthetic but realistic GPS/HR/cadence CSV sample data for demos"
+    },
+    {
+      "path": "tools/generate_sample_data.py.OLD",
+      "role": "dead",
+      "note": "Old version of generate_sample_data.py; 1-line file, superseded by current version"
+    },
+    {
+      "path": "tools/ingest_new_runs.py",
+      "role": "source",
+      "note": "Batch pipeline: scan data/raw/ for .fit/.gpx, run full biosystems pipeline, write *_gpx_full.csv and *_gpx_summary.csv, regenerate real_weekly_data.json"
+    },
+    {
+      "path": "tools/reproduce_study_analysis.py",
+      "role": "source",
+      "note": "Re-runs pipeline over data/processed/*_gpx_full.csv and verifies results match real_weekly_data.json (±5% tolerance)"
+    },
+    {
+      "path": "tools/sanitize_gps.py",
+      "role": "source",
+      "note": "Privacy tool: removes lat/lon columns and truncates first/last 500m from activity DataFrames; required before publishing data"
+    },
+    {
+      "path": "tools/strava_auth.py",
+      "role": "source",
+      "note": "One-time OAuth2 helper: opens browser for Strava authorization, exchanges code for refresh token"
+    },
+    {
+      "path": "tools/verify_installation.py",
+      "role": "source",
+      "note": "Installation verification: imports all core biosystems modules and reports pass/fail"
+    }
+  ],
+  "entry_points": [
+    {
+      "name": "biosystems (CLI entry point)",
+      "kind": "cli",
+      "location": "pyproject.toml:58",
+      "description": "console_scripts registration: biosystems = biosystems.cli:app; installs the `biosystems` command on PATH"
+    },
+    {
+      "name": "analyze",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:102",
+      "description": "Parse a .fit or .gpx activity file and output PhysiologicalMetrics as JSON or text"
+    },
+    {
+      "name": "strava",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:166",
+      "description": "Fetch a Strava activity (or list recent), compute FullRunReport with auto-weather/wellness enrichment, persist to history"
+    },
+    {
+      "name": "backfill-efforts",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:475",
+      "description": "Backfill Strava best-effort times (400m, 1K, 5K, etc.) for the last N runs into the local history store"
+    },
+    {
+      "name": "backfill-streams",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:544",
+      "description": "Backfill full GPS+HR stream metrics (EF, decoupling, hrTSS) for all runs since a given date; rate-limited at 18s/run"
+    },
+    {
+      "name": "summary",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:723",
+      "description": "Period-aggregated statistics (month/week/all) from history: run count, EF mean/best, decoupling, HR, pace, TSS"
+    },
+    {
+      "name": "efforts",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:822",
+      "description": "Best-effort progression by distance (first recorded -> current best, improvement) from strava_efforts in history"
+    },
+    {
+      "name": "top",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:939",
+      "description": "Rank top N runs by EF, decoupling, pace, TSS, or distance from local history"
+    },
+    {
+      "name": "trend",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:1014",
+      "description": "Longitudinal fitness trends: PMC (ATL/CTL/TSB), rolling EF/decoupling stats, optional Strava backfill"
+    },
+    {
+      "name": "wellness-sync",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:1106",
+      "description": "Pull HabitDash wellness metrics (Whoop + Garmin) into ~/.biosystems/wellness.parquet for N days"
+    },
+    {
+      "name": "wellness-show",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:1143",
+      "description": "Show G/A/R readiness signal plus raw HRV, RHR, sleep, body battery with 1d/7d deltas for a given date"
+    },
+    {
+      "name": "wellness-analyze",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:1260",
+      "description": "Coverage report, era baselines (Whoop vs Garmin), calibrated G/A/R thresholds, and metric correlations"
+    },
+    {
+      "name": "wellness-trends",
+      "kind": "cli",
+      "location": "src/biosystems/cli.py:1381",
+      "description": "Monthly RHR and VO2max longitudinal trends with trend label and per-month means"
+    },
+    {
+      "name": "biosystems package",
+      "kind": "library_export",
+      "location": "src/biosystems/__init__.py:35",
+      "description": "Top-level exports: models module, __version__='1.0.0'; __all__=['models', '__version__']"
+    },
+    {
+      "name": "biosystems.ingestion",
+      "kind": "library_export",
+      "location": "src/biosystems/ingestion/__init__.py:12",
+      "description": "Exports parse_gpx, parse_fit, add_derived_metrics; __all__ defined"
+    },
+    {
+      "name": "biosystems.physics",
+      "kind": "library_export",
+      "location": "src/biosystems/physics/__init__.py:14",
+      "description": "Exports run_metrics, calculate_efficiency_factor, calculate_decoupling, calculate_hr_tss, compute_training_zones, lower_z2_bpm, and all GAP functions; __all__ defined"
+    },
+    {
+      "name": "biosystems.signal",
+      "kind": "library_export",
+      "location": "src/biosystems/signal/__init__.py:13",
+      "description": "Exports walk_block_segments, summarize_walk_segments, filter_gps_jitter; __all__ defined"
+    },
+    {
+      "name": "biosystems.environment",
+      "kind": "library_export",
+      "location": "src/biosystems/environment/__init__.py:13",
+      "description": "Exports WeatherCache, fetch_weather_open_meteo, get_weather_description; __all__ defined"
+    },
+    {
+      "name": "biosystems.wellness",
+      "kind": "library_export",
+      "location": "src/biosystems/wellness/__init__.py:1",
+      "description": "Package marker with docstring only; no __all__; submodules (cache, analytics, habitdash) imported directly by callers"
+    },
+    {
+      "name": "tools/ingest_new_runs.py",
+      "kind": "script",
+      "location": "tools/ingest_new_runs.py:1",
+      "description": "Batch ingest: scans data/raw/ for unprocessed .gpx/.fit, runs full pipeline, writes _gpx_full.csv/_gpx_summary.csv, regenerates real_weekly_data.json"
+    },
+    {
+      "name": "tools/sanitize_gps.py",
+      "kind": "script",
+      "location": "tools/sanitize_gps.py:1",
+      "description": "Privacy tool to strip lat/lon and truncate start/end from activity DataFrames before publication"
+    },
+    {
+      "name": "tools/strava_auth.py",
+      "kind": "script",
+      "location": "tools/strava_auth.py:1",
+      "description": "One-time Strava OAuth2 helper: opens browser for authorization, prints refresh token for .env"
+    },
+    {
+      "name": "tools/verify_installation.py",
+      "kind": "script",
+      "location": "tools/verify_installation.py:1",
+      "description": "Installation sanity check: attempts import of all core biosystems modules and reports pass/fail"
+    },
+    {
+      "name": "tools/reproduce_study_analysis.py",
+      "kind": "script",
+      "location": "tools/reproduce_study_analysis.py:1",
+      "description": "Reproducibility check: re-runs study pipeline over committed processed CSVs and compares to real_weekly_data.json (±5% EF tolerance)"
+    },
+    {
+      "name": "tools/generate_charts_real_only.py",
+      "kind": "script",
+      "location": "tools/generate_charts_real_only.py:1",
+      "description": "Generate matplotlib charts from data/real_weekly_data.json only; refuses interpolation/fabrication"
+    },
+    {
+      "name": "tools/generate_readme_charts.py",
+      "kind": "script",
+      "location": "tools/generate_readme_charts.py:1",
+      "description": "Generate publication-quality charts for embedding in README.md"
+    },
+    {
+      "name": "tools/generate_from_real_data.py",
+      "kind": "script",
+      "location": "tools/generate_from_real_data.py:1",
+      "description": "Generate charts from hardcoded historical weekly data (W17-W20 real; W21-W33 partially estimated)"
+    },
+    {
+      "name": "tools/generate_sample_data.py",
+      "kind": "script",
+      "location": "tools/generate_sample_data.py:1",
+      "description": "Generate synthetic but realistic GPS/HR/cadence CSV sample data for demos and tests"
+    },
+    {
+      "name": "daily_running_brief/daily_running_brief.py",
+      "kind": "script",
+      "location": "daily_running_brief/daily_running_brief.py:1",
+      "description": "Post-run LLM synthesis pipeline: calls biosystems strava CLI, pre-computes stats, drives OpenAI (primary) / Anthropic (fallback) to write a narrative brief to ~/.openclaw/workspace/memory/intelligence/"
+    },
+    {
+      "name": "audit/forensic-audit.mjs",
+      "kind": "main",
+      "location": "audit/forensic-audit.mjs:1",
+      "description": "Node.js headless orchestrator for five-stage forensic audit: spawns claude -p workers, validates JSON schema output, commits and pushes per stage; supports --fresh, --stage N, --no-push flags"
+    },
+    {
+      "name": ".github/workflows/test.yml",
+      "kind": "script",
+      "location": ".github/workflows/test.yml:1",
+      "description": "CI: ruff lint, mypy type check (non-blocking), pytest on Python 3.10/3.11/3.12 matrix; uploads htmlcov artifact on 3.11"
+    },
+    {
+      "name": ".github/workflows/readme-validation.yml",
+      "kind": "script",
+      "location": ".github/workflows/readme-validation.yml:1",
+      "description": "CI: validates README code examples via test_readme_examples.py on push/PR to main/develop"
+    },
+    {
+      "name": ".github/workflows/installation-test.yml",
+      "kind": "script",
+      "location": ".github/workflows/installation-test.yml:1",
+      "description": "CI: tests pip install (3.10/3.11/3.12) and Docker build/test on changes to pyproject.toml, Dockerfile, requirements.txt"
+    }
+  ],
+  "architecture": "The repository is organized as a Python library (src/biosystems/) with 7 subsystems, a CLI layer, operational tools, and a post-run LLM briefing pipeline.\n\nSUBSYSTEMS:\n\n1. models (src/biosystems/models.py): Pydantic v2 data contracts that flow between all other subsystems. Key types: HeartRateZone, ZoneConfig (HR zone configuration), RunContext (temperature, weather, HRV, RHR, sleep for a given run), PhysiologicalMetrics (EF, decoupling, hrTSS, distance, pace, cadence), FullRunReport (comprehensive report combining session+run-only metrics, walk analysis, zone distributions, dynamics, splits, laps, best efforts, block bests). All other subsystems consume these contracts.\n\n2. ingestion (src/biosystems/ingestion/): Three parsers producing a normalized pandas DataFrame with UTC DatetimeIndex and columns: hr, cadence, speed_mps, dist, dt, pace_sec_km, ele, latitude, longitude, moving. Parsers: fit.py (Garmin binary via fitdecode; semicircle->degree conversion), gpx.py (XML via stdlib; haversine distance from GPS coordinates), strava.py (Strava V3 REST API with OAuth2 refresh-token flow; fetches streams, activity metadata, laps, splits, best efforts, device info; exponential backoff on HTTP 429/5xx).\n\n3. physics (src/biosystems/physics/): Pure-computation algorithms on DataFrames. gap.py: Minetti et al. energy-cost polynomial for Grade Adjusted Pace; elevation quality check (suppresses GAP when elevation data is unreliable). metrics.py: calculate_efficiency_factor (speed_mps/HR, walk-filtered), calculate_decoupling (Pa:HR split by time), calculate_hr_tss (hrTSS from zone threshold and duration), compute_training_zones, run_metrics() (top-level compositor returning PhysiologicalMetrics). report.py: build_run_report() assembles FullRunReport by calling run_metrics on both the full session and walk-filtered run-only data, adding GAP-adjusted EF, EF CV (reliability), AeV (aerobic efficiency velocity via linear regression at reference HR), zone time distributions, walk segment analysis, stride detection, within-run dynamics (HR drift, pace strategy), km splits, laps, block bests vs recorded history.\n\n4. signal (src/biosystems/signal/): walk_detection.py classifies each row as is_walk using dual threshold (pace>9.5 min/km OR cadence<140 spm); also respects Strava moving flag when present. walk_block_segments() extracts contiguous walk segments, tags them (warm-up/mid-session/cool-down/pause), and collects HR recovery rate. filter_gps_jitter() removes noise from walk segments.\n\n5. analytics (src/biosystems/analytics/): Longitudinal persistence and trending. history.py: append-only JSON Lines file at ~/.biosystems/history.jsonl; filelock-protected writes; deduplication by strava_activity_id (primary) or date (fallback); also provides backfill_from_strava() and detect_block_bests(). trending.py: compute_pmc() implements ATL (7-day EMA) and CTL (42-day EMA) from the Banister Impulse-Response model; compute_rolling_stats(); summarize_trend().\n\n6. environment (src/biosystems/environment/): weather.py fetches historical hourly weather from Open-Meteo API for a given lat/lon/datetime; caches JSON responses to disk (WeatherCache); maps WMO weather codes to human-readable descriptions. Used by the strava CLI command to auto-enrich RunContext.\n\n7. wellness (src/biosystems/wellness/): habitdash.py is a REST client for the HabitDash aggregation API (Whoop + Garmin biometrics; stable field IDs for HRV, RHR, sleep, body battery, strain, VO2max, respiratory rate; 15s inter-request delay; 3 retries on 429). cache.py manages ~/.biosystems/wellness.parquet: sync_wellness() pulls N days from HabitDash and merges; compute_wellness_context() returns a dict with raw values, 1d/7d deltas, G/A/R readiness signal (two flavors: all-signal and overnight-only), staleness warning, and calibrated thresholds; enrich_run_context() injects wellness data into RunContext. analytics.py: pure-computation analytics (no biosystems imports) covering coverage per metric, era stats (Whoop era ends 2025-12-25; Garmin-only era from 2026-01-01), cross-metric correlation matrix, calibrated G/A/R thresholds (personal p20/p40/p75/p90 vs clinical fallbacks), longitudinal RHR/VO2max trends, sleep debt.\n\nDATA FLOW:\nRaw activity (.fit/.gpx) or Strava API --> ingestion parsers --> normalized DataFrame\n--> signal.walk_detection (add is_walk column)\n--> physics.metrics.run_metrics() [walk-filtered] --> PhysiologicalMetrics\n--> physics.report.build_run_report() --> FullRunReport (Pydantic, JSON-serializable)\n--> analytics.history.append_run() --> ~/.biosystems/history.jsonl\n--> analytics.trending.compute_pmc() + compute_rolling_stats() --> PMC + trends\n\nParallel enrichment paths:\n- environment.weather.fetch_weather_open_meteo() --> RunContext.temperature_c / weather_code\n- wellness.cache.enrich_run_context() --> RunContext.hrv_rmssd / rest_hr / sleep_score\n\nCLI LAYER: src/biosystems/cli.py registers a Typer app with 12 commands grouped into Data Ingestion, Analytics, and Wellness panels. The biosystems console_scripts entry point (pyproject.toml:58) makes it available as `biosystems` on PATH.\n\nOPERATIONAL LAYER: tools/ scripts for one-time setup (strava_auth.py), batch ingestion (ingest_new_runs.py), privacy sanitization (sanitize_gps.py), reproducibility verification (reproduce_study_analysis.py), chart generation, and installation verification.\n\nPOST-RUN BRIEFING: daily_running_brief/daily_running_brief.py (run from ~/.openclaw/workspace/scripts/ via cron at 20:00) calls `biosystems strava --list` and per-run fetches, pre-computes all numeric comparisons in Python, then drives OpenAI (gpt-4o-mini primary) or Anthropic (claude-sonnet-4-6 fallback) to write a narrative running brief to ~/.openclaw/workspace/memory/intelligence/.\n\nFORENSIC AUDIT: audit/forensic-audit.mjs is a Node.js orchestrator that runs the current audit pipeline (five stages, each a schema-validated `claude -p` worker).",
+  "provisional_intent": "PROVISIONAL: This repository serves a dual purpose: (1) a reusable open-source Python analytics library (`biosystems`, v1.0.0, MIT) for running-physiology data pipelines accepting Garmin .fit/.gpx files and Strava API data, computing physiological metrics (Efficiency Factor, aerobic decoupling, GAP, hrTSS, PMC), and integrating wearable wellness telemetry (Whoop + Garmin via HabitDash); and (2) the primary data artifact of a 103-day N=1 longitudinal self-experiment (2025 W17-W36) in which a single athlete applied targeted cadence-modification drills (NME drills) under Zone 2 aerobic training, achieving an 18% EF improvement and 50.6% decoupling reduction. The repo is simultaneously a production daily-use system (the athlete continues to use `biosystems strava` and the LLM daily brief post-study) and a scientific report (`reports/01_longitudinal_study.md`) approaching publication readiness (see `docs/PUBLICATION_CHECKLIST.md`). The AIV commit protocol enforces falsifiable evidence with each code change. The forensic audit pipeline (`audit/forensic-audit.mjs`) is an active meta-layer running on top of the codebase.",
+  "coverage": {
+    "total_files": 174,
+    "classified": 174,
+    "unknown": 0,
+    "ignored": []
+  },
+  "_stoptest": {
+    "denominator": 174,
+    "inventoried": 174,
+    "missing_count": 0,
+    "missing_sample": [],
+    "unknown_roles": []
+  }
+}
