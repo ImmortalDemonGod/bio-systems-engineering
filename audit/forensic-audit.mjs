@@ -371,22 +371,46 @@ async function stage2(s1) {
 
 async function stage3(s1, s2) {
   log("STAGE 3 — execution / dynamic surface");
-  const prompt = `You are STAGE 3 (Execution) of a forensic audit of ${REPO}. Discover the build/test/coverage commands from the repo ITSELF (README.md, pyproject.toml [tool.pytest], .github/workflows/*, Dockerfile) — do not assume. The package is already pip-installed in this sandbox.
-Do, in the sandbox:
-(1) Run the test suite under coverage. Prefer: \`python -m pytest -o addopts="" --cov=biosystems --cov-report=term-missing -q\`. Capture passed/failed/skipped and the measured coverage %.
-(2) Drive at least 2 real entry points (e.g. \`python -m biosystems.cli --help\`, and the README sample-data snippet that computes run_metrics on data/sample/sample_run.csv) and record observed behavior.
-(3) Use this execution evidence to CONFIRM / REFUTE / REFINE the Stage-2 findings. Read 02-static-audit.json for the finding list and reference each by its id in finding_deltas.
-(4) Coverage accounting must total 100%: every significant unexecuted region is either listed in coverage.unexecuted_regions with a reason (requires-credentials | external-service | hardware-gated | dead | destructive-skip) or covered. Report the real measured % from pytest-cov.
+  const execPrompt = `You are STAGE 3 (Execution) of a forensic audit of ${REPO}. Discover the build/test/coverage commands from the repo ITSELF (README.md, pyproject.toml [tool.pytest], .github/workflows/*, Dockerfile) — do not assume. The package is already pip-installed in this sandbox.
+MAKE WRITING A VALID OUTPUT FILE YOUR FIRST PRIORITY: write it early with whatever you have, then enrich — a timeout must never leave you with no file.
+(1) Run the test suite under coverage: \`python -m pytest -o addopts="" --cov=biosystems --cov-report=term-missing -q\`. Capture passed/failed/skipped and the measured coverage %.
+(2) Drive at least 2 real entry points (e.g. \`python -m biosystems.cli --help\`; the README sample-data snippet computing run_metrics on data/sample/sample_run.csv) and record observed behavior with locations.
+(3) Coverage accounting: list significant unexecuted regions in coverage.unexecuted_regions each with a reason (requires-credentials | external-service | hardware-gated | dead | destructive-skip); report the REAL measured % from pytest-cov.
+(4) finding_deltas: include ONLY findings your execution directly bears on (a failing test confirming a bug, an observed behavior refuting a finding), referencing Stage-2 ids from 02-static-audit.json. A separate pass maps the rest — do not try to cover all of them here.
 Report build_commands you actually ran.`;
-  const res = await runAgent({ name: "s3-execute", prompt, schema: S3, maxTurns: 60 });
-  if (!res.ok) return halt("stage3", "Stage-3 worker produced no schema-valid execution report.");
-  // adversarial check of self-reported coverage/accounting
-  const chk = await runAgent({ name: "s3-coverage-check", schema: S3, maxTurns: 40, model: MODEL_DEEP,
-    prompt: `You independently verify a Stage-3 execution report for ${REPO}. RE-RUN \`python -m pytest -o addopts="" --cov=biosystems --cov-report=term -q\` yourself and compare to the claimed numbers below. Correct any passed/failed/skipped or measured_pct that does not match your own run, and ensure every unexecuted region has a valid reason. Return the corrected execution object (same schema), keeping finding_deltas from the input unless your run contradicts them.\nClaimed report:\n${JSON.stringify(res.data)}` });
-  const d = chk.ok ? chk.data : res.data;
-  writeFileSync(join(AUDIT, "03-execution.json"), JSON.stringify(d, null, 2));
-  await checkpoint("stage3 execution", { "03-execution.md": r3(d), "03-execution.json": JSON.stringify(d, null, 2) });
-  return d;
+  const res = await runAgent({ name: "s3-execute", prompt: execPrompt, schema: S3, maxTurns: 50, timeoutMs: 1_200_000 });
+  if (!res.ok) return halt("stage3", "Stage-3 execution worker produced no schema-valid report.");
+
+  // Chunked finding-delta mapping: classify every Stage-2 finding against the execution evidence
+  // in parallel batches (one monolithic pass over 100+ findings exceeds the timeout and gets killed).
+  const S3D = { type: "object", required: ["finding_deltas"], properties: { finding_deltas: S3.properties.finding_deltas } };
+  const execSummary = { build_commands: res.data.build_commands, test_result: res.data.test_result, coverage: { measured_pct: res.data.coverage?.measured_pct, accounting: res.data.coverage?.accounting }, observed_behaviors: res.data.observed_behaviors };
+  const allFindings = (s2.findings || []).map((f) => ({ id: f.id, location: f.location, class: f.class, severity: f.severity, description: f.description }));
+  const DCHUNK = 25;
+  const dbatches = [];
+  for (let i = 0; i < allFindings.length; i += DCHUNK) dbatches.push(allFindings.slice(i, i + DCHUNK));
+  log(`  mapping ${allFindings.length} findings to execution evidence in ${dbatches.length} batch(es)`);
+  const dres = await pMap(dbatches, (batch, bi) => runAgent({
+    name: `s3-delta-b${bi}`, schema: S3D, maxTurns: 40, model: MODEL_DEEP, timeoutMs: 900_000,
+    prompt: `STAGE 3 finding-delta mapping (batch ${bi + 1}/${dbatches.length}) for ${REPO}. Given the EXECUTION EVIDENCE below, classify EACH finding as: confirmed (execution supports it — failing test, observed crash), refuted (execution contradicts it — the path works as intended), refined (partly right), or untested (execution does not bear on it — e.g. static doc-drift, or an external-API path the suite never exercises). You MAY open source/tests to decide. Return finding_deltas with {finding_id, status, note}. Most static findings will be 'untested' — that is the correct status, not a failure.\nEXECUTION EVIDENCE:\n${JSON.stringify(execSummary)}\nFINDINGS:\n${JSON.stringify(batch)}`,
+  }), 3);
+  const deltas = [];
+  for (const r of dres) if (r.ok) deltas.push(...r.data.finding_deltas);
+  const seen = new Set(); const merged = [];
+  for (const dl of [...(res.data.finding_deltas || []), ...deltas]) {
+    if (!dl || !dl.finding_id || seen.has(dl.finding_id)) continue;
+    seen.add(dl.finding_id); merged.push(dl);
+  }
+  const d = { ...res.data, finding_deltas: merged };
+
+  // independent verification of the coverage/test numbers (small input — re-runs pytest only)
+  const checkInput = { build_commands: d.build_commands, test_result: d.test_result, coverage: d.coverage, observed_behaviors: d.observed_behaviors };
+  const chk = await runAgent({ name: "s3-coverage-check", schema: S3, maxTurns: 40, model: MODEL_DEEP, timeoutMs: 900_000,
+    prompt: `You independently verify a Stage-3 execution report for ${REPO}. RE-RUN \`python -m pytest -o addopts="" --cov=biosystems --cov-report=term -q\` yourself and compare to the claimed numbers below. Correct any passed/failed/skipped or measured_pct that does not match your run; ensure every unexecuted region has a valid reason. Return the corrected execution object (same schema) with finding_deltas set to an empty array (deltas are preserved separately).\nClaimed report:\n${JSON.stringify(checkInput)}` });
+  const final = chk.ok ? { ...chk.data, finding_deltas: merged } : d;
+  writeFileSync(join(AUDIT, "03-execution.json"), JSON.stringify(final, null, 2));
+  await checkpoint("stage3 execution", { "03-execution.md": r3(final), "03-execution.json": JSON.stringify(final, null, 2) });
+  return final;
 }
 
 async function stage4(s1, s2, s3) {
