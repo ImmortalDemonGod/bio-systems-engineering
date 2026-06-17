@@ -115,7 +115,7 @@ async function runAgent({ name, prompt, schema, model = MODEL_DEEP, maxTurns = 6
 const pMap = async (xs, fn, n = 3) => {
   const out = []; let i = 0;
   await Promise.all(Array(Math.min(n, xs.length)).fill(0).map(async () => {
-    while (i < xs.length) { const k = i++; out[k] = await fn(xs[k]); }
+    while (i < xs.length) { const k = i++; out[k] = await fn(xs[k], k); }
   }));
   return out;
 };
