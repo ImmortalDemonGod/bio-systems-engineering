@@ -79,17 +79,19 @@ function validate(schema, data, path = "$") {
 }
 
 // ───────────────────────── one subagent call ─────────────────────────
-async function runAgent({ name, prompt, schema, model = MODEL_DEEP, maxTurns = 60, web = false, timeoutMs = 900_000, retries = 1 }) {
+async function runAgent({ name, prompt, schema, model = MODEL_DEEP, maxTurns = 60, web = false, timeoutMs = 900_000, retries = 2 }) {
   const out = join(WORK, `a_${name.replace(/\W+/g, "_")}_${SEQ++}.json`);
   const tools = (web ? "Read,Grep,Glob,Bash,WebSearch,WebFetch" : "Read,Grep,Glob,Bash") + ",Write";
+  let lastErrs = [];
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (existsSync(out)) rmSync(out);
-    const nudge = attempt > 0 ? "\n\nYOUR PREVIOUS ATTEMPT PRODUCED NO VALID JSON FILE. Write ONLY raw JSON (no prose, no markdown fences) to the exact path below." : "";
-    const full = `${prompt}${nudge}\n\nOUTPUT CONTRACT: use the Write tool to put ONLY raw JSON conforming to this schema:\n${JSON.stringify(schema)}\nat the absolute path: ${out}\nWrite nothing else to that file. Do not commit.`;
+    const nudge = attempt === 0 ? "" :
+      `\n\nYOUR PREVIOUS ATTEMPT WAS REJECTED. ${lastErrs.length ? "Fix these EXACT schema violations:\n- " + lastErrs.slice(0, 10).join("\n- ") : "No valid JSON file was written to the output path."}\nWrite ONLY raw JSON (no prose, no markdown fences). Use EXACTLY the allowed enum string values from the schema — do not invent variants (e.g. write \"cli\", never \"cli_command\").`;
+    const full = `${prompt}${nudge}\n\nOUTPUT CONTRACT: use the Write tool to put ONLY raw JSON conforming to this schema:\n${JSON.stringify(schema)}\nat the absolute path: ${out}\nEvery field constrained by an enum MUST be exactly one of its listed values. Write nothing else to that file. Do not commit.`;
     const a = ["-p", full, "--output-format", "json", "--model", model, "--max-turns", String(maxTurns),
       "--allowedTools", tools, "--add-dir", REPO, "--strict-mcp-config",
       "--permission-mode", "acceptEdits", "--append-system-prompt", INVARIANTS];
-    log(`  → agent ${name} (model=${model}, attempt=${attempt + 1})`);
+    log(`  → agent ${name} (model=${model}, attempt=${attempt + 1}/${retries + 1})`);
     const r = await new Promise((res) => {
       const p = spawn("claude", a, { cwd: REPO, stdio: ["ignore", "pipe", "pipe"] });
       let O = "", E = "";
@@ -100,10 +102,10 @@ async function runAgent({ name, prompt, schema, model = MODEL_DEEP, maxTurns = 6
     });
     let env = null; try { env = JSON.parse(r.O); } catch {}
     if (env?.total_cost_usd) TOTAL_COST += Number(env.total_cost_usd);
-    if (!existsSync(out)) { log(`    ✗ ${name}: no structured output (envelope ${env ? "ok" : "non-json"})`); continue; }
-    let data; try { data = JSON.parse(readFileSync(out, "utf8")); } catch (e) { log(`    ✗ ${name}: handoff not parseable`); continue; }
+    if (!existsSync(out)) { lastErrs = ["no JSON file was written to the output path"]; log(`    ✗ ${name}: no structured output (envelope ${env ? "ok" : "non-json"})`); continue; }
+    let data; try { data = JSON.parse(readFileSync(out, "utf8")); } catch (e) { lastErrs = ["the file written was not valid JSON — emit raw JSON only, no prose or markdown fences"]; log(`    ✗ ${name}: handoff not parseable`); continue; }
     const errs = validate(schema, data);
-    if (errs.length) { log(`    ✗ ${name}: schema violations: ${errs.slice(0, 4).join(" | ")}`); continue; }
+    if (errs.length) { lastErrs = errs; log(`    ✗ ${name}: schema violations: ${errs.slice(0, 4).join(" | ")}`); continue; }
     log(`    ✓ ${name} ok (cum cost ~$${TOTAL_COST.toFixed(2)})`);
     return { ok: true, data };
   }
