@@ -298,23 +298,33 @@ async function stage2(s1) {
   const sources = s1.inventory.filter((f) => f.role === "source").map((f) => f.path);
   const surface = s1.inventory.length;
   const base = `You are STAGE 2 (Static Audit) of a forensic audit of ${REPO}. Read the actual source (do not trust the map alone). Stage-1 provisional intent: "${intent}". A defect is only a defect relative to intended behavior — judge against that intent, and record any CODE↔INTENT or CODE↔DOC mismatch as a finding (class intent_mismatch / doc_drift). The Stage-1 inventory has ${surface} items; ${sources.length} are source. Read 01-understanding.json for the full map.`;
-  let findings = [];
-  // round 0: broad audit across diverse lenses
-  const lenses = [
-    "correctness bugs & edge cases in the physics/metrics/gap computations and ingestion parsers (src/biosystems/physics/*, src/biosystems/ingestion/*)",
-    "security, secrets handling, privacy/PII (GPS), input validation, and external API calls (src/biosystems/ingestion/strava.py, wellness/habitdash.py, environment/weather.py, tools/sanitize_gps.py)",
-    "documentation/code drift between README.md / docs/* / reports/* and actual code behavior; and reproducibility of claimed results",
-    "design defects, error handling, type-safety gaps, CLI robustness, and test coverage gaps (src/biosystems/cli.py, tests/*)",
-  ];
-  const r0 = await pMap(lenses, (lens, i) => runAgent({
-    name: `s2-audit-l${i}`, schema: S2, maxTurns: 70,
-    prompt: `${base}\n\nLENS: focus on ${lens}. Find every defect findable by reading. Each finding: stable id (e.g. F-${i}-1), location path:line, class, severity, concrete evidence (quote the code by location, never paste secrets), and description. Set survived_falsification to null (a later pass decides). Report coverage.visited = number of distinct files you actually opened, surface_items = ${surface}, and list any high-value files you did NOT open in coverage.unvisited.`,
-  }), 2);
-  for (const r of r0) if (r.ok) findings.push(...r.data.findings);
   const fp = (f) => `${(f.location || "").toLowerCase()}|${f.class}|${(f.description || "").slice(0, 40).toLowerCase()}`;
   const dedupe = (arr) => { const seen = new Set(); return arr.filter((f) => { const k = fp(f); if (seen.has(k)) return false; seen.add(k); return true; }); };
-  findings = dedupe(findings);
-  log(`  round 0: ${findings.length} candidate findings from ${r0.filter((r) => r.ok).length}/${lenses.length} lenses`);
+  let findings = [];
+  const candPath = join(AUDIT, "02-candidates.json");
+  if (existsSync(candPath)) {
+    // Resume: reuse the durably-cached collection (lens + re-audit candidates), skipping the
+    // expensive lens fan-out; go straight to the (chunked) falsification fixpoint. Reset any
+    // stale survived flags so the falsifier re-judges honestly.
+    findings = dedupe((JSON.parse(readFileSync(candPath, "utf8")).findings || []).map((f) => ({ ...f, survived_falsification: null })));
+    log(`  reusing ${findings.length} cached candidate findings from 02-candidates.json (skipping lens collection)`);
+  } else {
+    // round 0: broad audit across diverse lenses
+    const lenses = [
+      "correctness bugs & edge cases in the physics/metrics/gap computations and ingestion parsers (src/biosystems/physics/*, src/biosystems/ingestion/*)",
+      "security, secrets handling, privacy/PII (GPS), input validation, and external API calls (src/biosystems/ingestion/strava.py, wellness/habitdash.py, environment/weather.py, tools/sanitize_gps.py)",
+      "documentation/code drift between README.md / docs/* / reports/* and actual code behavior; and reproducibility of claimed results",
+      "design defects, error handling, type-safety gaps, CLI robustness, and test coverage gaps (src/biosystems/cli.py, tests/*)",
+    ];
+    const r0 = await pMap(lenses, (lens, i) => runAgent({
+      name: `s2-audit-l${i}`, schema: S2, maxTurns: 70,
+      prompt: `${base}\n\nLENS: focus on ${lens}. Find every defect findable by reading. Each finding: stable id (e.g. F-${i}-1), location path:line, class, severity, concrete evidence (quote the code by location, never paste secrets), and description. Set survived_falsification to null (a later pass decides). Report coverage.visited = number of distinct files you actually opened, surface_items = ${surface}, and list any high-value files you did NOT open in coverage.unvisited.`,
+    }), 2);
+    for (const r of r0) if (r.ok) findings.push(...r.data.findings);
+    findings = dedupe(findings);
+    log(`  round 0: ${findings.length} candidate findings from ${r0.filter((r) => r.ok).length}/${lenses.length} lenses`);
+    writeFileSync(candPath, JSON.stringify({ findings }, null, 2)); // persist collection durably for resume
+  }
 
   // fixpoint: re-audit sweep (add candidates) → falsify the WHOLE set → keep survivors → stable?
   let prev = "";

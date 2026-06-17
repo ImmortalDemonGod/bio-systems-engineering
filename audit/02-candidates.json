@@ -1,0 +1,680 @@
+{
+  "findings": [
+    {
+      "id": "F-decoupling-empty-half-1",
+      "location": "src/biosystems/physics/metrics.py:199-213",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "elapsed = work_df[\"dt\"].cumsum(); midpoint_s = elapsed.iloc[-1] / 2.0; first_half = work_df[elapsed <= midpoint_s]. When work_df has exactly 1 row with dt=5s: elapsed=[5], midpoint_s=2.5, first_half = work_df[[5 <= 2.5]] = empty DataFrame. Then ef_1 = float(first_half[\"dist\"].sum()) / float(first_half[\"dt\"].sum()) executes as 0.0/0.0 \u2192 ZeroDivisionError. No empty-half guard exists anywhere in this function.",
+      "description": "calculate_decoupling raises ZeroDivisionError when work_df has one row (or when the first row's cumulative elapsed time exceeds the midpoint). The cumsum-based midpoint split makes first_half empty, causing 0.0/0.0 in the ef_1 computation. Triggered for very short runs where the fallback from Z2-filtered data to the full HR dataset still yields fewer than 2 valid time points.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cadence-doubling-2",
+      "location": "src/biosystems/ingestion/strava.py:359-363 vs src/biosystems/ingestion/fit.py:157-159 vs src/biosystems/ingestion/gpx.py:119",
+      "class": "intent_mismatch",
+      "severity": "high",
+      "evidence": "strava.py:360-362: '# Strava reports running cadence as single-foot RPM. / # Multiply by 2 to get total steps per minute, matching FIT file convention. / df[\"cadence\"] = pd.array(streams[\"cadence\"], dtype=\"float64\") * 2'. fit.py:157-159: '\"cadence\", # Cadence (spm, but stored as rpm for run) ... df[\"cadence\"] = df[\"cadence\"].replace(0, np.nan)' \u2014 no multiplication. gpx.py:119: 'cad = int(cad_node.text) if cad_node is not None else np.nan' \u2014 no multiplication. Walk detection threshold: walk_detection.py cad_thr=140 spm (total). The two comments contradict each other: strava.py says 'matching FIT file convention' (implying FIT stores total spm), fit.py says 'stored as rpm for run' (implying single-foot). If FIT and GPX store single-foot cadence (~90 for a 180-spm runner), the 140-spm walk threshold would misclassify all running points as walks.",
+      "description": "Cadence convention mismatch between parsers: Strava explicitly doubles single-foot RPM to get total spm, but FIT and GPX parsers pass the raw value unchanged. The two comments directly contradict each other on what 'FIT convention' means. If FIT/GPX store single-foot cadence (as the fit.py comment implies), then with a 140-spm total walk threshold, all running cadence values (~80-90 rpm) would appear below threshold, causing every FIT/GPX running point to be classified as a walk whenever cadence-based walk detection is applied.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-run-only-walks-leak-3",
+      "location": "src/biosystems/physics/report.py:464-469 and src/biosystems/physics/metrics.py:285-293",
+      "class": "intent_mismatch",
+      "severity": "medium",
+      "evidence": "build_run_report line 469: 'run_only_metrics = run_metrics(df.copy(), zone_config, context=context)' passes df with is_walk column. In run_metrics: 'total_dist_m = float(df[\"dist\"].sum())' and 'secs = float(df[\"dt\"].sum())' and 'avg_hr = float(df[\"hr\"].mean())' all operate on the full df (including walk rows). But 'ef = calculate_efficiency_factor(df, zone_config)' filters walks internally. FullRunReport docstring labels this field 'run_only : PhysiologicalMetrics' and the architecture describes it as walk-filtered. The distance_km, duration_min, avg_pace, and avg_hr fields in run_only_metrics are identical to session_metrics (both include walk data), while efficiency_factor and decoupling_pct are walk-filtered.",
+      "description": "run_only_metrics in build_run_report is labeled as the walk-filtered version but only walk-filters EF and decoupling (inside calculate_efficiency_factor and calculate_decoupling). Basic statistics \u2014 distance_km, duration_min, avg_pace_min_per_km, avg_hr \u2014 are computed from the full df including walk segments, producing the same values as session_metrics. The run_only / session distinction is therefore only meaningful for EF and decoupling, not for the headline distance/pace/HR fields, contrary to the intent stated in docstrings and the FullRunReport model.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-gpx-hr-parse-unguarded-4",
+      "location": "src/biosystems/ingestion/gpx.py:104-106",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "hr_node = pt.find(\".//gpxtpx:hr\", ns); if hr_node is not None: hr_val = int(hr_node.text). No try/except around int(). If hr_node.text is a non-integer string (e.g. an empty string, 'N/A', or whitespace from a malformed extension), int() raises ValueError and parse_gpx fails entirely for that file, even though the HR value could be treated as NaN and parsing could continue.",
+      "description": "GPX HR value is cast with int() without any exception handling. A malformed or empty text node in the gpxtpx:hr element causes ValueError, failing the entire parse rather than gracefully substituting NaN for that trackpoint. Same pattern appears for cadence (gpx.py:119). Real-world GPX files from third-party tools occasionally emit empty or textual extension values.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-gpx-cad-parse-unguarded-5",
+      "location": "src/biosystems/ingestion/gpx.py:119",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "cad_node = pt.find(\".//gpxtpx:cad\", ns); cad = int(cad_node.text) if cad_node is not None else np.nan. No try/except. Malformed cad_node.text raises ValueError and aborts parse_gpx.",
+      "description": "GPX cadence parsing has the same unguarded int() cast as HR. A non-integer cadence text value (e.g. decimal string like '90.5' from a non-Garmin device) would raise ValueError and fail the entire file parse instead of falling back to NaN for that trackpoint.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-ef-zero-dt-6",
+      "location": "src/biosystems/physics/metrics.py:148-151",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "calculate_efficiency_factor: 'secs = float(work_df[\"dt\"].sum())' then 'avg_speed = total_dist_m / secs'. No guard for secs==0. The calling run_metrics checks 'if secs <= 0: raise ValueError' but uses the full df's secs, not work_df's secs. If work_df consists entirely of rows with dt=0 (a degenerate edge case), division by zero occurs without an informative error.",
+      "description": "calculate_efficiency_factor can divide by zero if work_df's dt.sum() is 0. The run_metrics caller guards the full-df case but not the filtered work_df case. Pathological inputs (all dt=0 after walk/zone filtering) produce ZeroDivisionError instead of a clear ValueError.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-gap-ele-zero-sea-level-7",
+      "location": "src/biosystems/physics/gap.py:224",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "check_elevation_quality: 'ele_series = df[ele_col].replace(0, np.nan).dropna()'. All points with ele==0.0 are treated as missing data. For activities recorded at or near sea level (legitimate elevation of 0 m), this drops valid elevation points. If more than 90% of the activity is at sea level, len(ele_series) < 10 triggers 'insufficient elevation data points' and GAP is suppressed. The smoothed diff pipeline in calculate_gap_from_dataframe does NOT exclude ele=0 rows, creating an inconsistency: GAP is computed but not quality-checked for sea-level routes.",
+      "description": "Elevation quality check treats ele=0 as 'missing' by replacing with NaN. This is a GPS-dropout heuristic that falsely penalizes coastal or flat sea-level activities where 0 m is a correct barometric reading. Activities like beach runs or sea-wall routes may have GAP silently suppressed despite having perfectly valid elevation data, while the same data is still used in the gap computation path (which does not filter ele==0).",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-gap-loop-perf-8",
+      "location": "src/biosystems/physics/gap.py:171-185",
+      "class": "perf",
+      "severity": "medium",
+      "evidence": "calculate_gap_from_dataframe: 'for i in range(len(df)): ele_val = cast(float, ele_diff.iloc[i]); dist_val = cast(float, df[dist_col].iloc[i])'. Using .iloc[i] inside a Python for-loop is O(n) per access due to pandas label lookup, making the total loop O(n\u00b2). A 1-hour Strava activity at 1-second resolution (3600 rows) performs ~13M pandas operations. A second loop follows (lines 182-185) making it two full O(n\u00b2) passes. Vectorized numpy/pandas operations would be O(n).",
+      "description": "GAP computation for an entire activity DataFrame uses two Python for-loops with .iloc[i] indexing, incurring O(n\u00b2) overhead. For a typical 3600-point activity this is ~7-13M pandas index operations; for a marathon (~10800 points) it is ~120M. The computation can be fully vectorized using pandas .apply() or numpy operations on the grade array, eliminating the loop. This blocks the hot path in the strava CLI command for long-distance activities.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-gpx-ns-garmin-only-9",
+      "location": "src/biosystems/ingestion/gpx.py:79-83",
+      "class": "doc_drift",
+      "severity": "medium",
+      "evidence": "ns = {'g': 'http://www.topografix.com/GPX/1/1', 'gpxtpx': 'http://www.garmin.com/xmlschemas/TrackPointExtension/v1'}. Only the Garmin TrackPointExtension/v1 namespace is declared. Polar (xmlns:ns3='http://www.garmin.com/xmlschemas/TrackPointExtension/v2'), Suunto ('http://www.suunto.com/xmlschemas/extensions/gpxextension.xsd'), and Wahoo devices use different extension namespace URIs. HR and cadence from non-Garmin GPX files are silently NaN regardless of what is present in the XML. README and parse_gpx docstring claim generic GPX support.",
+      "description": "parse_gpx claims to support GPX files (a standard format used by many devices) but only resolves heart rate and cadence from Garmin's proprietary TrackPointExtension/v1 namespace. Non-Garmin GPX files from Polar, Suunto, or Wahoo devices produce hr=NaN and cadence=NaN silently, even when the XML contains valid sensor data in a different extension namespace. The README quick-start examples and function docstring do not caveat Garmin-only sensor support.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cadence-int-truncation-10",
+      "location": "src/biosystems/physics/metrics.py:310",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "avg_cadence = int(cadence_series.mean()). int() truncates toward zero, not rounds. A mean of 179.9 spm becomes 179, not 180. The field is declared as 'avg_cadence: int | None' in PhysiologicalMetrics so rounding is the intended semantics. round() should be used.",
+      "description": "Average cadence is computed with int() which truncates rather than rounds. For typical running cadence (160-180 spm), a mean of 163.8 reports as 163 instead of 164. Small absolute error but inconsistent with the rounding applied to all other metrics in run_metrics (avg_hr, avg_pace, ef, etc. all use round()).",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-fit-indoor-gps-11",
+      "location": "src/biosystems/ingestion/fit.py:207-208",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "add_derived_metrics: 'if \"latitude\" not in df.columns or \"longitude\" not in df.columns: raise ValueError(\"DataFrame must have latitude and longitude columns\")'. FIT files from indoor treadmill activities (e.g. sport_type=Run on a Garmin running on a treadmill with GPS disabled) legitimately lack position_lat/position_long records. These produce a DataFrame without latitude/longitude columns. add_derived_metrics raises ValueError. The FIT parser does not fall back to using the FIT file's own 'distance' and 'speed' fields even though those are extracted into the DataFrame and could replace haversine-derived dist/speed.",
+      "description": "add_derived_metrics requires GPS latitude/longitude to compute segment distances via haversine. For treadmill or indoor FIT activities, GPS is absent. The FIT file's native 'distance' (cumulative, in metres) and 'speed' (m/s) streams are parsed into the DataFrame but never used; instead, the code unconditionally raises ValueError. This makes the entire FIT ingestion path unusable for indoor running activities despite having valid speed/distance data available from the device's foot pod or accelerometer.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-decoupling-ef1-small-12",
+      "location": "src/biosystems/physics/metrics.py:217",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "decouple_pct = abs(ef_2 - ef_1) / ef_1 * 100. If first_half contains rows with very low speed (GPS dropout, all dist=0) and normal HR, ef_1 = (0.0 / dt_sum) / hr_mean = 0.0 / hr_mean = 0.0. Then 0.0 / 0.0 raises ZeroDivisionError, or if ef_1 is a small positive number, decouple_pct becomes astronomically large (e.g. ef_1=0.0001, ef_2=0.03 \u2192 decouple_pct=29900%). No clamp or guard is applied.",
+      "description": "calculate_decoupling divides by ef_1 without guarding against near-zero values. A GPS dropout at the start of work data (where the watch continues recording HR but distance is 0) produces ef_1 \u2248 0, either causing ZeroDivisionError or an astronomically large decoupling percentage that propagates unchecked into PhysiologicalMetrics and history.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-stride-endpoint-inclusive-13",
+      "location": "src/biosystems/physics/report.py:116-117",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "_detect_strides: 'elif not is_fast and in_stride and start_idx is not None: seg_df = df.loc[start_idx:idx]'. idx is the first non-fast row (the row that terminated the stride). df.loc[start_idx:idx] is inclusive on both ends for DatetimeIndex, so the non-stride row is included in seg_df. 'dur_s = float(seg_df[\"dt\"].sum())' includes the non-stride row's dt. avg_pace also includes this row's slower pace, making the reported stride pace slightly slower and duration slightly longer than the actual fast-segment.",
+      "description": "Stride segment extraction uses df.loc[start_idx:idx] where idx is the first row NOT in the stride. Because DatetimeIndex label slicing is inclusive on both ends, the ending non-stride row is included in seg_df. This overestimates stride duration by one dt interval and biases average stride pace slightly slower (the terminating non-fast row is included in the mean). The correct slice should be df.loc[start_idx:idx].iloc[:-1] or use exclusive slicing.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-maxhr-walk-semantics-14",
+      "location": "src/biosystems/signal/walk_detection.py:129-139",
+      "class": "intent_mismatch",
+      "severity": "low",
+      "evidence": "summarize_walk_segments: 'hrs = [s[\"avg_hr\"] for s in valid_segments if s.get(\"avg_hr\") and not pd.isnull(s.get(\"avg_hr\"))]' then 'max_hr = max(hrs) if hrs else np.nan'. hrs contains segment-average HRs, not instantaneous maxima. walk_block_segments only records avg_hr per segment (via grp_df[\"heart_rate\"].mean()), never the segment's max HR. The WalkSummary model field avg_hr_recovery_bpm_per_s in report.py separately computes peak_hr = float(seg_df[\"hr\"].max()) (report.py:285), indicating the intent is to track true peak HR, but that value is not stored back into the segment dict.",
+      "description": "summarize_walk_segments returns max_hr as max(segment_avg_hrS) \u2014 the maximum of per-segment average heart rates \u2014 not the maximum instantaneous HR observed during any walk segment. This value is stored as WalkSummary.max_hr and displayed in CLI output as if it were peak HR. For a walk segment with avg_hr=130 bpm but transient peak of 150 bpm (common after a running burst), the reported max_hr=130 significantly understates physiological load.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-fit-pace-unsmoothed-15",
+      "location": "src/biosystems/ingestion/fit.py:225-230 vs src/biosystems/ingestion/gpx.py:204-207",
+      "class": "intent_mismatch",
+      "severity": "low",
+      "evidence": "gpx.py:204-207: 'df[\"speed_mps_smooth\"] = df[\"speed_mps\"].rolling(window=5, center=True, min_periods=1).mean(); df[\"pace_sec_km\"] = 1000 / df[\"speed_mps_smooth\"].replace(0, np.nan)'. add_derived_metrics in fit.py:225-230: 'df[\"speed_mps\"] = df[\"dist\"] / df[\"dt\"].replace(0, np.nan); df[\"speed_mps\"] = df[\"speed_mps\"].bfill(); df[\"pace_sec_km\"] = 1000 / df[\"speed_mps\"].replace(0, np.nan)'. No rolling mean in FIT path. Strava uses velocity_smooth stream directly (pre-smoothed).",
+      "description": "GPX-derived pace_sec_km uses a 5-point centered rolling mean of speed_mps, producing smoothed pace values suitable for zone classification and walk detection. FIT-derived pace_sec_km uses raw per-segment speed (instantaneous haversine distance / dt), which is noisy for the typical 1-second sampling of Garmin devices. This inconsistency means the same pace threshold (e.g. 9.5 min/km walk cutoff) is applied to smooth data for GPX but to noisy data for FIT, potentially causing spurious walk/run misclassifications in FIT-sourced activities.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-strava-1",
+      "location": "src/biosystems/ingestion/strava.py:92",
+      "class": "bug",
+      "severity": "high",
+      "evidence": "retry_after = int(resp.headers.get(\"Retry-After\", 60))",
+      "description": "The Retry-After header in an HTTP 429 response may legally contain an HTTP-date string (e.g. 'Sat, 01 Jan 2026 00:00:00 GMT') per RFC 7231 \u00a77.1.3. Calling int() on a date string raises ValueError, which is not caught anywhere in _get_with_backoff(). The exception propagates unhandled through every caller (fetch_activity_streams, fetch_recent_runs, etc.) and aborts the API call chain. This path can be triggered by any Strava 429 that uses the date-format variant, which is permitted by the spec.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-strava-2",
+      "location": "src/biosystems/ingestion/strava.py:91-95",
+      "class": "security",
+      "severity": "medium",
+      "evidence": "if resp.status_code == 429:\n    retry_after = int(resp.headers.get(\"Retry-After\", 60))\n    time.sleep(retry_after)",
+      "description": "There is no upper bound on the Retry-After sleep duration. A misconfigured or adversarial upstream response with an arbitrarily large integer (e.g. Retry-After: 86400) causes the process to hang indefinitely without a cap. By contrast, habitdash.py lines 106-109 correctly applies min(int(reset_secs)+1, 3600). This is a local denial-of-service vector: any tool that embeds or wraps biosystems (e.g. the daily_running_brief cron job) can be stalled by a single API response.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-strava-3",
+      "location": "src/biosystems/ingestion/strava.py:345",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "    len(streams[\"time\"])\n    df = pd.DataFrame(index=timestamps)",
+      "description": "Line 345 is a bare expression statement: len(streams[\"time\"]). The computed integer is immediately discarded with no side effects. This is a no-op that looks like a debugging artifact \u2014 likely the remnant of a now-removed variable assignment (e.g. n = len(...)). It wastes a dict lookup and function call on every stream parse and will confuse future readers searching for its purpose.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-strava-4",
+      "location": "src/biosystems/ingestion/strava.py:163",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "    resp.raise_for_status()\n    return resp.json()[\"access_token\"]",
+      "description": "_refresh_access_token() accesses resp.json()[\"access_token\"] without confirming the key exists. Although raise_for_status() guards against HTTP error codes, an OAuth2 error response that arrives with a 2xx status (some providers do this) or a future API change would raise an uninformative KeyError: 'access_token' rather than a meaningful credential error. CLI callers (cli.py:213-218) catch generic Exception and surface the raw exception text, so the user would see the opaque KeyError.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-habitdash-1",
+      "location": "src/biosystems/wellness/habitdash.py:106-108",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "                reset_secs = resp.headers.get(\"x-ratelimit-reset\")\n                if remaining is not None and int(remaining) == 0 and reset_secs is not None:\n                    wait = min(int(reset_secs) + 1, 3600)",
+      "description": "The x-ratelimit-reset header is parsed as seconds-until-reset, but many REST APIs use this header as a Unix epoch timestamp of when the window resets (e.g. GitHub, Twitter/X). If HabitDash uses epoch semantics, int(reset_secs) yields ~1.7 billion; the min(..., 3600) cap always fires, causing the client to sleep 1 hour every time x-ratelimit-remaining reaches 0. Without HabitDash API documentation confirming seconds vs. epoch semantics, the interpretation is unverifiable from the source alone.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-weather-1",
+      "location": "src/biosystems/environment/weather.py:337",
+      "class": "security",
+      "severity": "medium",
+      "evidence": "    print(f\"[Weather] Failed after {max_retries} retries for lat={lat_r}, lon={lon_r}, time={dt}\", file=sys.stderr)",
+      "description": "GPS coordinates at 4-decimal-place precision (~11m accuracy) are written to stderr on weather fetch failure. Per CLAUDE.md, the daily brief runs via cron at 20:00 and wellness-sync runs at 06:43; cron daemons typically email stderr to root or a configured address, or write it to system logs. This creates a persistent, plaintext GPS location leak in system mail/logs on every weather fetch failure, even when the associated run data has been sanitized for publication.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-weather-2",
+      "location": "src/biosystems/environment/weather.py:234",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "    now = datetime.utcnow()",
+      "description": "datetime.utcnow() is deprecated since Python 3.12 and emits DeprecationWarning. The CI matrix includes Python 3.12 (per .github/workflows/test.yml). The correct modern replacement is datetime.now(timezone.utc); the timezone import is already present in the module at line 12, making this a trivial fix.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-sanitize-1",
+      "location": "tools/sanitize_gps.py:50-51",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "    if 'distance_cumulative_m' not in df.columns and 'dist' in df.columns:\n        df['distance_cumulative_m'] = df['dist'].cumsum()",
+      "description": "sanitize_dataframe() mutates the caller's DataFrame in-place by assigning the computed distance_cumulative_m column before any copy is made. The guarding copy at line 74 (df_truncated = df[mask].copy()) applies only to the truncated slice, not the original df. A caller that passes a DataFrame expecting it to be unchanged will find it silently modified with a new column, breaking subsequent processing that assumes a clean input.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-sanitize-2",
+      "location": "tools/sanitize_gps.py:1-16",
+      "class": "doc_drift",
+      "severity": "medium",
+      "evidence": "Security Guarantees:\\n- Removes lat/lon columns completely\\n- Truncates first/last 500m to obscure start/end locations\\n- Preserves: distance, elevation, HR, cadence, pace, power",
+      "description": "The module-level 'Security Guarantees' section claims to protect location privacy by removing lat/lon and truncating endpoints, but does not acknowledge that the preserved elevation (ele) column can fingerprint a route via its terrain profile. Unique elevation signatures (hills, bridges, tunnels) allow route identification without lat/lon. The guarantees section is what users rely on before publishing data; this omission creates a false sense of complete anonymization.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-sanitize-3",
+      "location": "tools/sanitize_gps.py:226-265",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "    input_path = Path(args.input)\n    output_path = Path(args.output)\n    ...\n        if sanitize_parquet_file(file_path, output_file, args.start, args.end):",
+      "description": "The CLI does not validate that output_path differs from input_path. Running `sanitize_gps.py data/ data/ --recursive` overwrites original GPS-containing files with sanitized versions, destroying raw data with no warning prompt, confirmation flag, or dry-run check before the overwrite. This is particularly dangerous because the tool is safety-critical: a mistaken invocation can silently and irreversibly destroy the athlete's original raw activity files.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-pii-1",
+      "location": "data/subjective.csv",
+      "class": "security",
+      "severity": "high",
+      "evidence": "Stage-1 inventory: 'Real per-day subjective data: rest_hr, hrv, rpe, ankle_pain; sparse (study period)'. .gitignore excludes data/raw/**, data/processed/, data/*.parquet, data/*.zip but NOT data/*.csv. AIV evidence for this file exists, confirming it is committed to git history.",
+      "description": "Personal health data (resting heart rate, HRV, RPE, ankle pain) for the N=1 study subject is committed to the git repository. The .gitignore does not exclude data/*.csv, so this file is tracked in git history and would appear in any public clone. For a study with a single identifiable athlete, this constitutes PHI committed to a codebase intended for open-source publication (LICENSE is MIT). The data must be either explicitly consented-to as public, anonymized, or gitignore-excluded before the repository is made public.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-brief-1",
+      "location": "daily_running_brief/daily_running_brief.py:27",
+      "class": "doc_drift",
+      "severity": "low",
+      "evidence": "\"Requires:\\n  ANTHROPIC_API_KEY  (or OPENAI_API_KEY \u2014 OpenAI is primary, Anthropic is fallback)\"",
+      "description": "The module docstring states 'OpenAI is primary, Anthropic is fallback' and lists only ANTHROPIC_API_KEY and OPENAI_API_KEY as requirements. However, _chat() (lines 1075-1087) actually tries OPENROUTER_API_KEY first, then OPENAI_API_KEY, then ANTHROPIC_API_KEY. The OPENROUTER_API_KEY variable is not mentioned anywhere in the docstring or README. The error message at line 1157 also omits it: 'Set OPENAI_API_KEY (preferred, cheaper) or ANTHROPIC_API_KEY.' Users configuring only OpenAI + Anthropic keys per the docstring will have the correct fallback behavior, but OpenRouter users receive no documentation of their option.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-test-1",
+      "location": "tests/test_strava.py",
+      "class": "test_gap",
+      "severity": "medium",
+      "evidence": "Stage-1 inventory: 'Unit tests for Strava ingestion: credential validation, stream parsing, mocked HTTP, rate-limit HTML response'. No mention of date-format Retry-After test case.",
+      "description": "The strava.py test suite covers rate-limit HTML responses but has no test for the date-format Retry-After header path that triggers the ValueError crash in _get_with_backoff() (F-strava-1). A test mocking a 429 response with Retry-After: Mon, 01 Jan 2026 00:00:00 GMT would expose the crash. Without this test, the bug is undetected by CI.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-test-2",
+      "location": "src/biosystems/wellness/habitdash.py",
+      "class": "test_gap",
+      "severity": "low",
+      "evidence": "Stage-1 inventory lists no test file for habitdash.py. Wellness tests exist only for cache.py (tests/test_wellness_cache.py).",
+      "description": "No test file exists for habitdash.py. The HabitDashClient._get() retry logic, proactive rate-limit header handling (including the ambiguous x-ratelimit-reset interpretation, F-habitdash-1), and the silent-None return on exhausted retries are all untested. Silent data loss on network failure \u2014 where fetch_all_metrics() returns [] with only a log.error() call \u2014 has no regression coverage.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-01",
+      "location": "README.md:20",
+      "class": "doc_drift",
+      "severity": "critical",
+      "evidence": "README.md line 20: '| **Environmental Conditions** | 20\u00b0C (mild) | 36\u00b0C (extreme heat) |'. Report Phase IV (reports/01_longitudinal_study.md:212): 'Temperature (run time) | **~28\u00b0C** (daily max 32\u00b0C)'. data/real_weekly_data.json W32 note: '36\u00b0C heat'. PUBLICATION_CHECKLIST.md:43: '- [ ] **Temperature inconsistency**: Abstract/conclusion say final RPE 10 retest was at **36\u00b0C**; Phase IV table (Week 35) says **27\u00b0C**; README header table says \"Final (W32) @ 36\u00b0C\".' (explicitly unchecked P0 blocker).",
+      "description": "The README top-level results table claims the final (W32) environmental condition was '36\u00b0C (extreme heat)', while the scientific report clearly states '~28\u00b0C (daily max 32\u00b0C)' based on Open-Meteo historical archive data (Lawton OK, 2025-08-05). The PUBLICATION_CHECKLIST.md marks this as an unresolved P0 blocker. The data/real_weekly_data.json note also says '36\u00b0C heat', meaning two of three committed artifacts use the wrong (uncorrected) temperature while the report was updated. A reader of the README receives a materially different thermal-stress narrative than the report.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-02",
+      "location": "README.md:17,reports/01_longitudinal_study.md:19,data/real_weekly_data.json:99",
+      "class": "doc_drift",
+      "severity": "high",
+      "evidence": "README.md:17: 'Efficiency Factor | 0.0180 | 0.0212 | **+18%**'. Report abstract (reports/01_longitudinal_study.md:19): 'EF improved +17% (0.0180 \u2192 0.0211)'. Report Phase IV table (line 212): '0.0211'. data/real_weekly_data.json:99: 'rpe10_ef: 0.02122'. Three committed documents give three different final EF values: 0.0212 (README), 0.0211 (report), 0.02122 (raw data). Arithmetic check: (0.02122-0.01801)/0.01801 = 17.8%, consistent with neither '17%' nor '18%' nor CITATION.cff's '18.4%'.",
+      "description": "The W32 RPE 10 retest Efficiency Factor is reported as 0.0212 (+18%) in the README, 0.0211 (+17%) in the scientific report, and 0.02122 in real_weekly_data.json. The improvement percentage stated in the report (17%) and README (18%) are both approximations of 17.8% but from different rounding of the final EF. No single canonical value is established. CITATION.cff uses yet a fourth value, 18.4%, which is unsupported by any committed data.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-03",
+      "location": "README.md:18,data/real_weekly_data.json",
+      "class": "doc_drift",
+      "severity": "high",
+      "evidence": "README.md:18: 'Aerobic Decoupling | 7.7% | 3.8% | **-50.6%**'. data/real_weekly_data.json W17: 'decoupling_mean: 8.1'. data/real_weekly_data.json W32: 'decoupling_mean: 12.05'. Report Phase I says '>8%'; report Phase V says W35 decoupling=4.71%. No committed file contains a 7.7% W17 decoupling or a 3.8% W32 decoupling value. The W32 weekly mean (12.05%) is the opposite direction from the README's 3.8%.",
+      "description": "The README headline results table uses baseline decoupling 7.7% and final decoupling 3.8% (claiming -50.6% reduction). Neither value matches the committed weekly aggregate data: W17 decoupling_mean=8.1 (not 7.7) and W32 decoupling_mean=12.05 (not 3.8). The 3.8% figure may refer to an individual run, but no such value appears in any committed artifact. The report's primary decoupling comparison is W23 (19.78%) to W35 (4.71%), a completely different comparison set than the README. The README comparison has unknown data provenance.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-repro-01",
+      "location": "tools/reproduce_study_analysis.py:49,147",
+      "class": "reproducibility",
+      "severity": "high",
+      "evidence": "reproduce_study_analysis.py:49: 'DATA_PROCESSED = ROOT / \"data\" / \"processed\"'. reproduce_study_analysis.py:147: '_all_csvs = sorted(DATA_PROCESSED.glob(\"*_gpx_full.csv\"))'. The data/processed/ directory does not exist in the repository (only data/raw/.gitkeep and data/sample/ are present). .gitignore excludes data/processed/. The raw .fit files are not shared (privacy). The report \u00a75 claims 'complete analysis pipeline, zone configuration, and aggregate weekly data are publicly available, enabling independent verification of all reported metrics'.",
+      "description": "The reproduction script requires per-session *_gpx_full.csv files in data/processed/ but this directory is gitignored and not committed. Without the original .fit activity files or the processed CSVs, any external party running reproduce_study_analysis.py will immediately fail ('No *_gpx_full.csv files found'). The report's reproducibility claim applies only to the code and aggregate JSON, not to re-running the metric pipeline. The weekly aggregate data/real_weekly_data.json is committed but cannot be re-derived without private per-session files.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-04",
+      "location": "CHANGELOG.md:16,pyproject.toml:6,src/biosystems/__init__.py:31",
+      "class": "doc_drift",
+      "severity": "medium",
+      "evidence": "CHANGELOG.md:16: '## [1.1.0] - 2026-03-22' with major additions (Strava API, Wellness intelligence, FullRunReport, PMC, CLI expansion). pyproject.toml:6: 'version = \"1.0.0\"'. src/biosystems/__init__.py:31: '__version__ = \"1.0.0\"'. CITATION.cff:5: 'version: 1.0.0'. Both runtime and packaging code still report v1.0.0 despite the CHANGELOG documenting a v1.1.0 release with substantial feature additions.",
+      "description": "The CHANGELOG documents a v1.1.0 release dated 2026-03-22 that adds Strava ingestion, the wellness module, FullRunReport, PMC trending, and a full CLI. However, pyproject.toml, __init__.py, and CITATION.cff all still declare version 1.0.0. A user installing the package via pip or calling biosystems.__version__ receives '1.0.0' even though substantially more functionality than the initial release is present. This breaks semantic versioning and means `pip install biosystems==1.1.0` would fail.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-intent-01",
+      "location": "src/biosystems/physics/metrics.py:306-310",
+      "class": "intent_mismatch",
+      "severity": "medium",
+      "evidence": "metrics.py:305-310: 'if \"cadence\" in df.columns: cadence_series = df[\"cadence\"].replace(0, np.nan); if not cadence_series.isna().all(): avg_cadence = int(cadence_series.mean())'. This uses the full input `df`, not the walk-filtered or HR-filtered `work_df`. Report Phase IV (reports/01_longitudinal_study.md:217): 'Cadence computed using the Run-Only Filter (N=1,900 samples, SD=3.6 spm, median=170.0 spm)'. run_metrics() computes avg_cadence from all rows including warm-up and walk periods.",
+      "description": "The study report explicitly states that cadence values (including the key 170.1 spm result) were computed using the Run-Only Filter. But in run_metrics(), avg_cadence is computed from the full `df` parameter before any walk-detection or HR filtering, diluting the cadence metric with warm-up and walk periods. The EF and decoupling calculations use walk-filtered, HR-thresholded work_df, but avg_cadence does not. This means PhysiologicalMetrics.avg_cadence is methodologically inconsistent with how EF is computed and inconsistent with the paper's stated methodology.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-05",
+      "location": "README.md:182-198",
+      "class": "doc_drift",
+      "severity": "medium",
+      "evidence": "README.md:183-188 labels the code block 'From biosystems/physics/metrics.py' and shows: 'lz2 = lower_z2_bpm(zones)  # Lower bound of Zone 2\\nwork_df = df[df[\"hr\"] >= lz2]  # Filter: Only data where HR \u2265 Z2\\nef = (work_df[\"dist\"].sum() / work_df[\"dt\"].sum()) / work_df[\"hr\"].mean()'. Actual calculate_efficiency_factor (metrics.py:133-153): first strips walk segments via 'base_df = df[~df[\"is_walk\"].astype(bool)] if \"is_walk\" in df.columns else df', then drops NaN HR rows, then applies lz2 filter, then applies a fallback when work_df has fewer than 120 rows.",
+      "description": "The README presents a simplified 3-line code snippet as the 'Run-Only Filter from biosystems/physics/metrics.py' but the actual function has four distinct steps: (1) is_walk pre-filter, (2) HR dropna, (3) Z2 HR threshold filter, (4) fallback to full HR-valid data when fewer than 120 qualifying rows exist. A reader attempting to replicate or understand the filter from the README would implement an incomplete algorithm that differs from the actual code in edge cases such as activities with walk detection data or short aerobic segments.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-06",
+      "location": "reports/01_longitudinal_study.md:82-86",
+      "class": "doc_drift",
+      "severity": "medium",
+      "evidence": "Report \u00a72.2 (lines 82-86): 'lz2 = lower_z2_bpm(zone_config)  # Zone 2 lower bound\\nwork_df = df[df[\"hr\"] >= lz2]    # Filter to aerobic work only'. The accompanying text calls this the 'Run-Only Filter' for EF computation. The actual walk detection threshold that drives is_walk is in walk_detection.py (pace > 9.5 min/km OR cadence < 140 spm). The paper conflates two separate steps: walk exclusion (cadence/pace thresholds \u2192 is_walk column) and aerobic work filtering (hr >= lz2). The \u00a72.2 header says 'cadence \u2265140 spm, pace <9.5 min/km' are the thresholds, but the shown code filters by HR only.",
+      "description": "The report's \u00a72.2 description of the Run-Only Filter is ambiguous: the header says cadence/pace thresholds define the filter, but the code block shows only an HR threshold filter. In reality, these are two separate stages: walk_detection classifies rows via pace/cadence thresholds (adding is_walk column), then calculate_efficiency_factor strips is_walk rows and separately applies the HR\u2265Z2 filter. The report description misrepresents this two-stage process as a single cadence/pace-based filter, making methodology replication harder.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-07",
+      "location": "CITATION.cff:23-28",
+      "class": "doc_drift",
+      "severity": "medium",
+      "evidence": "CITATION.cff:23-28 abstract: 'Documents a 103-day longitudinal N=1 study demonstrating an 18.4% improvement in running Efficiency Factor'. README.md:17 says '+18%'. Report abstract (reports/01_longitudinal_study.md:19) says '+17% (0.0180 \u2192 0.0211)'. data/real_weekly_data.json rpe10_ef values: W17=0.01801, W32=0.02122. Actual calculation: (0.02122-0.01801)/0.01801 = 17.8%, which rounds to neither 17%, 18%, nor 18.4%.",
+      "description": "CITATION.cff is the machine-readable citation record that academic tools (Zenodo, GitHub, etc.) read to populate reference databases. It claims 18.4% EF improvement, a value that appears nowhere in the report, README, or raw data. The true improvement is approximately 17.8% based on the committed real_weekly_data.json. The four-way disagreement (17%, 18%, 18.4%, 17.8%) across citation record, README, report, and data means any downstream citation will contain an inaccurate headline claim.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-08",
+      "location": "README.md:239",
+      "class": "doc_drift",
+      "severity": "low",
+      "evidence": "README.md:239: '**Comprehensive Test Suite** - 161 tests across Python 3.10/3.11/3.12 with automated CI validation'. Running 'pytest --collect-only -q 2>/dev/null | tail -1' returns '185 tests collected in 14.27s'. The README undercounts by 24 tests.",
+      "description": "The README states 161 tests but pytest currently collects 185. Tests have been added since the README was last updated with this count. While a minor issue, it creates a credibility gap if reviewers attempt to reproduce CI numbers.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-intent-02",
+      "location": "src/biosystems/models.py:294,src/biosystems/signal/walk_detection.py:267-277",
+      "class": "intent_mismatch",
+      "severity": "low",
+      "evidence": "models.py:294: 'tag: str = Field(..., pattern=\"^(warm-up|mid-session|cool-down|pause)$\")'. walk_detection.py:267-277: assigns only 'warm-up', 'mid-session', or 'cool-down'. A mid-session segment with dur_s<30 and dist_km<0.05 instead sets 'note = \"pause?\"' on the same object (line 276) but keeps tag='mid-session'. No code path in walk_block_segments() ever assigns tag='pause'.",
+      "description": "The WalkSegment model defines 'pause' as a valid tag value via regex pattern, but the walk_block_segments() implementation never emits it. Short mid-session micro-stops are labeled 'mid-session' with a 'pause?' note field instead. The model contract (which documents what values are valid) and the producing code are out of sync, creating confusion about how to interpret the 'pause' option in the model for future callers.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-design-01",
+      "location": "src/biosystems/ingestion/fit.py:225-230,src/biosystems/ingestion/gpx.py:202-207",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "gpx.py:202-207: 'df[\"speed_mps_smooth\"] = df[\"speed_mps\"].rolling(window=5, center=True, min_periods=1).mean()\\ndf[\"pace_sec_km\"] = 1000 / df[\"speed_mps_smooth\"].replace(0, np.nan)'. fit.py add_derived_metrics():225-231: 'df[\"speed_mps\"] = df[\"dist\"] / df[\"dt\"].replace(0, np.nan)\\n... df[\"pace_sec_km\"] = 1000 / df[\"speed_mps\"].replace(0, np.nan)'. No rolling average applied in the FIT path.",
+      "description": "The GPX parser smooths speed with a 5-point centered rolling mean before computing pace_sec_km, suppressing GPS noise. The FIT parser's add_derived_metrics() computes raw instantaneous speed with no smoothing. The same activity file in FIT vs GPX format would produce different pace_sec_km distributions, leading to different EF and decoupling values. This asymmetry is undocumented.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-bug-01",
+      "location": "src/biosystems/analytics/history.py:211",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "history.py:211: 'def backfill_from_strava(\\n    n: int,\\n    zone_config: ZoneConfig,  # type: ignore[name-defined]  # noqa: F821'. ZoneConfig is not imported at module level in history.py. The imports at the top of history.py are: 'import json, import os, from pathlib import Path, from typing import Any, from filelock import FileLock'. The '# type: ignore[name-defined]' comment acknowledges the undefined reference.",
+      "description": "The backfill_from_strava() function has a type annotation referencing ZoneConfig which is not imported in history.py. While Python does not evaluate type annotations at runtime (they are stored as strings in __annotations__), any tool that evaluates annotations (e.g., get_type_hints(), Pydantic, or a doc generator) would raise NameError. The acknowledged suppression comment confirms this is a known broken annotation rather than an intentional forward reference.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-09",
+      "location": "pyproject.toml:17",
+      "class": "doc_drift",
+      "severity": "info",
+      "evidence": "pyproject.toml:17: '\"Development Status :: 4 - Beta\"'. README.md:340: '**Status:** \u2705 Active Development | \ud83d\udcca Publication-Ready | \ud83d\udd2c Research Artifact'. pyproject.toml:6: 'version = \"1.0.0\"'. A stable 1.0.0 semantic version conventionally maps to PyPI classifier '5 - Production/Stable', not '4 - Beta'.",
+      "description": "The package classifier 'Development Status :: 4 - Beta' conflicts with the declared version 1.0.0 (which by semantic versioning implies stable API) and the README's 'Publication-Ready' status claim. Any PyPI or package index search for stable running-analysis packages would demote this library below packages correctly classified as stable, even though the project's own documentation claims publication readiness.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-repro-02",
+      "location": "reports/01_longitudinal_study.md:16-19,README.md:15-22",
+      "class": "reproducibility",
+      "severity": "medium",
+      "evidence": "README.md table (lines 15-22) compares Baseline vs Final across five metrics. EF comparison uses RPE10-specific values (rpe10_ef from real_weekly_data.json). Decoupling comparison uses 7.7% baseline and 3.8% final, neither of which appears in real_weekly_data.json (W17 decoupling_mean=8.1, W32 decoupling_mean=12.05) or in the report's stated comparison (W23\u2192W35). The README table mixes metric types: EF from RPE10 single session vs decoupling from an unspecified source, making the table's -50.6% decoupling reduction non-verifiable from any committed data.",
+      "description": "The README's primary results table presents heterogeneous metrics: EF from identifiable RPE10 test sessions, but decoupling from sources that cannot be matched to any row in the committed weekly aggregate data or to the values cited in the report. The -50.6% decoupling headline depends on unverifiable 7.7% and 3.8% values. A reader cannot reproduce these numbers from the public repository.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-doc-10",
+      "location": "docs/PUBLICATION_CHECKLIST.md:43-45",
+      "class": "doc_drift",
+      "severity": "high",
+      "evidence": "PUBLICATION_CHECKLIST.md P0 item (line 43): '- [ ] **Temperature inconsistency**' \u2014 still unchecked. PUBLICATION_CHECKLIST.md P2 item (line 68-70, checked): 'W32 retest confirmed ~28\u00b0C run-time (daily max 32\u00b0C). \"36\u00b0C\" figure removed from paper; sourced temperatures added with citation.' README.md:20 still contains '36\u00b0C (extreme heat)'. data/real_weekly_data.json W32 note still contains '36\u00b0C heat'.",
+      "description": "The P2 checklist item claims the 36\u00b0C figure was removed from the paper (report) \u2014 which is accurate. But the P0 item tracking the README and data/real_weekly_data.json inconsistency remains unchecked. Two of three committed locations where the temperature appears (README.md and data/real_weekly_data.json) still contain the incorrect 36\u00b0C value. The P2 fix corrected only the report body, leaving the P0 issue unresolved. This creates a false signal that progress has been made while the publication-blocking inconsistency remains active in the most publicly visible document.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cli-dead-1",
+      "location": "src/biosystems/cli.py:415",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "[bb for bb in report.block_bests if bb.is_new_best and bb.prev_best_s is None]",
+      "description": "Line 415 computes a list comprehension whose result is immediately discarded \u2014 the expression is a bare statement with no assignment. This is a no-op and appears to be the remnant of a refactor where a variable (e.g. `first_bests`) was removed but the comprehension was not cleaned up. The surrounding context suggests the variable was intended to control whether a 'first recorded' header was printed; that logic is now handled inline by the `elif bb.is_new_best:` branch at line 427, so the dead expression serves no purpose.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cli-dead-2",
+      "location": "src/biosystems/cli.py:526",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "summary.get(\"moving_time\", 0)",
+      "description": "Inside the `backfill_efforts` command, line 526 calls `summary.get(\"moving_time\", 0)` as a bare expression whose return value is never assigned or used. This is a silent no-op identical in character to the strava.py:345 `len(streams[\"time\"])` finding. The moving_time value was presumably needed to compute pace or log duration for a minimal history entry, but the variable assignment was removed without removing the access. The per-entry output at line 539 confirms moving_time is never used: `typer.echo(f\"  {run_date}  {summary.get('name', ''):<30}  {len(efforts_dict)} efforts\")`.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cli-types-3",
+      "location": "src/biosystems/cli.py:1109-1110",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "date_start: str = typer.Option(None, \"--from\", help=\"Start date YYYY-MM-DD (overrides --days)\")\ndate_end: str = typer.Option(None, \"--to\", help=\"End date YYYY-MM-DD (default: today)\")",
+      "description": "The `wellness_sync` command parameters `date_start` and `date_end` are annotated as `str` but their defaults are `None`, making the annotation incorrect \u2014 both should be `str | None`. This inconsistency causes mypy to flag a type error and misleads callers about valid argument types. Comparable parameters in the same file (e.g. `since: str | None = typer.Option(None, \"--since\", ...)` at line 724) use the correct annotation. The Typer library uses the annotation to choose how to convert CLI input, so an incorrect annotation can affect option parsing behavior in edge cases.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cli-skip-4",
+      "location": "src/biosystems/cli.py:639-644",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "if skip_existing and (\n    activity_id in existing_stream_ids\n    or (not existing_stream_ids and run_date in existing_stream_dates)\n):",
+      "description": "The `backfill_streams` skip-existing guard uses `not existing_stream_ids` to enable a date-string fallback. Once any entry in history has a `strava_activity_id`, `existing_stream_ids` is non-empty and `not existing_stream_ids` is False, permanently disabling the date-based fallback for the entire run of the command. Consequently, activities represented in history as date-only entries (e.g. those written by `backfill_efforts` with a minimal stub that lacks `strava_activity_id`) are re-fetched and re-processed even though their date already exists in history. This creates a second id-keyed entry for the same calendar date alongside the existing date-keyed entry, silently producing duplicate records that both survive `load_history()` deduplication (because they have different keys: `\"id:12345\"` vs `\"2025-06-01\"`).",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cli-date-5",
+      "location": "src/biosystems/cli.py:751",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "if since:\n    entries = [e for e in entries if e.get(\"date\", \"\") >= since]",
+      "description": "The `--since` / `--after` date filters in the `summary`, `efforts`, `top`, and `backfill-streams` commands compare ISO date strings lexicographically against an unvalidated user-supplied string. If a user passes a non-zero-padded date (e.g. `--since 2025-1-1` instead of `--since 2025-01-01`), string comparison is incorrect: `\"2025-01-05\" >= \"2025-1-1\"` evaluates to `False` because `'0' < '1'` in ASCII, silently excluding valid entries. No datetime parsing, format validation, or user-facing error is applied to the `--since` / `--after` option values. The help text specifies YYYY-MM-DD but there is no enforcement.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-history-fwd-6",
+      "location": "src/biosystems/analytics/history.py:211",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "def backfill_from_strava(\n    n: int,\n    zone_config: ZoneConfig,  # type: ignore[name-defined]  # noqa: F821\n    access_token: str | None = None,\n) -> list[dict[str, Any]]:",
+      "description": "`backfill_from_strava()` annotates its `zone_config` parameter as `ZoneConfig` but `ZoneConfig` is not imported anywhere in `history.py`. The `# type: ignore[name-defined]` comment silences mypy and `# noqa: F821` silences flake8, so the error is never surfaced in CI. Under `from __future__ import annotations` (line 13), Python defers evaluation of annotations so no runtime `NameError` occurs, but the intent to enforce the ZoneConfig contract is completely nullified \u2014 any object with a `.threshold_hr` attribute passes silently. The pattern used in the call site (`cli.py:1060`) imports ZoneConfig from `biosystems.models` and passes a validated instance, so there is no runtime defect today, but the suppressed import creates a maintenance trap.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-analytics-dead-7",
+      "location": "src/biosystems/wellness/analytics.py:74",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "(df.index.max() - df.index.min()).days + 1",
+      "description": "In `compute_coverage()`, line 74 computes the total index span in days as `(df.index.max() - df.index.min()).days + 1` but the result is assigned to nothing \u2014 it is a bare expression statement that is immediately discarded. The per-metric span computed at line 87 (`span = (end - start).days + 1`) is the one actually used for `pct_coverage`. This appears to be a remnant of a refactor that removed a `total_span` variable (possibly used to compare per-metric coverage against the total timeline), leaving the dead computation in place.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-fit-perf-8",
+      "location": "src/biosystems/ingestion/fit.py:214-222",
+      "class": "perf",
+      "severity": "low",
+      "evidence": "seg_dist = [0.0] + [\n    _haversine(\n        df[\"latitude\"].iloc[i - 1],\n        df[\"longitude\"].iloc[i - 1],\n        df[\"latitude\"].iloc[i],\n        df[\"longitude\"].iloc[i],\n    )\n    for i in range(1, len(df))\n]",
+      "description": "`add_derived_metrics` computes segment distances via a Python list comprehension with four `.iloc[i]` calls per iteration. For a 3,600-row (60-min, 1 Hz) FIT activity, this performs 14,400 pandas row-index accesses. A vectorized approach using `df[\"latitude\"].shift(1)` and `df[\"longitude\"].shift(1)` would compute all consecutive pairs in two O(n) pandas operations, eliminating the Python loop overhead and matching the rolling-mean pattern already used in the GPX parser (gpx.py:204). The analogous O(n\u00b2)-class pattern in `calculate_gap_from_dataframe` (gap.py:171-185) was separately identified; this is a lower-severity variant because `.iloc` in a list comprehension has O(1) per access rather than O(n), but the Python-loop overhead is still substantial for long activities.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-testcov-1",
+      "location": "tests/test_cli_integration.py:14-15",
+      "class": "test_gap",
+      "severity": "medium",
+      "evidence": "gpx_file = Path(\"data/raw/20250503_174110_baseox_wk1_sat_day6_proglong_30_40min_145_160bpm_11-14minmi_Z2_durability_rpe_4_anklepain_2.gpx\")\nif not gpx_file.exists():\n    pytest.skip(f\"Test file {gpx_file} not found\")",
+      "description": "The only CLI integration test (`test_cli_analyze_gpx`) unconditionally skips in every CI run because it requires a file from `data/raw/`, which is excluded by `.gitignore` and is therefore absent in any clean checkout. The CI matrix (`.github/workflows/test.yml`) runs `pytest` on a fresh clone with no raw data. As a result, the full end-to-end path of `biosystems analyze <gpx_file>` (including zone config loading, GPX parsing, haversine distance, run_metrics, and JSON serialization) has zero executable test coverage in CI. A synthetic fixture using `data/sample/sample_run.csv` or a tiny synthetic GPX file in `data/sample/` (which IS committed) would allow this test to run unconditionally.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-testcov-2",
+      "location": "tests/test_cli_integration.py:17-22",
+      "class": "test_gap",
+      "severity": "low",
+      "evidence": "result = subprocess.run(\n    [sys.executable, \"-m\", \"biosystems.cli\", \"analyze\", str(gpx_file)],\n    capture_output=True,\n    text=True,\n    env={\"PYTHONPATH\": \"src\"}\n)",
+      "description": "The subprocess.run call passes `env={\"PYTHONPATH\": \"src\"}` which creates a completely new environment with only one variable, discarding PATH, HOME, USER, and all other inherited env vars. While `sys.executable` is used directly (avoiding PATH resolution for Python itself), the `dotenv.load_dotenv()` call in cli.py relies on finding `.env` relative to the CWD or its parents; `HOME` is needed on some systems to locate the XDG config path; and any C extension loaded by numpy/pandas/fitdecode may rely on LD_LIBRARY_PATH or equivalent. The correct pattern is `env={**os.environ, \"PYTHONPATH\": \"src\"}` to inherit the parent environment while overriding only PYTHONPATH.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-testcov-3",
+      "location": "tests/test_physics_metrics.py:112-152",
+      "class": "test_gap",
+      "severity": "medium",
+      "evidence": "class TestCalculateDecoupling:\n    def test_no_drift(self, sample_activity_df, sample_zone_config): ...\n    def test_positive_drift(self, sample_zone_config): ...\n    def test_negative_drift(self, sample_zone_config): ...",
+      "description": "The three `TestCalculateDecoupling` tests exercise steady-state, increasing-HR, and decreasing-HR scenarios \u2014 none of which produces a work_df with fewer than 2 rows. The critical crash path identified in the prior audit (F-decoupling-empty-half-1): when `work_df` has exactly 1 row, `elapsed = work_df[\"dt\"].cumsum()` is a 1-element Series `[dt_value]`, `midpoint_s = dt_value / 2`, and `first_half = work_df[elapsed <= midpoint_s]` is empty (since `dt_value > dt_value / 2`). Then `float(first_half[\"dt\"].sum())` is 0.0 and the division in `ef_1 = ... / float(first_half[\"dt\"].sum())` raises `ZeroDivisionError`. A test calling `calculate_decoupling` on a single-row DataFrame would expose this crash and confirm (or refute) the finding.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-testcov-4",
+      "location": "tests/test_physics_metrics.py:265",
+      "class": "test_gap",
+      "severity": "low",
+      "evidence": "assert metrics.avg_cadence == 170",
+      "description": "`test_with_cadence` asserts `metrics.avg_cadence == 170` using an input fixture where all cadence values are exactly 170. The calculation in metrics.py:310 uses `int(cadence_series.mean())` which truncates rather than rounds. A test with cadence values that produce a mean of e.g. 179.9 would catch the truncation-vs-rounding discrepancy (int(179.9)=179, round(179.9)=180). Because the fixture uses a whole number, the int() truncation goes undetected. The finding F-cadence-int-truncation-10 from the prior audit cannot be confirmed or refuted by the current test.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-sleep-merge-priority-1",
+      "location": "src/biosystems/wellness/analytics.py:451",
+      "class": "intent_mismatch",
+      "severity": "medium",
+      "evidence": "Line 451: `combined = df[\"sleep_duration_s\"].combine_first(df[\"sleep_duration_s_garmin\"])`. The inline comment on lines 449-450 reads 'Garmin wins when both exist for a date; Whoop fills earlier history.' pandas.Series.combine_first() returns the caller's non-null values first; here the caller is `sleep_duration_s` (Whoop), so Whoop wins when both have data \u2014 opposite of the stated intent.",
+      "description": "compute_sleep_debt() merges Whoop and Garmin sleep-duration columns with the wrong priority. The comment says 'Garmin wins when both exist,' but combine_first() gives Whoop (the caller) priority over Garmin (the argument). For dates in the overlap window where both Whoop and Garmin report sleep duration, the Whoop value is silently kept and the Garmin value is discarded. The correct call should be df[\"sleep_duration_s_garmin\"].combine_first(df[\"sleep_duration_s\"]).",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-rr-sigma-none-crash-2",
+      "location": "src/biosystems/wellness/cache.py:393,441",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "rr_sigma is initialized to None at line 333 and set only when `rr_mean and rr_std and rr_std > 0` (lines 344-347). calibrate_thresholds() does not guard against zero-variance respiratory rate data when building the rr_thresholds dict; it writes std=0.0 to the result. In cache.py, rr_thresholds is then truthy (non-empty dict), so lines 389-395 and 437-443 are entered. The f-string `f\"Resp rate {resp_rate:.1f} brpm (+{rr_sigma:.1f}\u03c3)\"` with rr_sigma=None raises TypeError: unsupported format character.",
+      "description": "If all Garmin respiratory-rate readings over the calibration window are identical (std=0), calibrate_thresholds() writes a valid but zero-std rr_thresholds dict. In compute_wellness_context(), rr_sigma remains None (the rr_std > 0 guard at line 346 blocks assignment). Later at lines 393 and 441, the format expression {rr_sigma:.1f} in an f-string with rr_sigma=None raises TypeError, crashing compute_wellness_context() and by extension the daily brief pipeline.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-walk-debug-print-3",
+      "location": "src/biosystems/signal/walk_detection.py:251-255",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "Lines 251-255 contain: `print(f'[SANITY DEBUG] SKIPPING BAD SEGMENT seg_id={seg_id}, dur_s={dur_s}, dist_km={dist_km}', file=sys.stderr)` inside walk_block_segments(). CLAUDE.md documents that the daily running brief runs via cron at 20:00 and wellness-sync at 06:43; cron daemons email stderr to root or a configured address.",
+      "description": "A '[SANITY DEBUG]' diagnostic print statement was left in production code inside walk_block_segments(). It fires whenever a walk block >=60s has missing or zero distance_cumulative_km data \u2014 a plausible condition for FIT/GPX files without cumulative distance columns. Since the biosystems strava pipeline and daily brief run as cron jobs (CLAUDE.md), every such occurrence emits debug noise to cron email logs, adding operational clutter and potentially masking real error output.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-iso-week-no-year-4",
+      "location": "tools/ingest_new_runs.py:281-284",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "Line 283: `iso_week = dt.isocalendar().week` returns an integer 1-52 without a year component. Line 304: `week_data.setdefault(iso_week, []).append(...)` keys week_data by bare week number. Week 17 of 2025 and week 17 of 2026 would share key 17 and be merged into a single output record in real_weekly_data.json.",
+      "description": "regenerate_weekly_json() builds week_data keyed by ISO week number (1-52) without the year. The study covered W17-W36 of 2025, so no collision has occurred yet. Post-study, as the athlete continues using biosystems (per README intent), runs from 2026 onward will collide with 2025 study data when week numbers repeat. The resulting ef_mean and decoupling_mean aggregates in real_weekly_data.json would silently blend 2025 study sessions with 2026 post-study sessions, corrupting the longitudinal record. Fix: use `f\"{dt.isocalendar().year}-W{iso_week:02d}\"` as the key.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-tsb-docstring-typo-5",
+      "location": "src/biosystems/analytics/trending.py:48",
+      "class": "doc_drift",
+      "severity": "info",
+      "evidence": "Line 48 of the compute_pmc() docstring reads: `- \\`tsb\\` (float): CTB = CTL - ATL (rounded to 0.1) computed before that day's load`. The acronym 'CTB' is not a defined PMC term; the correct acronym is 'TSB' (Training Stress Balance), which matches the key name (`tsb`) and the module-level docstring definition (lines 12-13).",
+      "description": "The compute_pmc() return-value docstring misspells the tsb field's expansion as 'CTB = CTL - ATL' instead of 'TSB = CTL - ATL'. This is inconsistent with the module-level definitions at lines 12-13 and with established Banister model terminology. The error could mislead a reader implementing downstream consumers of the PMC output who rely on the docstring for field semantics.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-walk-pace-unweighted-6",
+      "location": "src/biosystems/signal/walk_detection.py:137",
+      "class": "intent_mismatch",
+      "severity": "low",
+      "evidence": "Line 137: `avg_pace = np.mean(paces)` is an unweighted arithmetic mean of per-segment avg_pace_min_km values. Each segment's duration is available as `s['dur_s']` but is not used as a weight. For two walk segments of duration 1 min at 12 min/km and 10 min at 10 min/km, the unweighted result is 11.0 min/km while the time-weighted result is ~10.18 min/km.",
+      "description": "summarize_walk_segments() aggregates per-segment average pace with an unweighted np.mean(). The resulting WalkSummary.avg_pace_min_km is labelled and displayed as the average walk pace, but it over-weights short high-pace segments relative to long low-pace segments. The methodologically correct aggregation is a time-weighted mean: sum(dur_s * avg_pace) / sum(dur_s). The same function correctly uses dur_s for time totals but ignores it for pace aggregation, creating an internal inconsistency.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-gpx-fallback-zero-latlon-7",
+      "location": "src/biosystems/ingestion/gpx.py:159-161",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "Lines 159-161 in the non-namespaced fallback loop: `lat = float(pt.attrib.get('lat', 0))` and `lon = float(pt.attrib.get('lon', 0))`. If a trkpt element is missing lat or lon attributes (malformed GPX), the default 0.0 is silently used instead of NaN or skipping the point. Downstream haversine at lines 190-198 computes large spurious distances from (0.0, 0.0). The namespaced primary parser at line 90 uses direct attribute access `pt.attrib['lat']` which raises KeyError immediately.",
+      "description": "The non-namespaced GPX fallback parser (invoked when the Garmin-namespaced parse yields no rows) uses `get('lat', 0)` and `get('lon', 0)` as a default for missing GPS attributes. A trkpt with absent or empty lat/lon resolves to the coordinate origin (Gulf of Guinea), producing enormous haversine distances that corrupt dist, speed_mps, pace_sec_km, and all derived metrics (EF, decoupling, GAP) for that trackpoint and those adjacent to it. No warning is emitted and no NaN is propagated.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-history-backfill-existing-stale",
+      "location": "src/biosystems/analytics/history.py:230-236",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "Line 230: `existing = {e[\"date\"] for e in load_history()}` builds a set of known dates once before the loop. Lines 233-236: `for s in summaries: run_date = s.get(\"start_date_local\", \"\")[:10]; if not run_date or run_date in existing: continue`. `existing` is never updated after `append_run(entry)` at line 263. If `summaries` contains two activities on the same date (e.g. two races logged on the same calendar day, or a morning run + afternoon run with the same local date), the first passes the `run_date in existing` guard, is written via `append_run()`. The second also passes (since `existing` still does not contain `run_date`), and `append_run()` overwrites the first \u2014 `history.py:110-126` shows `append_run` performs last-write-wins dedup by date key. The second entry silently replaces the first with no error or warning.",
+      "description": "backfill_from_strava() constructs the set of already-known dates once before iterating over Strava summaries. It never updates that set after writing a new entry. When two activities share the same local date, both pass the `run_date in existing` guard; the second call to append_run() silently overwrites the first. The dedup logic in append_run (lines 110-126) rewrites the .jsonl file, replacing the earlier same-date entry. No warning is emitted and the return value (new_entries) includes both, masking the data loss.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-brief-openai-no-fallback",
+      "location": "daily_running_brief/daily_running_brief.py:1108-1135",
+      "class": "design_defect",
+      "severity": "medium",
+      "evidence": "OpenRouter block lines 1079-1106 is wrapped in `try: ... except Exception: pass` \u2014 correct fallthrough on any error. OpenAI block lines 1108-1135: lines 1108-1112 have only a `try/except ImportError` guard for the import itself; lines 1113-1135 contain NO try/except around `resp = client.chat.completions.create(**kwargs)` at line 1124. Any runtime error from the OpenAI API (network failure, quota exceeded, invalid model name `gpt-5-mini`, HTTP 429/500) propagates directly as an unhandled exception. Lines 1137-1155 (Anthropic block) are unreachable when the OpenAI call raises. The module header (line 26) and section comment (line 1053) both promise three-provider fallback: OpenRouter \u2192 OpenAI \u2192 Anthropic.",
+      "description": "The _chat() fallback chain advertises three providers (OpenRouter \u2192 OpenAI \u2192 Anthropic) but only the first level has exception handling. If OpenAI's chat.completions.create() at line 1124 raises any exception \u2014 network timeout, rate limit, invalid model ID, quota \u2014 it propagates unhandled and the Anthropic fallback at line 1137 is never reached. The daily running brief cron job (20:00 per CLAUDE.md) therefore fails entirely rather than falling back to Anthropic whenever OpenAI is unavailable.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-walk-filter-nan-drop",
+      "location": "src/biosystems/signal/walk_detection.py:32-34",
+      "class": "bug",
+      "severity": "low",
+      "evidence": "filter_gps_jitter lines 32-34: `pace_flag = df[pace_col] <= 12.0; cad_flag = df[cad_col] >= cad_thr; return df[pace_flag | cad_flag]`. When df[pace_col] or df[cad_col] contains NaN (e.g. from FIT/GPX rows with missing sensor data), the comparison `NaN <= 12.0` evaluates to False in pandas, and `NaN >= cad_thr` also evaluates to False. `pace_flag | cad_flag` is therefore False for those rows, silently excluding them from the returned subset. A walk-phase point with a valid GPS trace but missing pace or cadence reading is dropped from the jitter-filtered output. The walk detection immediately following (walk_detection.py:classify_walk via threshold check) also uses these columns, but the GPS jitter filter is applied first (the caller in report.py:502 passes the full df to _compute_walk_summary which calls filter_gps_jitter).",
+      "description": "filter_gps_jitter() uses boolean comparisons on pace_col and cad_col columns that may contain NaN. In pandas, comparisons with NaN produce NaN (treated as False in boolean context), so rows with any missing pace or cadence value are silently excluded from the filtered DataFrame regardless of GPS quality. Points at the boundary of walk and run segments \u2014 which are most likely to have sensor dropouts \u2014 are precisely those most important for accurate walk detection, and they are silently dropped instead of being preserved with a NaN-safe default.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cli-zone-silent-drop",
+      "location": "src/biosystems/cli.py:82-91",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "load_zone_config lines 82-91: `zones: dict[str, HeartRateZone] = {}; for name, data in raw.items(): if not isinstance(data, dict) or \"bpm\" not in data or \"pace_min_per_km\" not in data: continue; zones[name] = HeartRateZone(name=name, bpm=tuple(data[\"bpm\"]), pace_min_per_km=tuple(data[\"pace_min_per_km\"]))`. The `continue` silently skips any YAML zone entry that lacks either `bpm` or `pace_min_per_km`. No warning, log message, or exception is raised. A user with a partially-configured zones YAML (e.g. zones defined only by HR without pace boundaries, or vice versa) receives a ZoneConfig with silently fewer zones than configured. The resulting zone distributions and walk classification will use an incomplete zone set without any indication of the problem.",
+      "description": "load_zone_config() silently drops YAML zone entries that are missing either `bpm` or `pace_min_per_km` keys. A `continue` statement skips them without any user-visible warning. A user who configures zones using only HR (no pace boundaries) or only pace (no HR boundaries) will find those zones absent from ZoneConfig with no error message. The resulting zone time distributions and walk-detection thresholds will be computed from a subset of the configured zones, and since the omission is silent, the user has no way to discover the misconfiguration without inspecting the output carefully.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-report-dynamics-keyerror",
+      "location": "src/biosystems/physics/report.py:140",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "_compute_dynamics line 140: `valid = run_df.dropna(subset=[\"hr\", \"pace_min_per_km\"])`. No check that `\"pace_min_per_km\"` exists in `run_df.columns` before this call. In pandas, `DataFrame.dropna(subset=[col])` raises `KeyError: \"['pace_min_per_km'] not found in axis\"` when the column is absent. In the same file, _compute_stride_splits guards at line 100: `if \"pace_min_per_km\" not in df.columns: return []`; and at line 513, `pace_dist = _percentile_stats(run_df[\"pace_min_per_km\"]) if \"pace_min_per_km\" in run_df.columns else None`. Both sibling functions guard against the column being absent; _compute_dynamics does not. The build_run_report() docstring at line 440 lists `pace_min_per_km` as an expected column in the input df, but ingestion parsers (fit.py, gpx.py) produce `pace_sec_km`, not `pace_min_per_km`. Whether the column is always present depends on the ingestion path and any upstream normalization not visible in this file.",
+      "description": "_compute_dynamics() calls dropna(subset=[\"hr\", \"pace_min_per_km\"]) without first verifying the column exists. Two sibling functions in the same file guard against this case explicitly, revealing that the codebase acknowledges pace_min_per_km may be absent from run_df. When pace_min_per_km is missing, dropna raises KeyError, crashing build_run_report() and surfacing an unhelpful exception instead of returning dynamics=None. The fix matches the guard pattern already used in _compute_stride_splits and the pace_dist block.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-habitdash-int-crash",
+      "location": "src/biosystems/wellness/habitdash.py:106",
+      "class": "bug",
+      "severity": "medium",
+      "evidence": "habitdash.py:103-106 confirmed: 'remaining = resp.headers.get(\"x-ratelimit-remaining\")' at line 104; 'if remaining is not None and int(remaining) == 0 and reset_secs is not None:' at line 106. The guard 'remaining is not None' ensures the header is present, but does NOT ensure it contains a valid integer string. A malformed header value (e.g. 'N/A', '0.5', '', or an HTTP-date string from a CDN proxy) causes int() to raise ValueError. The surrounding try/except at line 123 catches only 'requests.exceptions.RequestException' \u2014 ValueError is NOT a subclass of RequestException and propagates unhandled through _get(), through every caller (fetch_metric, fetch_all_metrics), and aborts the entire wellness sync pipeline. The existing finding F-habitdash-1 covers semantics of int(reset_secs) interpretation; this is the distinct crash path for int(remaining).",
+      "description": "_get() calls int() on the x-ratelimit-remaining header value after confirming the header is present but without confirming it is a valid integer string. If a CDN proxy or malformed API response sets x-ratelimit-remaining to a non-numeric string, int() raises ValueError that escapes the try/except (which catches only requests.exceptions.RequestException). The exception propagates through fetch_metric() and fetch_all_metrics() and aborts the wellness-sync pipeline entirely, producing no wellness data for that run with only a log.error() entry. The parallel defense (strava.py F-strava-1 uses int() on Retry-After for the same crash pattern) shows this is a recurrent defensive gap.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cli-analyze-no-walk-filter",
+      "location": "src/biosystems/cli.py:102-163",
+      "class": "intent_mismatch",
+      "severity": "medium",
+      "evidence": "cli.py analyze command (lines 102-163) confirmed: df = parse_fit(file_path) or parse_gpx(file_path), then df = add_derived_metrics(df), then metrics = run_metrics(df, zone_config, context=context). No is_walk column is added to df at any point in the analyze path. By contrast, the strava command at cli.py:286-289 adds: 'df[\"pace_min_per_km\"] = df[\"pace_sec_km\"] / 60; df[\"is_walk\"] = (df[\"pace_min_per_km\"] > 9.5) | (df[\"cadence\"].fillna(999) < 140)' before calling run_metrics. The backfill-streams command at cli.py:657-659 similarly adds is_walk. In calculate_efficiency_factor (metrics.py:134): 'base_df = df[~df[\"is_walk\"].astype(bool)] if \"is_walk\" in df.columns else df' \u2014 the absent column causes the fallback to the full DataFrame including walk segments. The same applies to calculate_decoupling (metrics.py:181).",
+      "description": "The `biosystems analyze <file>` CLI command computes EF and decoupling from the full DataFrame without adding an is_walk column. The strava and backfill-streams commands both add is_walk before calling run_metrics, so walk segments are excluded from EF and decoupling in those paths. The analyze command omits this step, producing metrics that include warm-up and walk-segment data. The resulting EF and decoupling values are not comparable to those produced by the strava path for the same activity, and contradict the study's stated Run-Only Filter methodology. The discrepancy is silent \u2014 no warning is emitted.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-walk-block-iterrows-perf",
+      "location": "src/biosystems/signal/walk_detection.py:199-218",
+      "class": "perf",
+      "severity": "low",
+      "evidence": "walk_block_segments lines 199-218 confirmed: 'for _, (idx, row) in enumerate(gpx_df.iterrows()):' iterates over the FULL gpx_df (all rows, both run and walk), not just the pre-filtered walk rows. The filter_gps_jitter result (walk_df) is used only for an index lookup: 'if row[is_walk_col] and idx in walk_df.index:'. For a 3600-row activity with 300 walk rows, this runs 3600 Python-level iterrows() iterations instead of 300. The same O(n) Python-loop anti-pattern is documented at F-gap-loop-perf-8 (gap.py:171-185) and F-fit-perf-8 (fit.py:214-222), confirming this is a recurrent pattern. A vectorized alternative would iterate only over walk-classified rows: use walk_df.iterrows() directly and look up gpx_df rows by index.",
+      "description": "walk_block_segments() iterates over the full input DataFrame (gpx_df) via iterrows() even though only the walk-classified subset (walk_df from filter_gps_jitter) drives the output. Every non-walk row is visited only to be skipped by the 'if row[is_walk_col] and idx in walk_df.index:' guard. For a 60-minute run with 10% walk time, 90% of iterations are wasted. This is the same O(n) Python-loop anti-pattern identified at F-gap-loop-perf-8 and F-fit-perf-8; this finding names a third independent location. The vectorized fix \u2014 iterating walk_df directly \u2014 eliminates 90% of iterations for typical run/walk activities.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-cache-rhr-era-boundary",
+      "location": "src/biosystems/wellness/cache.py:271,296",
+      "class": "intent_mismatch",
+      "severity": "medium",
+      "evidence": "cache.py:270-272 confirmed: 'rhr_today = (_val(today_row, \"resting_hr_whoop\") or _val(today_row, \"resting_hr_garmin\"))'. cache.py:296 confirmed: 'rhr_7d_mean = _7d_mean(\"resting_hr_whoop\") or _7d_mean(\"resting_hr_garmin\")'. The _WHOOP_ERA_END timestamp in the file is '2025-12-26'. For dates from 2026-01-01 onward: rhr_today draws from resting_hr_garmin (Whoop data absent for today). However _7d_mean(\"resting_hr_whoop\") looks back 7 days \u2014 for dates like 2026-01-01 to 2026-01-06, the 7-day window extends into Dec 2025 where Whoop data still exists. Thus rhr_7d_mean returns a Whoop-derived mean while rhr_today is Garmin-derived. cache.py:298: 'rhr_7d_delta = ((rhr_today - rhr_7d_mean) if (rhr_today and rhr_7d_mean) else None)' computes Garmin_RHR_today minus Whoop_RHR_7d_mean, a cross-device subtraction where device-specific offsets (typically 2-5 bpm) make the delta meaningless as a physiological signal.",
+      "description": "During the Whoop-to-Garmin transition window (approximately 2026-01-01 to 2026-01-06), compute_wellness_context() computes rhr_7d_delta by subtracting a Garmin today-RHR value from a Whoop 7-day-mean. The _7d_mean fallback tries Whoop first; for dates within 7 days of the final Whoop reading, _7d_mean(\"resting_hr_whoop\") returns a non-None value from the Whoop era, so rhr_7d_mean never falls through to the Garmin mean. The resulting delta is a cross-device comparison subject to systematic inter-device bias rather than a true cardiovascular trend signal. The green/amber/red RHR classification in the daily brief \u2014 which uses rhr_7d_delta as its primary input \u2014 is therefore unreliable for the first week after the device transition.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-report-kmsplit-zero-pace",
+      "location": "src/biosystems/physics/report.py:350-354",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "report.py:_parse_km_splits lines 350-354 confirmed: 'avg_speed = s.get(\"average_speed\"); if avg_speed and float(avg_speed) > 0: pace_min_per_km = round((1000.0 / 60.0) / float(avg_speed), 2); else: pace_min_per_km = 0.0'. No 'continue' or None assignment on the else branch. The KmSplit is always appended: 'km_splits.append(KmSplit(km=..., pace_min_per_km=pace_min_per_km, ...))'. models.py:200 confirmed: 'pace_min_per_km: float' with no 'gt=0' validator, so Pydantic accepts 0.0. The CLI renders this as '0.00/km'. By contrast, _parse_laps (report.py:400) uses 'continue' to skip zero-speed laps. The auto-lap paused segment case (e.g. from a Garmin watch paused at a traffic light that auto-laps at 1km) produces a 0.0 pace split.",
+      "description": "_parse_km_splits() stores pace_min_per_km=0.0 for splits with absent or zero average_speed (e.g. paused auto-laps). The KmSplit model has no gt=0 validator, so Pydantic accepts the 0.0 value without error. The CLI renders it as '0.00/km' \u2014 a nonsensical value that implies infinite speed. The sibling function _parse_laps() skips zero-speed laps with 'continue', showing the intent is to exclude them; _parse_km_splits should similarly skip or use None for zero-speed splits. In activities with GPS auto-pause at signals, one KmSplit per pause event will carry 0.0 pace.",
+      "survived_falsification": null
+    },
+    {
+      "id": "F-pmc-samename-drop",
+      "location": "src/biosystems/analytics/trending.py:69-72",
+      "class": "design_defect",
+      "severity": "low",
+      "evidence": "trending.py:compute_pmc lines 69-72 confirmed: 'curr_name = d.get(\"activity_name\"); prev_name = meta_by_date[run_date].get(\"activity_name\"); if curr_name and curr_name != prev_name: prev[\"activity_name\"] = f\"{prev_name} + {curr_name}\" if prev_name else curr_name'. The guard 'curr_name != prev_name' is False when both sessions on the same date have the same activity_name value (e.g. both named 'Morning Run' by Strava's default). In this case the name aggregation branch is skipped entirely and the second session's name is silently dropped \u2014 meta_by_date[run_date][\"activity_name\"] remains the first session's name. TSS and distance are still summed correctly (line 60: meta_by_date[run_date][\"tss\"] += tss). Only the metadata reflection of the double training day is affected.",
+      "description": "In compute_pmc(), when two activities on the same date have identical activity_name values, the 'curr_name != prev_name' guard at line 71 evaluates False and the name concatenation is skipped. The second session's name is silently dropped from the PMC metadata. For double training days where Strava assigns the same default name to both sessions (e.g. two 'Morning Run' activities), PMC output represents the combined day as a single named activity rather than the intended 'Morning Run + Morning Run' compound label. The TSS summation is not affected; only the activity_name metadata in the PMC output is wrong.",
+      "survived_falsification": null
+    }
+  ],
+  "_provenance": "reconstructed from killed run's lens(57)+reaudit(7/5/6) scratch outputs; survived flags reset for honest re-falsification"
+}
