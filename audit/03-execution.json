@@ -1,0 +1,615 @@
+{
+  "build_commands": [
+    "python -m pytest -o addopts=\"\" --cov=biosystems --cov-report=term -q",
+    "python -m biosystems.cli --help",
+    "biosystems analyze data/sample/sample_run.csv",
+    "biosystems summary",
+    "python -c \"import pandas as pd; from biosystems.physics.metrics import run_metrics; from biosystems.models import ZoneConfig, HeartRateZone; df = pd.read_csv('data/sample/sample_run.csv', parse_dates=['time']); zones = ZoneConfig(resting_hr=50, threshold_hr=186, zones={'Z2': HeartRateZone(name='Z2 (Aerobic)', bpm=(145, 165), pace_min_per_km=(4.5, 6.0))}); metrics = run_metrics(df, zones); print(f'EF: {metrics.efficiency_factor:.5f}'); print(f'Decoupling: {metrics.decoupling_pct:.4f}%'); print(f'TSS: {metrics.hr_tss:.1f}')\""
+  ],
+  "test_result": {
+    "ran": true,
+    "passed": 184,
+    "failed": 0,
+    "skipped": 1,
+    "summary": "184 passed, 1 skipped in 3.48s. The single skipped test is tests/test_cli_integration.py::test_cli_analyze_gpx — it guards with pytest.skip() when data/raw/20250503_174110_baseox_wk1_sat_day6_proglong_30_40min_145_160bpm_11-14minmi_Z2_durability_rpe_4_anklepain_2.gpx is absent from the sandbox. No failures."
+  },
+  "coverage": {
+    "measured_pct": 41,
+    "accounting": "pytest-cov measured 2735 total statements across 22 modules; 1627 missed; TOTAL=41%. Three modules are 0%: cli.py (746 stmts — all CLI subcommands require real Strava credentials, history parquet, or real GPX/FIT files; no mock-based CLI tests exist), physics/report.py (276 stmts — build_run_report and FullRunReport are exercised nowhere in the test suite), and wellness/habitdash.py (73 stmts — requires live HabitDash API key). Well-covered modules: biosystems/__init__.py 100%, models.py 98%, physics/metrics.py 93%, signal/walk_detection.py 94%, physics/gap.py 82%, ingestion/strava.py 83%, environment/weather.py 87%. CI pyproject.toml addopts include --cov=biosystems --cov-report=html --cov-report=term by default; the verification run overrides addopts with --cov-report=term (no term-missing).",
+    "unexecuted_regions": [
+      {
+        "module": "src/biosystems/cli.py",
+        "lines": "9-1436 (746 stmts, 0%)",
+        "reason": "external-service",
+        "detail": "All CLI subcommands (analyze, strava, summary, trend, efforts, top, backfill-*, wellness-*) require real Strava API credentials (STRAVA_CLIENT_ID/SECRET/REFRESH_TOKEN) or a local history parquet, or a real .gpx/.fit file. The sole integration test (test_cli_analyze_gpx) is unconditionally skipped because the referenced GPX file is absent from the sandbox."
+      },
+      {
+        "module": "src/biosystems/physics/report.py",
+        "lines": "18-596 (276 stmts, 0%)",
+        "reason": "dead",
+        "detail": "build_run_report() and FullRunReport are never called by any test in the test suite. There is no test_report.py. The module is imported by cli.py (also 0%) and nowhere else in tested code paths."
+      },
+      {
+        "module": "src/biosystems/wellness/habitdash.py",
+        "lines": "12-191 (73 stmts, 0%)",
+        "reason": "requires-credentials",
+        "detail": "HabitDashClient requires a live HABITDASH_API_KEY env var and network access to the HabitDash API. No mock-based tests exist for this module."
+      },
+      {
+        "module": "src/biosystems/wellness/analytics.py",
+        "lines": "71-92, 107-128, 141-148, 164-181, 223-225, 238-304, 308, 357-425, 445, 451-454, 458-461, 466-476, 504-573 (173/213 stmts, 19%)",
+        "reason": "external-service",
+        "detail": "compute_wellness_analytics(), compute_sleep_debt(), compute_era_baselines(), compute_readiness_signal() all require a wellness parquet file produced by wellness-sync (which requires HabitDash credentials). Tests exist for a narrow slice only."
+      },
+      {
+        "module": "src/biosystems/wellness/cache.py",
+        "lines": "55-57, 64-73, 78, 83-84, 112-157, 167-174, 185-191, 200, 237, 308-310, 330-333, 341-347, 354-357, 361-402, 414-450, 521-591, 610-635 (188/323 stmts, 42%)",
+        "reason": "requires-credentials",
+        "detail": "WellnessCache.load(), compute_wellness_context(), and calibrate_thresholds() all require either a local wellness parquet or HabitDash credentials + network. format_sleep_context() and related helpers branch on Garmin sleep columns that are never written (per F-new-garmin-sleep-never-fetched-12)."
+      },
+      {
+        "module": "src/biosystems/ingestion/gpx.py",
+        "lines": "99, 114-115, 126, 131, 136, 141-150, 155, 159-169, 172, 182-184, 210-212 (34/97 stmts, 65%)",
+        "reason": "external-service",
+        "detail": "Complex GPX edge-case branches (elevation, cumulative distance, fallback speed) and the call paths triggered by real GPX files are not covered because the only CI integration test (test_cli_analyze_gpx) is skipped. Tests mock GPX behavior for HR/cadence only."
+      },
+      {
+        "module": "src/biosystems/ingestion/fit.py",
+        "lines": "123-127, 165, 202-235 (17/63 stmts, 73%)",
+        "reason": "hardware-gated",
+        "detail": "FIT-specific derived-metric computation (add_derived_metrics lines 202-235, including the haversine loop and indoor GPS guard) and multi-session FIT aggregation are not exercised; no real .fit file is present in the sandbox."
+      },
+      {
+        "module": "src/biosystems/analytics/history.py",
+        "lines": "61, 64-65, 98, 106-107, 169, 227-266 (31/118 stmts, 74%)",
+        "reason": "external-service",
+        "detail": "History parquet loading branches and backfill paths require a local history.parquet produced by real Strava ingestion runs."
+      },
+      {
+        "module": "src/biosystems/analytics/trending.py",
+        "lines": "76, 161, 163, 208, 211-217, 222-231 (19/98 stmts, 81%)",
+        "reason": "external-service",
+        "detail": "PMC computation edge cases (empty history, no ATL/CTL data) and rolling EF branches that require sufficient history records are not triggered by the minimal fixture data used in tests."
+      }
+    ]
+  },
+  "observed_behaviors": [
+    {
+      "entry_point": "python -m biosystems.cli --help",
+      "behavior": "Exits 0. Prints the top-level help with description 'Running performance analytics pipeline.' and lists four command groups: Data Ingestion (analyze, strava, backfill-efforts, backfill-streams), Analytics (summary, efforts, top, trend), Wellness (wellness-sync, wellness-show, wellness-analyze, wellness-trends), and global options --install-completion / --show-completion / --help.",
+      "location": "src/biosystems/cli.py:9 (app = typer.Typer(...))"
+    },
+    {
+      "entry_point": "python -c 'run_metrics on data/sample/sample_run.csv with README zones'",
+      "behavior": "Computed EF=0.02162 (README claims 0.02162 — exact match), Aerobic Decoupling=3.3200% (README claims 3.33% — off by 0.01%, within the test tolerance of ±0.5%), TSS=42.8 (README claims 42.8 — exact match). The README sample values are substantially correct but the decoupling figure is slightly rounded up in documentation.",
+      "location": "src/biosystems/physics/metrics.py:calculate_decoupling, src/biosystems/physics/metrics.py:run_metrics"
+    },
+    {
+      "entry_point": "biosystems analyze data/sample/sample_run.csv",
+      "behavior": "Exits with exit code 1. Prints 'Unsupported file format: .csv' then 'Analysis Failed:'. The analyze subcommand accepts only .fit and .gpx files; the README does not document CSV as a supported input to the CLI. The sample_run.csv is only usable via the Python API (pd.read_csv → run_metrics), not the CLI.",
+      "location": "src/biosystems/cli.py (analyze command, file format check)"
+    },
+    {
+      "entry_point": "biosystems summary",
+      "behavior": "Exits cleanly (exit 0) printing 'No entries match the given filters.' No history parquet exists in the sandbox environment, so zero runs are returned. The command does not crash on missing data.",
+      "location": "src/biosystems/cli.py (summary command), src/biosystems/analytics/history.py"
+    },
+    {
+      "entry_point": "python -c \"calculate_decoupling(one_row_df, zones)\" with 1-row DataFrame having hr/dist/dt columns",
+      "behavior": "Raises ZeroDivisionError: 'float division by zero'. The cumsum midpoint split produces an empty first_half DataFrame when work_df has exactly one row with dt=5s (elapsed=[5], midpoint_s=2.5, first_half=work_df[elapsed<=2.5]=empty). first_half['dt'].sum()=0.0 causes float division by zero at ef_1 computation (metrics.py:205-208). No guard exists in calculate_decoupling. Note: calling with a DataFrame missing expected columns raises KeyError instead; the ZeroDivisionError only manifests when all required columns (hr, dist, dt) are present.",
+      "location": "src/biosystems/physics/metrics.py:199-213"
+    },
+    {
+      "entry_point": "python -m pytest -o addopts='' --cov=biosystems --cov-report=term -q (full suite)",
+      "behavior": "184 tests pass, 1 skipped (test_cli_analyze_gpx — GPX file absent), 0 failures. Measured coverage 41% across 2735 statements. Runtime 3.48s. Exit code 0.",
+      "location": "tests/ (184 tests), src/biosystems/ (22 modules)"
+    }
+  ],
+  "finding_deltas": [
+    {
+      "finding_id": "F-decoupling-empty-half-1",
+      "status": "confirmed",
+      "note": "Directly triggered in execution: calculate_decoupling(pd.DataFrame({'hr':[160.0],'dist':[50.0],'dt':[5.0]}), zones) raises ZeroDivisionError: 'float division by zero'. The empty first_half path is live and unguarded. Observed at src/biosystems/physics/metrics.py:199-213."
+    },
+    {
+      "finding_id": "F-cadence-doubling-2",
+      "status": "confirmed",
+      "note": "Logic verified in execution: Garmin FIT single-foot cadence for a typical runner is ~90 rpm. The walk detection threshold in cli.py is 140 total spm. 90 < 140 is True, so every FIT-sourced running row would be classified as a walk by the cadence branch. Strava correctly doubles to ~180 spm. The inconsistency is structural and confirmed by code path inspection and arithmetic check."
+    },
+    {
+      "finding_id": "F-gpx-hr-parse-unguarded-4",
+      "status": "confirmed",
+      "note": "Verified in execution: int('') raises ValueError ('invalid literal for int() with base 10: \\\"\\\"') and int('75.5') raises ValueError ('invalid literal for int() with base 10: \\\"75.5\\\"'). The code at src/biosystems/ingestion/gpx.py:104-106 has no try/except around int(hr_node.text), so both cases propagate and abort parse_gpx."
+    },
+    {
+      "finding_id": "F-gpx-cad-parse-unguarded-5",
+      "status": "confirmed",
+      "note": "Same mechanism as F-gpx-hr-parse-unguarded-4. Verified: int('75.5') raises ValueError. gpx.py:119 'cad = int(cad_node.text) if cad_node is not None else np.nan' has no guard for non-integer text."
+    },
+    {
+      "finding_id": "F-testcov-1",
+      "status": "confirmed",
+      "note": "Observed in test run: tests/test_cli_integration.py::test_cli_analyze_gpx is SKIPPED. The skip message confirms the GPX file 'data/raw/20250503_174110_baseox_wk1_sat_day6_proglong_30_40min_145_160bpm_11-14minmi_Z2_durability_rpe_4_anklepain_2.gpx' does not exist. This is the sole CLI integration test; with it skipped, cli.py remains at 0% coverage."
+    },
+    {
+      "finding_id": "F-new-report-no-tests-04",
+      "status": "confirmed",
+      "note": "Coverage run confirms: src/biosystems/physics/report.py has 276 stmts, 276 missed, 0% coverage. No test in the suite invokes build_run_report() or any FullRunReport constructor. The module is exercised only by cli.py, which is also 0% covered."
+    },
+    {
+      "finding_id": "F-new-ingest-nan-cadence-study-14",
+      "status": "refined",
+      "note": "The main library (signal/walk_detection.py, test_walk_classification.py) uses fillna(0) for cadence before the < 140 threshold, correctly classifying sensor-dropout rows as walks. However, tools/ingest_new_runs.py:101 — the script that produced real_weekly_data.json — uses the bare expression without fillna, as found by Stage 2. The test suite's passing test_nan_cadence_is_walk applies only to the library helper, not to the tools script. The study-data concern stands."
+    },
+    {
+      "finding_id": "F-rr-sigma-none-crash-2",
+      "status": "untested",
+      "note": "wellness/cache.py is 42% covered; the calibrate_thresholds + compute_wellness_context path that triggers the rr_sigma None TypeError is in the uncovered 58%. Cannot confirm or refute from this execution without real wellness parquet data."
+    },
+    {
+      "finding_id": "F-sleep-merge-priority-1",
+      "status": "untested",
+      "note": "wellness/analytics.py compute_sleep_debt() is in the 81% unexecuted region (lines 451-454). No test exercises this code path. Cannot confirm or refute from execution."
+    },
+    {
+      "finding_id": "F-new-garmin-sleep-never-fetched-12",
+      "status": "untested",
+      "note": "wellness/habitdash.py is 0% covered. The FIELD_IDS and fetch_all_metrics() paths are not reachable without HabitDash credentials. Cannot confirm from execution, but static analysis finding stands unrefuted."
+    },
+    {
+      "finding_id": "F-run-only-walks-leak-3",
+      "status": "untested",
+      "note": "physics/report.py is 0% covered ('build_run_report and FullRunReport are exercised nowhere in the test suite'). The distinction between run_only_metrics and session_metrics was never executed."
+    },
+    {
+      "finding_id": "F-ef-zero-dt-6",
+      "status": "untested",
+      "note": "No test constructs a DataFrame where dt.sum()==0 after zone/walk filtering. The metrics.py coverage is 93% but this specific zero-dt edge case is not mentioned in observed behaviors."
+    },
+    {
+      "finding_id": "F-gap-ele-zero-sea-level-7",
+      "status": "untested",
+      "note": "No execution path exercised the elevation quality check with ele=0 data. GAP computation was not invoked in the evidence runs."
+    },
+    {
+      "finding_id": "F-gap-loop-perf-8",
+      "status": "untested",
+      "note": "Performance characteristic; no benchmark was run. Execution evidence includes no timing data for the GAP loop path."
+    },
+    {
+      "finding_id": "F-gpx-ns-garmin-only-9",
+      "status": "untested",
+      "note": "No non-Garmin GPX file was parsed in the run. GPX test was skipped. Static doc-drift finding, unexercised."
+    },
+    {
+      "finding_id": "F-cadence-int-truncation-10",
+      "status": "untested",
+      "note": "Tests pass at 93% coverage of metrics.py but execution evidence does not verify whether any test asserts the specific rounded vs. truncated avg_cadence value. The finding is about a subtle numeric artifact not surfaced by observed behaviors."
+    },
+    {
+      "finding_id": "F-fit-indoor-gps-11",
+      "status": "untested",
+      "note": "No FIT file (indoor or outdoor) was ingested during the evidence runs. The analyze command was invoked only with a CSV, which was rejected. FIT ingestion untested."
+    },
+    {
+      "finding_id": "F-decoupling-ef1-small-12",
+      "status": "untested",
+      "note": "This ZeroDivisionError fires at the final ef_1 division when first_half is non-empty but all-zero-distance. The confirmed crash in F-decoupling-empty-half-1 is the empty-half variant; this all-zero-distance variant was not exercised."
+    },
+    {
+      "finding_id": "F-stride-endpoint-inclusive-13",
+      "status": "untested",
+      "note": "physics/report.py is 0% covered. Stride extraction logic was never executed."
+    },
+    {
+      "finding_id": "F-maxhr-walk-semantics-14",
+      "status": "untested",
+      "note": "walk_detection.py has 94% coverage but execution evidence does not verify the max_hr semantic (max of segment averages vs. max instantaneous HR). Intent mismatch, not observable from pass/fail results."
+    },
+    {
+      "finding_id": "F-fit-pace-unsmoothed-15",
+      "status": "untested",
+      "note": "No FIT file was ingested. The smoothed-vs-raw pace inconsistency between GPX and FIT parsers was not exercised."
+    },
+    {
+      "finding_id": "F-strava-1",
+      "status": "untested",
+      "note": "Strava API calls require live credentials; CLI coverage is 0%. No HTTP 429 with date-format Retry-After header was observed. External API path, unexercised."
+    },
+    {
+      "finding_id": "F-strava-2",
+      "status": "untested",
+      "note": "Same as F-strava-1: no live Strava API call was made. Unbounded sleep path unexercised."
+    },
+    {
+      "finding_id": "F-strava-3",
+      "status": "untested",
+      "note": "Strava stream parsing (strava.py:345) was not invoked; CLI is 0% covered and requires live credentials. Static no-op expression, not exercised."
+    },
+    {
+      "finding_id": "F-strava-4",
+      "status": "untested",
+      "note": "Token refresh requires live OAuth credentials. Not invoked during any evidence run."
+    },
+    {
+      "finding_id": "F-habitdash-1",
+      "status": "untested",
+      "note": "wellness/habitdash.py is 0% covered per coverage report. Requires live HabitDash API key. Rate-limit header semantics unexercised."
+    },
+    {
+      "finding_id": "F-weather-1",
+      "status": "untested",
+      "note": "No weather fetch failure was triggered during evidence runs. The GPS-coordinates-to-stderr path was not exercised."
+    },
+    {
+      "finding_id": "F-weather-2",
+      "status": "untested",
+      "note": "datetime.utcnow() deprecation warning is not surfaced in the test output summary. The evidence does not report DeprecationWarnings, and warnings-as-errors is not confirmed to be set in the test config."
+    },
+    {
+      "finding_id": "F-sanitize-1",
+      "status": "untested",
+      "note": "tools/sanitize_gps.py is outside the biosystems package; pytest-cov measured only the biosystems package. sanitize_dataframe() was not called in any evidence run."
+    },
+    {
+      "finding_id": "F-sanitize-2",
+      "status": "untested",
+      "note": "Static doc-drift finding in tools/sanitize_gps.py. Not exercised by any evidence run."
+    },
+    {
+      "finding_id": "F-sanitize-3",
+      "status": "untested",
+      "note": "sanitize_gps.py CLI was not invoked in any evidence run. Path-equality validation is a static design finding."
+    },
+    {
+      "finding_id": "F-pii-1",
+      "status": "untested",
+      "note": "Static security finding about committed PHI in data/subjective.csv. No execution path in the test suite reads or validates .gitignore coverage of data/*.csv. Execution evidence does not bear on this finding."
+    },
+    {
+      "finding_id": "F-brief-1",
+      "status": "untested",
+      "note": "Static doc-drift in daily_running_brief.py module docstring. The _chat() API-key fallback order is not exercised by any test in the suite (that module is outside biosystems coverage). Execution evidence does not bear on this finding."
+    },
+    {
+      "finding_id": "F-test-1",
+      "status": "untested",
+      "note": "The finding concerns the absence of a test for the date-format Retry-After path in strava.py. The 83% coverage on strava.py does not reveal whether this specific branch is covered; no execution entry point triggered a date-format Retry-After response. The crash risk claim is unverified by execution."
+    },
+    {
+      "finding_id": "F-test-2",
+      "status": "confirmed",
+      "note": "Coverage report explicitly shows wellness/habitdash.py at 0% (73 stmts missed), confirming the finding that no test exercises HabitDashClient's retry logic, rate-limit header handling, or silent-empty-return behavior. The accounting note attributes this to the live API key requirement."
+    },
+    {
+      "finding_id": "F-doc-01",
+      "status": "untested",
+      "note": "Static doc-drift across README.md, reports/01_longitudinal_study.md, and data/real_weekly_data.json regarding W32 temperature. No execution path reads or validates these documents."
+    },
+    {
+      "finding_id": "F-doc-02",
+      "status": "untested",
+      "note": "Static doc-drift: EF value disagreement (0.0212 vs 0.0211 vs 0.02122 vs 18.4%) for the W32 RPE10 retest. The execution-measured EF=0.02162 is for the sample_run.csv (a different activity), not the W32 retest session. Execution does not resolve the committed-artifact disagreement."
+    },
+    {
+      "finding_id": "F-doc-03",
+      "status": "untested",
+      "note": "Static doc-drift: README decoupling headline values (7.7% baseline, 3.8% final) vs committed weekly aggregate data. No execution path validates these specific values or their provenance. The sample-run decoupling=3.32% is an unrelated data point."
+    },
+    {
+      "finding_id": "F-repro-01",
+      "status": "untested",
+      "note": "Static reproducibility finding about gitignored data/processed/ directory. tools/reproduce_study_analysis.py was not executed in the evidence. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-doc-04",
+      "status": "untested",
+      "note": "Static version-mismatch finding (CHANGELOG v1.1.0 vs pyproject.toml/CITATION.cff 1.0.0). No execution path asserted or checked __version__; CLI --help output does not display a version string in the observed behavior."
+    },
+    {
+      "finding_id": "F-intent-01",
+      "status": "untested",
+      "note": "Methodological concern: avg_cadence uses full df while EF/decoupling use walk-filtered work_df. The execution confirms run_metrics returns values (EF=0.02162, decoupling=3.32%, TSS=42.8) but does not distinguish which DataFrame backs avg_cadence. The 93% metrics.py coverage does not include a test that verifies cadence source."
+    },
+    {
+      "finding_id": "F-doc-05",
+      "status": "untested",
+      "note": "Static doc-drift: README presents a simplified 3-line Run-Only Filter vs the actual 4-step implementation. No execution path validates the README code snippet against the real function. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-doc-06",
+      "status": "untested",
+      "note": "Static doc-drift: report §2.2 description conflates the two-stage walk-detection + HR-threshold filter into a single filter. No execution path validates report text. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-doc-07",
+      "status": "untested",
+      "note": "Static doc-drift: CITATION.cff claims 18.4% EF improvement, unsupported by any committed data file. No execution path reads or validates CITATION.cff content. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-doc-08",
+      "status": "confirmed",
+      "note": "Execution shows 184 passed + 1 skipped = 185 tests collected. The finding states the README claims 161 tests at lines 238 and 311. The execution result directly confirms the README count is wrong by 24 tests (185 collected vs 161 documented)."
+    },
+    {
+      "finding_id": "F-intent-02",
+      "status": "untested",
+      "note": "Static code/model inconsistency: WalkSegment.tag regex allows 'pause' but walk_block_segments() never emits it. The signal/walk_detection.py module is 94% covered, but no test checks emitted tag values for completeness against the model schema. Execution does not bear on this specific invariant."
+    },
+    {
+      "finding_id": "F-design-01",
+      "status": "untested",
+      "note": "Static design asymmetry: FIT parser uses raw instantaneous speed, GPX parser applies 5-point rolling smoothing before computing pace. No execution entry point compared the same activity in both formats. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-bug-01",
+      "status": "untested",
+      "note": "Type annotation for ZoneConfig not imported in history.py; from __future__ import annotations defers evaluation. The 184 passing tests confirm no runtime NameError at import time, consistent with the finding's own explanation. The finding's actual risk (get_type_hints() callers) is not exercised by any test. Status is untested, not refuted."
+    },
+    {
+      "finding_id": "F-doc-09",
+      "status": "untested",
+      "note": "Static classifier mismatch in pyproject.toml (Beta vs 1.0.0 stable). No execution path reads or validates package classifiers. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-repro-02",
+      "status": "untested",
+      "note": "Static reproducibility finding: README's -50.6% decoupling headline depends on values (7.7%, 3.8%) with unverifiable provenance. No execution path validates these values against any data source. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-doc-10",
+      "status": "untested",
+      "note": "Static doc-drift: PUBLICATION_CHECKLIST P0 item unresolved while P2 item was checked. No execution path validates checklist state against committed file contents. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-cli-dead-1",
+      "status": "untested",
+      "note": "Dead list comprehension at cli.py:415. The test suite reports 0% coverage for cli.py (746 stmts), and the two CLI entry points exercised (analyze exiting on .csv format error, summary returning empty) do not reach line 415 (inside an efforts/best display path). Execution does not confirm or refute the dead-code claim."
+    },
+    {
+      "finding_id": "F-cli-dead-2",
+      "status": "untested",
+      "note": "Dead bare expression at cli.py:526 inside backfill_efforts. cli.py is 0% covered by the test suite and backfill_efforts was not invoked in the observed CLI runs. Execution does not confirm or refute the dead-code claim."
+    },
+    {
+      "finding_id": "F-cli-types-3",
+      "status": "untested",
+      "note": "Static type annotation defect: wellness_sync date_start/date_end annotated as str with None default instead of str | None. No mypy run and no test exercises this command signature. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-cli-skip-4",
+      "status": "untested",
+      "note": "Logic bug in backfill_streams skip-existing guard at cli.py:639-644. The backfill_streams command was not invoked in any observed execution entry point. cli.py has 0% test coverage. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-cli-date-5",
+      "status": "untested",
+      "note": "Date-string lexicographic comparison defect at cli.py:751. The biosystems summary command was run but without any --since/--after argument, so the comparison branch was never reached. No test covers this CLI path. Execution does not bear on this finding."
+    },
+    {
+      "finding_id": "F-history-fwd-6",
+      "status": "untested",
+      "note": "Static annotation defect — execution never exercises backfill_from_strava(); CLI requires real Strava credentials and all Strava-path tests are absent from the suite. The from __future__ import annotations deferral prevents a runtime NameError in any case, so normal test runs cannot expose this."
+    },
+    {
+      "finding_id": "F-analytics-dead-7",
+      "status": "untested",
+      "note": "Dead expression statement is a static code structure finding. The wellness/analytics.py module is not covered by any executed test that would reveal compute_coverage() behavior; execution evidence does not bear on whether the bare expression at line 74 is present or discarded."
+    },
+    {
+      "finding_id": "F-fit-perf-8",
+      "status": "untested",
+      "note": "Performance characterization of a list comprehension with .iloc accesses. No FIT file was parsed during the test run (test_cli_analyze_gpx skipped; no FIT fixture exercised), so no timing or profiling evidence exists."
+    },
+    {
+      "finding_id": "F-testcov-2",
+      "status": "untested",
+      "note": "The subprocess.run env dict defect lives inside test_cli_analyze_gpx, which was unconditionally skipped in the executed run. The env construction code was never reached, so execution neither confirms nor refutes whether env={\"PYTHONPATH\":\"src\"} causes failures in practice."
+    },
+    {
+      "finding_id": "F-testcov-3",
+      "status": "confirmed",
+      "note": "Execution evidence directly demonstrates the crash: 'Raises ZeroDivisionError: float division by zero' when calculate_decoupling is called on a 1-row DataFrame. The suite's 184 passing tests did not exercise this path (all TestCalculateDecoupling fixtures use multi-row DataFrames). Both the test gap and the underlying ZeroDivisionError are confirmed."
+    },
+    {
+      "finding_id": "F-testcov-4",
+      "status": "untested",
+      "note": "The int() truncation-vs-rounding discrepancy cannot be confirmed or refuted from execution evidence: test_with_cadence uses an all-170 fixture that produces an integer mean, so int() and round() agree. No execution path exercised a non-integer mean cadence."
+    },
+    {
+      "finding_id": "F-walk-debug-print-3",
+      "status": "untested",
+      "note": "walk_detection.py achieved 94% line coverage, but the debug print at lines 251-255 fires only when a walk block >=60s has missing or zero distance_cumulative_km — a condition requiring specific FIT/GPX fixture data not present in the sandbox. Whether those lines were in the covered or missed 6% cannot be determined from the execution summary alone."
+    },
+    {
+      "finding_id": "F-iso-week-no-year-4",
+      "status": "untested",
+      "note": "tools/ingest_new_runs.py is outside the biosystems package and not covered by pytest. The week-key collision is a future-date data integrity issue; no execution in the sandbox can trigger a 2026-vs-2025 collision against real study data."
+    },
+    {
+      "finding_id": "F-tsb-docstring-typo-5",
+      "status": "untested",
+      "note": "Documentation drift / docstring typo. No test asserts docstring content, and execution does not bear on string literals in comments."
+    },
+    {
+      "finding_id": "F-walk-pace-unweighted-6",
+      "status": "untested",
+      "note": "Methodological aggregation defect in summarize_walk_segments(). Execution evidence does not include any assertion on avg_pace correctness; the finding is a static intent-mismatch in aggregation logic."
+    },
+    {
+      "finding_id": "F-gpx-fallback-zero-latlon-7",
+      "status": "untested",
+      "note": "The non-namespaced GPX fallback parser was not exercised: test_cli_analyze_gpx was skipped and no other GPX fixture is used in the suite. The get('lat',0) default-zero defect cannot be confirmed or refuted from available execution evidence."
+    },
+    {
+      "finding_id": "F-history-backfill-existing-stale",
+      "status": "untested",
+      "note": "backfill_from_strava() requires real Strava credentials and an active API connection; the CLI is at 0% coverage. The dual-same-date overwrite bug was not exercised. Static analysis finding only."
+    },
+    {
+      "finding_id": "F-brief-openai-no-fallback",
+      "status": "untested",
+      "note": "daily_running_brief.py is outside the biosystems package and not in the pytest suite. The OpenAI exception-propagation defect requires a live OpenAI API call to exercise. No execution evidence bears on this."
+    },
+    {
+      "finding_id": "F-walk-filter-nan-drop",
+      "status": "untested",
+      "note": "filter_gps_jitter() NaN-boundary behavior depends on specific fixture data with NaN in pace/cadence columns. The test suite's walk_detection coverage (94%) may or may not include NaN-bearing rows; the execution summary does not specify which lines are in the missed 6%."
+    },
+    {
+      "finding_id": "F-cli-zone-silent-drop",
+      "status": "untested",
+      "note": "load_zone_config() is in cli.py (0% coverage). The silent-drop behavior for incomplete YAML zone entries was not exercised by any test. Static design defect finding."
+    },
+    {
+      "finding_id": "F-report-dynamics-keyerror",
+      "status": "untested",
+      "note": "physics/report.py is at 0% coverage — _compute_dynamics() was never called. The KeyError on missing pace_min_per_km column cannot be confirmed or refuted from execution evidence."
+    },
+    {
+      "finding_id": "F-habitdash-int-crash",
+      "status": "untested",
+      "note": "wellness/habitdash.py is at 0% coverage (requires live HabitDash API key). The int() ValueError on a non-numeric rate-limit header was not exercised."
+    },
+    {
+      "finding_id": "F-cli-analyze-no-walk-filter",
+      "status": "untested",
+      "note": "The execution test 'biosystems analyze data/sample/sample_run.csv' failed with 'Unsupported file format: .csv', so the analyze command's FIT/GPX path was never reached. test_cli_analyze_gpx was skipped. cli.py is at 0% coverage. The is_walk omission could not be confirmed or refuted."
+    },
+    {
+      "finding_id": "F-walk-block-iterrows-perf",
+      "status": "untested",
+      "note": "Performance characterization of iterrows() over the full DataFrame. No profiling or timing evidence in the execution run. The 94% walk_detection coverage tells us the code ran but not at what scale."
+    },
+    {
+      "finding_id": "F-cache-rhr-era-boundary",
+      "status": "untested",
+      "note": "The Whoop-to-Garmin transition window (approx 2026-01-01 to 2026-01-06) has passed as of 2026-06-17, and wellness/cache.py has no test coverage. The cross-device delta bias was not observable in this execution."
+    },
+    {
+      "finding_id": "F-report-kmsplit-zero-pace",
+      "status": "untested",
+      "note": "physics/report.py is at 0% coverage. _parse_km_splits() and the zero-pace storage defect were not exercised. Static design defect finding."
+    },
+    {
+      "finding_id": "F-pmc-samename-drop",
+      "status": "untested",
+      "note": "compute_pmc() in trending.py was not exercised by any test in the executed suite (trending.py is not listed among the well-covered modules and requires a history parquet not present in the sandbox). The same-name metadata drop was not observable from execution evidence."
+    },
+    {
+      "finding_id": "F-new-avgpace-zdiv-01",
+      "status": "untested",
+      "note": "run_metrics() was exercised on valid sample data (EF=0.02162, TSS=42.8) but the zero-distance path (Strava streams without 'distance') was never triggered. The ZeroDivisionError observed in execution is in calculate_decoupling (1-row DataFrame), a distinct code path not covered by this finding."
+    },
+    {
+      "finding_id": "F-new-repro-week-no-year-02",
+      "status": "untested",
+      "note": "tools/reproduce_study_analysis.py was not executed during the test run. No execution evidence bears on this static reproducibility defect."
+    },
+    {
+      "finding_id": "F-new-aev-keyerror-03",
+      "status": "untested",
+      "note": "physics/report.py has 0% coverage (276 stmts, never exercised per coverage report). No execution path reached _compute_aev()."
+    },
+    {
+      "finding_id": "F-new-cli-zdiv-summary-01",
+      "status": "untested",
+      "note": "'biosystems summary' was run and exited cleanly with 'No entries match the given filters.' — this is the zero-entries case (all_efs and all_decs both empty, guarded by 'if all_efs:'). The crash scenario requires entries where all_efs is non-empty but all_decs is empty; this was not exercised."
+    },
+    {
+      "finding_id": "F-new-cli-efforts-mislabel-02",
+      "status": "untested",
+      "note": "The efforts command was not exercised in the execution evidence. No history parquet exists in the sandbox, so the command cannot reach the mislabeling branch."
+    },
+    {
+      "finding_id": "F-new-report-dynamics-rangeidx-03",
+      "status": "untested",
+      "note": "physics/report.py is 0% covered. _compute_dynamics() was never called. The latent RangeIndex defect is unexercised."
+    },
+    {
+      "finding_id": "F-new-gpx-loop-haversine-04",
+      "status": "untested",
+      "note": "The GPX test (test_cli_analyze_gpx) was skipped due to missing fixture file. No GPX parsing was exercised. Performance characteristics of the haversine loop cannot be evaluated from this execution."
+    },
+    {
+      "finding_id": "F-new-walk-rangeidx-crash-05",
+      "status": "untested",
+      "note": "No GPX-sourced activity was processed. walk_block_segments() was only exercised via the passing DatetimeIndex-based tests. The RangeIndex crash path was not triggered."
+    },
+    {
+      "finding_id": "F-new-test-gap-walk-rangeidx-06",
+      "status": "untested",
+      "note": "Execution confirms the full test suite passes (184/184), consistent with the claim that no RangeIndex fixture exists, but execution evidence alone does not enumerate fixture index types. The finding is structurally static and would require reading test source to confirm directly."
+    },
+    {
+      "finding_id": "F-new-gpx-power-unguarded-01",
+      "status": "untested",
+      "note": "GPX parsing was not exercised (test_cli_analyze_gpx skipped, no GPX file present). The unguarded int() call on power_node.text was never reached."
+    },
+    {
+      "finding_id": "F-new-strava-name-lost-02",
+      "status": "untested",
+      "note": "No Strava credentials available in the sandbox; fetch_activity_streams() and the strava CLI subcommand were not reachable. The name-loss path was not exercised."
+    },
+    {
+      "finding_id": "F-new-brief-dead-pct-rank-03",
+      "status": "untested",
+      "note": "daily_running_brief.py was not run during this execution. The dead nested function is a static code observation."
+    },
+    {
+      "finding_id": "F-new-brief-runtime-msg-04",
+      "status": "untested",
+      "note": "daily_running_brief.py was not run. The RuntimeError message content is a static doc-drift finding."
+    },
+    {
+      "finding_id": "F-new-brief-reasoning-flag-05",
+      "status": "untested",
+      "note": "daily_running_brief.py was not run. The is_reasoning flag behavior for gpt-5-mini is a static analysis finding unexercised by the test suite."
+    },
+    {
+      "finding_id": "F-new-metrics-pace-keyerror-06",
+      "status": "untested",
+      "note": "run_metrics() was called on sample_run.csv which already had the required columns; the missing-pace_sec_km KeyError path was never triggered. The successful run does not refute the latent defect."
+    },
+    {
+      "finding_id": "F-new-walk-heart-rate-col-07",
+      "status": "untested",
+      "note": "All 184 tests pass, consistent with the claim that test fixtures use 'heart_rate' while production parsers emit 'hr'. However, no production-data walk detection was performed, so the silent NaN behavior in production was not observed."
+    },
+    {
+      "finding_id": "F-new-reproduce-iso-week-08",
+      "status": "untested",
+      "note": "tools/reproduce_study_analysis.py was not executed. No execution evidence bears on the week-number-without-year bucketing defect."
+    },
+    {
+      "finding_id": "F-new-fit-haversine-loop-09",
+      "status": "untested",
+      "note": "No FIT file ingest was triggered during execution. Performance characteristics of the per-row haversine loop are not observable from the correctness test suite."
+    },
+    {
+      "finding_id": "F-new-walk-fillna-intent-10",
+      "status": "untested",
+      "note": "The test suite passes (184/184) because test_walk_classification.py defines a local classify_walk() independent of production code. The fillna(999) vs fillna(0) discrepancy in cli.py is unexercised by any test and was not triggered in manual execution."
+    },
+    {
+      "finding_id": "F-new-weather-cache-nodup-11",
+      "status": "untested",
+      "note": "weather.py is 87% covered overall, but WeatherCache.set() deduplication behavior was not specifically tested. No repeated cache writes were performed in the execution evidence."
+    },
+    {
+      "finding_id": "F-new-sanitize-stdout-print-13",
+      "status": "untested",
+      "note": "tools/sanitize_gps.py was not imported or run during the execution. The unconditional stdout write behavior is a static design defect not observable from the test suite."
+    },
+    {
+      "finding_id": "F-new-walk-segment-unused-model-15",
+      "status": "untested",
+      "note": "The WalkSegment model is tested in test_models.py and test_walk_detection_fix.py (both pass), but execution does not exercise the production pipeline path that bypasses Pydantic validation by using plain dicts. This is a static design defect."
+    },
+    {
+      "finding_id": "F-new-trending-roll-closure-loop-16",
+      "status": "untested",
+      "note": "Pure static observation about closure placement in analytics/trending.py:compute_rolling_metrics(). No execution evidence touches this code path: trending.py is absent from the well-covered modules list, and none of the observed entry points (CLI --help, run_metrics on sample CSV, biosystems summary, full pytest suite) exercise compute_rolling_metrics(). The finding is not a correctness defect, so passing tests neither confirm nor refute it."
+    }
+  ]
+}
