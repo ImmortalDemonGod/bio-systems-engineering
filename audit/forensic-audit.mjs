@@ -25,7 +25,7 @@ const REPO = resolve(process.cwd());
 const AUDIT = join(REPO, "audit");
 const WORK = join(AUDIT, ".work");
 const ARGS = process.argv.slice(2);
-const ONLY_STAGE = ARGS.includes("--stage") ? Number(ARGS[ARGS.indexOf("--stage") + 1]) : null;
+const ONLY_STAGE = ARGS.includes("--stage") ? (n => Number.isNaN(n) || n < 1 || n > 5 ? null : n)(Number(ARGS[ARGS.indexOf("--stage") + 1])) : null;
 const FRESH = ARGS.includes("--fresh");
 const NO_PUSH = ARGS.includes("--no-push");
 
@@ -370,6 +370,7 @@ async function stage2(s1) {
 }
 
 async function stage3(s1, s2) {
+  if (!s2) return halt("stage3", "Stage 2 artifact (02-static-audit.json) is required but missing — run stage 2 first.");
   log("STAGE 3 — execution / dynamic surface");
   const execPrompt = `You are STAGE 3 (Execution) of a forensic audit of ${REPO}. Discover the build/test/coverage commands from the repo ITSELF (README.md, pyproject.toml [tool.pytest], .github/workflows/*, Dockerfile) — do not assume. The package is already pip-installed in this sandbox.
 MAKE WRITING A VALID OUTPUT FILE YOUR FIRST PRIORITY: write it early with whatever you have, then enrich — a timeout must never leave you with no file.
