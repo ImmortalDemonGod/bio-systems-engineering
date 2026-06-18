@@ -55,7 +55,7 @@ Ordered change items closing the gap between current state (01–03) and goal (0
 ### C09 — `src/biosystems/ingestion/strava.py:92`
 - **Closes:** F-strava-1
 - **Change:** At line 92, replace 'retry_after = int(resp.headers.get("Retry-After", 60))' with a try/except that handles the HTTP-date string variant: 'try: retry_after = int(resp.headers.get("Retry-After", 60)) \nexcept (ValueError, TypeError): retry_after = 60'. This prevents an uncaught ValueError when Strava returns a date-format Retry-After header per RFC 7231 §7.1.3.
-- **Verify:** pytest tests/test_strava.py -q — all existing tests pass. Add a new test in tests/test_strava.py that mocks a 429 response with Retry-After: 'Mon, 01 Jan 2026 00:00:00 GMT' (date-format string) and asserts _get_with_backoff falls back to a 60-second sleep without raising ValueError.
+- **Verify:** pytest tests/test_strava.py -q — all existing tests pass. Add a new test in tests/test_strava.py that mocks a 429 response with Retry-After: 'Thu, 01 Jan 2026 00:00:00 GMT' (date-format string) and asserts _get_with_backoff falls back to a 60-second sleep without raising ValueError.
 - **Depends on:** —
 
 ### C10 — `src/biosystems/ingestion/strava.py:91-95`
