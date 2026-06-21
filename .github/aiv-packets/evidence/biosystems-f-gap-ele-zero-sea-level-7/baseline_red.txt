@@ -1,0 +1,165 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.0, pluggy-1.6.0 -- /usr/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /tmp/biosystems-f-gap-ele-zero-sea-level-7_base
+configfile: pyproject.toml
+plugins: mock-3.15.1, cov-7.1.0
+collecting ... collected 116 items
+
+tests/test_physics_gap.py::TestElevationQuality::test_reliable_elevation PASSED [  0%]
+tests/test_physics_gap.py::TestElevationQuality::test_corrupted_jitter PASSED [  1%]
+tests/test_physics_gap.py::TestElevationQuality::test_insufficient_data PASSED [  2%]
+tests/test_physics_gap.py::TestElevationQuality::test_missing_columns PASSED [  3%]
+tests/test_physics_gap.py::TestCalculateGradePercent::test_flat_ground PASSED [  4%]
+tests/test_physics_gap.py::TestCalculateGradePercent::test_uphill_5_percent PASSED [  5%]
+tests/test_physics_gap.py::TestCalculateGradePercent::test_downhill_3_percent PASSED [  6%]
+tests/test_physics_gap.py::TestCalculateGradePercent::test_zero_distance PASSED [  6%]
+tests/test_physics_gap.py::TestCalculateGradePercent::test_steep_uphill PASSED [  7%]
+tests/test_physics_gap.py::TestMinettiEnergyCost::test_flat_ground_baseline PASSED [  8%]
+tests/test_physics_gap.py::TestMinettiEnergyCost::test_uphill_5_percent PASSED [  9%]
+tests/test_physics_gap.py::TestMinettiEnergyCost::test_uphill_10_percent PASSED [ 10%]
+tests/test_physics_gap.py::TestMinettiEnergyCost::test_downhill_5_percent PASSED [ 11%]
+tests/test_physics_gap.py::TestMinettiEnergyCost::test_steep_uphill PASSED [ 12%]
+tests/test_physics_gap.py::TestCalculateGAPSegment::test_flat_ground_no_adjustment PASSED [ 12%]
+tests/test_physics_gap.py::TestCalculateGAPSegment::test_uphill_faster_gap PASSED [ 13%]
+tests/test_physics_gap.py::TestCalculateGAPSegment::test_downhill_slower_gap PASSED [ 14%]
+tests/test_physics_gap.py::TestCalculateGAPSegment::test_very_slow_uphill PASSED [ 15%]
+tests/test_physics_gap.py::TestCalculateGAPFromDataFrame::test_simple_dataframe PASSED [ 16%]
+tests/test_physics_gap.py::TestCalculateGAPFromDataFrame::test_flat_dataframe PASSED [ 17%]
+tests/test_physics_gap.py::TestCalculateGAPFromDataFrame::test_missing_values PASSED [ 18%]
+tests/test_physics_gap.py::TestCalculateAverageGAP::test_simple_average PASSED [ 18%]
+tests/test_physics_gap.py::TestCalculateAverageGAP::test_weighted_by_time PASSED [ 19%]
+tests/test_physics_gap.py::TestCalculateAverageGAP::test_empty_dataframe PASSED [ 20%]
+tests/test_physics_gap.py::TestPhysicalProperties::test_p1_flat_grade_identity PASSED [ 21%]
+tests/test_physics_gap.py::TestPhysicalProperties::test_p2_ele_zero_validity FAILED [ 22%]
+tests/test_physics_gap.py::TestPhysicalProperties::test_p3_minetti_positivity PASSED [ 23%]
+tests/test_physics_gap.py::TestPhysicalProperties::test_p4_minetti_reference_value PASSED [ 24%]
+tests/test_physics_gap.py::TestElevationQualitySeaLevel::test_check_elevation_quality_returns_true_for_all_zero_elevation_sea_level_activity FAILED [ 25%]
+tests/test_physics_gap.py::TestElevationQualitySeaLevel::test_check_elevation_quality_preserves_ok_reason_for_sea_level FAILED [ 25%]
+tests/test_physics_gap.py::TestElevationQualitySeaLevel::test_check_elevation_quality_distinguishes_sea_level_from_genuinely_missing_elevation PASSED [ 26%]
+tests/test_physics_gap.py::TestFlatGradeIdentitySeaLevel::test_calculate_average_gap_all_zero_elevation_equals_raw_pace_flat_grade_identity PASSED [ 27%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-40] PASSED [ 28%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-39] PASSED [ 29%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-38] PASSED [ 30%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-37] PASSED [ 31%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-36] PASSED [ 31%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-35] PASSED [ 32%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-34] PASSED [ 33%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-33] PASSED [ 34%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-32] PASSED [ 35%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-31] PASSED [ 36%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-30] PASSED [ 37%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-29] PASSED [ 37%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-28] PASSED [ 38%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-27] PASSED [ 39%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-26] PASSED [ 40%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-25] PASSED [ 41%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-24] PASSED [ 42%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-23] PASSED [ 43%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-22] PASSED [ 43%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-21] PASSED [ 44%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-20] PASSED [ 45%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-19] PASSED [ 46%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-18] PASSED [ 47%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-17] PASSED [ 48%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-16] PASSED [ 49%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-15] PASSED [ 50%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-14] PASSED [ 50%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-13] PASSED [ 51%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-12] PASSED [ 52%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-11] PASSED [ 53%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-10] PASSED [ 54%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-9] PASSED [ 55%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-8] PASSED [ 56%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-7] PASSED [ 56%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-6] PASSED [ 57%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-5] PASSED [ 58%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-4] PASSED [ 59%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-3] PASSED [ 60%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-2] PASSED [ 61%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[-1] PASSED [ 62%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[0] PASSED [ 62%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[1] PASSED [ 63%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[2] PASSED [ 64%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[3] PASSED [ 65%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[4] PASSED [ 66%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[5] PASSED [ 67%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[6] PASSED [ 68%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[7] PASSED [ 68%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[8] PASSED [ 69%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[9] PASSED [ 70%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[10] PASSED [ 71%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[11] PASSED [ 72%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[12] PASSED [ 73%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[13] PASSED [ 74%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[14] PASSED [ 75%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[15] PASSED [ 75%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[16] PASSED [ 76%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[17] PASSED [ 77%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[18] PASSED [ 78%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[19] PASSED [ 79%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[20] PASSED [ 80%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[21] PASSED [ 81%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[22] PASSED [ 81%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[23] PASSED [ 82%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[24] PASSED [ 83%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[25] PASSED [ 84%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[26] PASSED [ 85%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[27] PASSED [ 86%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[28] PASSED [ 87%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[29] PASSED [ 87%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[30] PASSED [ 88%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[31] PASSED [ 89%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[32] PASSED [ 90%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[33] PASSED [ 91%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[34] PASSED [ 92%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[35] PASSED [ 93%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[36] PASSED [ 93%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[37] PASSED [ 94%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[38] PASSED [ 95%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[39] PASSED [ 96%]
+tests/test_physics_gap.py::TestMinettiPositivity::test_minetti_energy_cost_positive_for_all_valid_grades_p3[40] PASSED [ 97%]
+tests/test_physics_gap.py::TestMinettiReferenceValue::test_minetti_energy_cost_at_zero_grade_matches_published_3_6_joules_per_kg_per_m_p4 PASSED [ 98%]
+tests/test_physics_gap.py::TestRunMetricsGAPSeaLevel::test_run_metrics_gap_computed_for_all_zero_elevation_sea_level_activity FAILED [ 99%]
+tests/test_physics_gap.py::TestRunMetricsGAPSeaLevel::test_run_metrics_gap_value_approximates_raw_pace_for_flat_sea_level_run FAILED [100%]
+
+=================================== FAILURES ===================================
+_______________ TestPhysicalProperties.test_p2_ele_zero_validity _______________
+tests/test_physics_gap.py:282: in test_p2_ele_zero_validity
+    assert is_ok is True, f"P2 violated: check_elevation_quality rejected all-ele=0 df: {reason}"
+E   AssertionError: P2 violated: check_elevation_quality rejected all-ele=0 df: insufficient elevation data points
+E   assert False is True
+_ TestElevationQualitySeaLevel.test_check_elevation_quality_returns_true_for_all_zero_elevation_sea_level_activity _
+tests/test_physics_gap.py:336: in test_check_elevation_quality_returns_true_for_all_zero_elevation_sea_level_activity
+    assert is_ok is True, (
+E   AssertionError: check_elevation_quality wrongly rejected sea-level activity: 'insufficient elevation data points'. BUG-1: replace(0, np.nan).dropna() conflates missing GPS (0=sentinel) with genuine 0 m elevation.
+E   assert False is True
+_ TestElevationQualitySeaLevel.test_check_elevation_quality_preserves_ok_reason_for_sea_level _
+tests/test_physics_gap.py:348: in test_check_elevation_quality_preserves_ok_reason_for_sea_level
+    assert is_ok is True
+E   assert False is True
+_ TestRunMetricsGAPSeaLevel.test_run_metrics_gap_computed_for_all_zero_elevation_sea_level_activity _
+tests/test_physics_gap.py:511: in test_run_metrics_gap_computed_for_all_zero_elevation_sea_level_activity
+    assert metrics.gap_min_per_km is not None, (
+E   AssertionError: BUG-2: run_metrics returned gap_min_per_km=None for a sea-level (all-ele=0) activity. metrics.py:317-318 incorrectly treats 0 m elevation as missing data and skips the GAP computation block entirely.
+E   assert None is not None
+E    +  where None = PhysiologicalMetrics(distance_km=6.0, duration_min=10.0, avg_pace_min_per_km=1.67, avg_hr=165.0, efficiency_factor=0.06061, decoupling_pct=0.0, hr_tss=11.9, avg_cadence=None, gap_min_per_km=None, gap_quality_note=None, context=None).gap_min_per_km
+_ TestRunMetricsGAPSeaLevel.test_run_metrics_gap_value_approximates_raw_pace_for_flat_sea_level_run _
+tests/test_physics_gap.py:537: in test_run_metrics_gap_value_approximates_raw_pace_for_flat_sea_level_run
+    assert metrics.gap_min_per_km is not None, (
+E   AssertionError: BUG-2: gap_min_per_km is None — run_metrics skipped GAP for all-ele=0
+E   assert None is not None
+E    +  where None = PhysiologicalMetrics(distance_km=6.0, duration_min=10.0, avg_pace_min_per_km=1.67, avg_hr=165.0, efficiency_factor=0.06061, decoupling_pct=0.0, hr_tss=11.9, avg_cadence=None, gap_min_per_km=None, gap_quality_note=None, context=None).gap_min_per_km
+=========================== short test summary info ============================
+FAILED tests/test_physics_gap.py::TestPhysicalProperties::test_p2_ele_zero_validity - AssertionError: P2 violated: check_elevation_quality rejected all-ele=0 df: insufficient elevation data points
+assert False is True
+FAILED tests/test_physics_gap.py::TestElevationQualitySeaLevel::test_check_elevation_quality_returns_true_for_all_zero_elevation_sea_level_activity - AssertionError: check_elevation_quality wrongly rejected sea-level activity: 'insufficient elevation data points'. BUG-1: replace(0, np.nan).dropna() conflates missing GPS (0=sentinel) with genuine 0 m elevation.
+assert False is True
+FAILED tests/test_physics_gap.py::TestElevationQualitySeaLevel::test_check_elevation_quality_preserves_ok_reason_for_sea_level - assert False is True
+FAILED tests/test_physics_gap.py::TestRunMetricsGAPSeaLevel::test_run_metrics_gap_computed_for_all_zero_elevation_sea_level_activity - AssertionError: BUG-2: run_metrics returned gap_min_per_km=None for a sea-level (all-ele=0) activity. metrics.py:317-318 incorrectly treats 0 m elevation as missing data and skips the GAP computation block entirely.
+assert None is not None
+ +  where None = PhysiologicalMetrics(distance_km=6.0, duration_min=10.0, avg_pace_min_per_km=1.67, avg_hr=165.0, efficiency_factor=0.06061, decoupling_pct=0.0, hr_tss=11.9, avg_cadence=None, gap_min_per_km=None, gap_quality_note=None, context=None).gap_min_per_km
+FAILED tests/test_physics_gap.py::TestRunMetricsGAPSeaLevel::test_run_metrics_gap_value_approximates_raw_pace_for_flat_sea_level_run - AssertionError: BUG-2: gap_min_per_km is None — run_metrics skipped GAP for all-ele=0
+assert None is not None
+ +  where None = PhysiologicalMetrics(distance_km=6.0, duration_min=10.0, avg_pace_min_per_km=1.67, avg_hr=165.0, efficiency_factor=0.06061, decoupling_pct=0.0, hr_tss=11.9, avg_cadence=None, gap_min_per_km=None, gap_quality_note=None, context=None).gap_min_per_km
+======================== 5 failed, 111 passed in 0.70s =========================
