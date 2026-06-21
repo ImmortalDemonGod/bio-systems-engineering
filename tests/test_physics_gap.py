@@ -249,6 +249,55 @@ class TestCalculateAverageGAP:
         assert np.isnan(avg_gap)
 
 
+class TestPhysicalProperties:
+    """Physical oracle properties P1-P4 (Minetti 2002, sea-level invariant).
+
+    All DataFrames are synthetic (np.zeros / literals). No data/ paths referenced.
+    """
+
+    def test_p1_flat_grade_identity(self):
+        """P1: all-ele=0 flat run — average GAP equals mean raw pace within 1%."""
+        n = 20
+        pace = 300.0
+        df = pd.DataFrame({
+            'pace_sec_km': [pace] * n,
+            'ele': np.zeros(n),
+            'dist': [100.0] * n,
+            'dt': [60.0] * n,
+        })
+        avg_gap = calculate_average_gap(df)
+        assert not np.isnan(avg_gap), "calculate_average_gap returned NaN for flat all-ele=0 df"
+        assert abs(avg_gap - pace) / pace < 0.01, (
+            f"P1 violated: avg_gap={avg_gap:.2f} deviates from raw pace {pace:.2f} by more than 1%"
+        )
+
+    def test_p2_ele_zero_validity(self):
+        """P2: check_elevation_quality returns (True, 'ok') for all-ele=0 DataFrame."""
+        n = 20
+        df = pd.DataFrame({
+            'ele': np.zeros(n),
+            'dist': [100.0] * n,
+        })
+        is_ok, reason = check_elevation_quality(df)
+        assert is_ok is True, f"P2 violated: check_elevation_quality rejected all-ele=0 df: {reason}"
+        assert reason == "ok"
+
+    def test_p3_minetti_positivity(self):
+        """P3: minetti_energy_cost is strictly > 0 for every grade in [-40, +40]."""
+        for grade in [-40, -20, -10, 0, 10, 20, 40]:
+            cost = minetti_energy_cost(float(grade))
+            assert cost > 0, f"P3 violated: minetti_energy_cost({grade}) = {cost} is not > 0"
+
+    def test_p4_minetti_reference_value(self):
+        """P4: Minetti 0%-grade cost * 3.6 matches published flat cost ~3.6 J/kg/m within 5%."""
+        cost_at_zero = minetti_energy_cost(0.0)
+        abs_cost = cost_at_zero * 3.6
+        assert 3.42 <= abs_cost <= 3.78, (
+            f"P4 violated: minetti_energy_cost(0.0) * 3.6 = {abs_cost:.3f}, "
+            f"expected in [3.42, 3.78] (Minetti 2002 ±5%)"
+        )
+
+
 # ---------------------------------------------------------------------------
 # P2 — ELE=0 VALIDITY (unit layer): BUG-1
 # check_elevation_quality must treat 0 m as valid sea-level terrain, not missing
