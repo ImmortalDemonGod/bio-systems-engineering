@@ -68,3 +68,7 @@ secrets/
 *.parquet.cache
 weather_cache.parquet
 .cache/
+# AIV scaffolding (corpus-captured) + provisioned venv — kept off the PR (#1/#40; .venv dangles on CI)
+.aiv/launch-briefs/
+.aiv/plans/
+.venv/
