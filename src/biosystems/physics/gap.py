@@ -221,7 +221,7 @@ def check_elevation_quality(
     if ele_col not in df.columns or dist_col not in df.columns:
         return False, "elevation or distance column missing"
 
-    ele_series = df[ele_col].replace(0, np.nan).dropna()
+    ele_series = df[ele_col].dropna()
     if len(ele_series) < 10:
         return False, "insufficient elevation data points"
 

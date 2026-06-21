@@ -314,7 +314,7 @@ def run_metrics(
     gap_quality_note = None
     if "ele" in df.columns and "pace_sec_km" in df.columns and "dist" in df.columns:
         # Check if we have valid elevation data
-        ele_series = df["ele"].replace(0, np.nan)
+        ele_series = df["ele"]
         if not ele_series.isna().all():
             try:
                 ele_ok, ele_reason = check_elevation_quality(df, ele_col="ele", dist_col="dist")

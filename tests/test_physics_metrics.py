@@ -274,3 +274,32 @@ class TestRunMetrics:
 
         # GAP should be None without elevation
         assert metrics.gap_min_per_km is None
+
+
+class TestRunMetricsGAP:
+    """METRICS-PRE-GATE: run_metrics must compute GAP for all-ele=0 (sea-level) data.
+
+    Verifies that metrics.py:317 no longer applies replace(0, np.nan) before the
+    isna().all() guard, so all-ele=0 activities reach check_elevation_quality and
+    get a computed gap_min_per_km.
+
+    All DataFrames are synthetic literals. No data/ paths referenced.
+    """
+
+    def test_zero_elevation_gap_computed(self, sample_zone_config):
+        """METRICS-PRE-GATE: run_metrics on all-ele=0 df yields non-None gap_min_per_km."""
+        n = 20
+        df = pd.DataFrame({
+            "dist": [100.0] * n,
+            "dt": [60.0] * n,
+            "hr": [165.0] * n,
+            "pace_sec_km": [300.0] * n,
+            "ele": np.zeros(n),
+            "cadence": [170] * n,
+        })
+        result = run_metrics(df, sample_zone_config)
+        assert result.gap_min_per_km is not None, (
+            "METRICS-PRE-GATE: run_metrics returned gap_min_per_km=None for all-ele=0 df; "
+            "metrics.py pre-gate still blocking GAP computation for sea-level activities"
+        )
+        assert result.gap_min_per_km > 0

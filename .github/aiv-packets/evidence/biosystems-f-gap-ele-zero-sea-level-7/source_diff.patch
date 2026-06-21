@@ -1,0 +1,26 @@
+diff --git a/src/biosystems/physics/gap.py b/src/biosystems/physics/gap.py
+index 5103bed..3f7d5ba 100644
+--- a/src/biosystems/physics/gap.py
++++ b/src/biosystems/physics/gap.py
+@@ -221,7 +221,7 @@ def check_elevation_quality(
+     if ele_col not in df.columns or dist_col not in df.columns:
+         return False, "elevation or distance column missing"
+ 
+-    ele_series = df[ele_col].replace(0, np.nan).dropna()
++    ele_series = df[ele_col].dropna()
+     if len(ele_series) < 10:
+         return False, "insufficient elevation data points"
+ 
+diff --git a/src/biosystems/physics/metrics.py b/src/biosystems/physics/metrics.py
+index ceac7e2..bb5d609 100644
+--- a/src/biosystems/physics/metrics.py
++++ b/src/biosystems/physics/metrics.py
+@@ -314,7 +314,7 @@ def run_metrics(
+     gap_quality_note = None
+     if "ele" in df.columns and "pace_sec_km" in df.columns and "dist" in df.columns:
+         # Check if we have valid elevation data
+-        ele_series = df["ele"].replace(0, np.nan)
++        ele_series = df["ele"]
+         if not ele_series.isna().all():
+             try:
+                 ele_ok, ele_reason = check_elevation_quality(df, ele_col="ele", dist_col="dist")
