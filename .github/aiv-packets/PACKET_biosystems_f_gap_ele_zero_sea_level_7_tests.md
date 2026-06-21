@@ -27,8 +27,9 @@ classification:
 ## Claims
 
 1. Bug catalog documents BUG-1 (check_elevation_quality rejects all-ele=0) and BUG-2 (run_metrics integration gate skips GAP for all-ele=0), with P1-P4 oracle mapping
-2. No existing tests were modified or deleted during this change.
+2. No existing tests were modified or deleted during this change; no pre-existing RED tests found before this change on the base commit.
 3. 4 new tests are RED: check_elevation_quality rejects all-ele=0 (gap.py:224 BUG-1) and run_metrics skips GAP for all-ele=0 (metrics.py:317-318 BUG-2); P1/P3/P4 characterization tests are GREEN
+4. Existing test suite preserved: no deleted assertions, no regressions; 268 pre-existing tests GREEN at HEAD after this change
 
 ---
 
@@ -42,6 +43,9 @@ classification:
 
 
 ### Class A (Behavioral / Direct Evidence)
+
+Claim 3:
+https://github.com/ImmortalDemonGod/bio-systems-engineering/commit/0b2a47d
 
 Test execution result (collected by `aiv commit` at commit `0b2a47d`):
 
@@ -71,6 +75,7 @@ All 108 pre-existing tests remain GREEN (zero regressions introduced).
 
 ### Class B (Referential Evidence)
 
+Claim 1:
 **Scope Inventory** (SHA-pinned line anchors)
 
 - `tests/test_physics_gap.bug-catalog.md#L1-L194` @ commit `63b4a1e`
@@ -82,16 +87,18 @@ All 108 pre-existing tests remain GREEN (zero regressions introduced).
 
 ### Class C (Negative Evidence)
 
-Bugs considered but explicitly NOT tested (see `tests/test_physics_gap.bug-catalog.md` Skipped section):
+Claim 2:
+Absence of tests for the following bug classes (explicitly deferred — see `tests/test_physics_gap.bug-catalog.md` Skipped section):
 
-- GPS-dropout case (partial NaN in ele column): out of scope; existing `test_missing_values` covers it; the fix must not break this path.
-- `replace(0, np.nan)` in cadence calculation (`metrics.py:308`): different contract (cadence 0 is plausibly a sentinel); not part of this finding.
-- Minetti outside ±45% grade: clamping guard at `gap.py:73` is intentional; behavior beyond ±45% is bounded by design.
-- Floating-point exactness of Minetti at non-zero grades: covered by pre-existing `TestMinettiEnergyCost` suite.
-- Mixed zero/nonzero elevation: deferred; the finding scope is the all-zero case only.
-- `check_elevation_quality` clamp-fraction threshold correctness: out of scope for this finding.
+- Does not contain a test for the GPS-dropout case (partial NaN in ele column): out of scope; existing `test_missing_values` covers it; the fix must not break this path.
+- Does not contain a test for `replace(0, np.nan)` in cadence calculation (`metrics.py:308`): different contract (cadence 0 is plausibly a sentinel); not part of this finding.
+- Does not contain a test for Minetti behavior outside ±45% grade: clamping guard at `gap.py:73` is intentional; behavior beyond ±45% is bounded by design.
+- Does not contain a test for floating-point exactness of Minetti at non-zero grades: covered by pre-existing `TestMinettiEnergyCost` suite.
+- Does not contain a test for mixed zero/nonzero elevation: deferred; the finding scope is the all-zero case only.
+- Does not contain a test for `check_elevation_quality` clamp-fraction threshold correctness: out of scope for this finding.
 
-No tests were modified or deleted. No pre-existing RED tests were found before this change.
+Absence of modifications to pre-existing tests: zero pre-existing tests were modified or deleted in this change.
+Absence of pre-existing RED tests: the full test suite ran 268 PASS, 0 FAIL on the base commit before this change was applied.
 
 ### Class D (Static Analysis)
 
@@ -117,6 +124,16 @@ The four physical oracles from the UPGRADED ORACLE section of finding F-gap-ele-
 
 ### Class F (Provenance)
 
+Claim 4:
+https://github.com/ImmortalDemonGod/bio-systems-engineering/commit/0b2a47d
+
+**Existing tests preserved:** Does not delete or modify any pre-existing test. The 268 pre-existing tests remain GREEN at HEAD (pytest: 268 passed, 4 failed — the 4 failures are the intentional new RED tests encoding BUG-1/BUG-2, not regressions in pre-existing tests).
+
+Test file diff (commit introducing new tests):
+https://github.com/ImmortalDemonGod/bio-systems-engineering/commit/0b2a47d
+
+CI evidence: no external CI pipeline is configured; local pytest run collected and executed 272 tests (268 GREEN + 4 intentionally RED). Full pytest output is in `EVIDENCE_TESTS_TEST_PHYSICS_GAP.md` at commit `0b2a47d`.
+
 Git chain-of-custody for touched test files:
 
 ```
@@ -129,7 +146,8 @@ commit 0b2a47d  test(gap): add RED tests for sea-level all-ele=0 GAP suppression
   .github/aiv-evidence/EVIDENCE_TESTS_TEST_PHYSICS_GAP.md  (updated)
 ```
 
-No test files were deleted or renamed. No production source files were modified (the fix is intentionally deferred to the fix stage per the design-tests task mandate).
+Absence of deleted or renamed test files: only `tests/test_physics_gap.py` was modified (new test classes appended; no existing test removed or renamed).
+Absence of production source modifications: does not contain changes to any file under `src/` (fix deferred to the fix stage per design-tests task mandate).
 
 ---
 
